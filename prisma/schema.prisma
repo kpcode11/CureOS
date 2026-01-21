@@ -1,0 +1,349 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or "mysql", "sqlite", etc.
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations based on role
+  doctor       Doctor?
+  nurse        Nurse?
+  pharmacist   Pharmacist?
+  labTech      LabTech?
+  receptionist Receptionist?
+  admin        Admin?
+}
+
+enum Role {
+  DOCTOR
+  NURSE
+  PHARMACIST
+  LAB_TECH
+  RECEPTIONIST
+  ADMIN
+  EMERGENCY
+}
+
+model Patient {
+  id              String   @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String?  @unique
+  phone           String
+  dateOfBirth     DateTime
+  gender          String
+  address         String?
+  emergencyContact String?
+  bloodType       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  appointments    Appointment[]
+  emrRecords      EMR[]
+  prescriptions   Prescription[]
+  labTests        LabTest[]
+  billings        Billing[]
+  bedAssignments  BedAssignment[]
+}
+
+model Doctor {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  specialization String
+  licenseNumber String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments  Appointment[]
+  prescriptions Prescription[]
+  surgeries     Surgery[]
+}
+
+model Nurse {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  department    String
+  licenseNumber String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nursingRecords    NursingRecord[]
+  bedAssignments    BedAssignment[]
+}
+
+model Pharmacist {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  licenseNumber String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dispensedMeds Prescription[]
+}
+
+model LabTech {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  department    String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  labTests LabTest[]
+}
+
+model Receptionist {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Appointment {
+  id            String   @id @default(cuid())
+  patientId     String
+  doctorId      String
+  receptionistId String?
+  dateTime      DateTime
+  reason        String
+  status        AppointmentStatus @default(SCHEDULED)
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  patient      Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor       Doctor        @relation(fields: [doctorId], references: [id])
+  receptionist Receptionist? @relation(fields: [receptionistId], references: [id])
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model EMR {
+  id          String   @id @default(cuid())
+  patientId   String
+  diagnosis   String
+  symptoms    String
+  vitals      Json?
+  notes       String?
+  attachments String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+}
+
+model Prescription {
+  id            String   @id @default(cuid())
+  patientId     String
+  doctorId      String
+  pharmacistId  String?
+  medications   Json
+  instructions  String
+  dispensed     Boolean  @default(false)
+  dispensedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  patient    Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor     Doctor      @relation(fields: [doctorId], references: [id])
+  pharmacist Pharmacist? @relation(fields: [pharmacistId], references: [id])
+}
+
+model LabTest {
+  id         String   @id @default(cuid())
+  patientId  String
+  labTechId  String?
+  testType   String
+  results    Json?
+  status     LabTestStatus @default(PENDING)
+  orderedAt  DateTime @default(now())
+  completedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  patient Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  labTech LabTech? @relation(fields: [labTechId], references: [id])
+}
+
+enum LabTestStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Surgery {
+  id           String   @id @default(cuid())
+  doctorId     String
+  patientName  String
+  surgeryType  String
+  scheduledAt  DateTime
+  status       SurgeryStatus @default(SCHEDULED)
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  doctor Doctor @relation(fields: [doctorId], references: [id])
+}
+
+enum SurgeryStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Bed {
+  id         String   @id @default(cuid())
+  bedNumber  String   @unique
+  ward       String
+  bedType    String
+  status     BedStatus @default(AVAILABLE)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  assignments BedAssignment[]
+}
+
+enum BedStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
+
+model BedAssignment {
+  id          String    @id @default(cuid())
+  bedId       String
+  patientId   String
+  nurseId     String?
+  assignedAt  DateTime  @default(now())
+  dischargedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  bed     Bed      @relation(fields: [bedId], references: [id])
+  patient Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  nurse   Nurse?   @relation(fields: [nurseId], references: [id])
+}
+
+model NursingRecord {
+  id          String   @id @default(cuid())
+  nurseId     String
+  patientName String
+  vitals      Json
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  nurse Nurse @relation(fields: [nurseId], references: [id])
+}
+
+model Billing {
+  id          String   @id @default(cuid())
+  patientId   String
+  amount      Float
+  description String
+  status      BillingStatus @default(PENDING)
+  dueDate     DateTime
+  paidAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+}
+
+enum BillingStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model Inventory {
+  id          String   @id @default(cuid())
+  itemName    String
+  category    String
+  quantity    Int
+  minStock    Int
+  unit        String
+  lastRestocked DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Emergency {
+  id          String   @id @default(cuid())
+  patientName String
+  condition   String
+  severity    EmergencySeverity
+  status      EmergencyStatus @default(ACTIVE)
+  arrivedAt   DateTime @default(now())
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum EmergencySeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum EmergencyStatus {
+  ACTIVE
+  TREATED
+  DISCHARGED
+  TRANSFERRED
+}
+
+model Incident {
+  id          String   @id @default(cuid())
+  type        String
+  description String
+  severity    String
+  status      IncidentStatus @default(OPEN)
+  reportedAt  DateTime @default(now())
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum IncidentStatus {
+  OPEN
+  INVESTIGATING
+  RESOLVED
+  CLOSED
+}
