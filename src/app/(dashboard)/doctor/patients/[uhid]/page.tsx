@@ -1,7 +1,7 @@
 import React from "react";
 
 const page = () => {
-  return <div>Reception dashboard page</div>;
+  return <div>uhid page</div>;
 };
 
 export default page;
