@@ -1,57 +1,12 @@
-src/app/(auth)/login/page.tsx:
+'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/router';
-import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
-import { useAuth } from '@/lib/auth';
+import React from 'react';
 
-const LoginPage = () => {
-  const router = useRouter();
-  const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await login(email, password);
-      router.push('/dashboard/doctor'); // Redirect to the doctor's dashboard after login
-    } catch (err) {
-      setError('Invalid email or password');
-    }
-  };
-
+export default function AdminPage() {
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-2xl font-bold">Login</h1>
-      {error && <p className="text-red-500">{error}</p>}
-      <Form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <Button type="submit">Login</Button>
-      </Form>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+      <p className="mt-4 text-gray-600">Welcome to the admin dashboard.</p>
     </div>
   );
-};
-
-export default LoginPage;
+}
