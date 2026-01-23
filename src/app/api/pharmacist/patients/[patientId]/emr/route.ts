@@ -3,14 +3,14 @@ import { requirePermission } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/pharmacist/patients/:patientId/emr
-export async function GET(req: Request, { params }: { params: { patientId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ patientId: string }> }) {
   try {
     await requirePermission(req, 'emr.read');
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const patientId = params.patientId;
+  const { patientId } = await params;
   const records = await prisma.eMR.findMany({
     where: { patientId },
     select: { id: true, diagnosis: true, symptoms: true, vitals: true, notes: true, createdAt: true },

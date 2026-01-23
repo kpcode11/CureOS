@@ -4,8 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { createAudit } from '@/services/audit.service';
 
 // PATCH /api/pharmacist/prescriptions/:id/dispense
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const id = params.id;
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   let sessionRes;
   try {
     sessionRes = await requirePermission(req, 'pharmacy.dispense');

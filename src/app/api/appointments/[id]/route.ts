@@ -5,7 +5,7 @@ import { createAudit } from "@/services/audit.service";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     await requirePermission(req, "appointments.read");
@@ -13,8 +13,9 @@ export async function GET(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const { id } = await params;
   const appointment = await prisma.appointment.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       patient: true,
       doctor: {
@@ -42,7 +43,7 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   let actorId: string | null = null;
 
@@ -53,10 +54,11 @@ export async function PATCH(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const { id } = await params;
   const body = await req.json();
 
   const appointment = await prisma.appointment.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       ...(body.dateTime && { dateTime: new Date(body.dateTime) }),
       ...(body.reason && { reason: body.reason }),
