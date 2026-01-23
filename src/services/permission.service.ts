@@ -5,18 +5,38 @@ export const listPermissions = async () => {
 };
 
 export const findPermission = async (name: string) => {
-  return prisma.permission.findUnique({ where: { name } });
+  // Case-insensitive lookup
+  const normalizedName = name.toLowerCase();
+  return prisma.permission.findUnique({ where: { name: normalizedName } });
 };
 
 export const ensurePermissions = async (names: string[]) => {
-  const out = [] as any[];
-  for (const n of names) {
-    const p = await prisma.permission.upsert({
-      where: { name: n },
-      update: {},
-      create: { name: n },
-    });
-    out.push(p);
-  }
-  return out;
+  return prisma.$transaction(async (tx) => {
+    const out = [] as any[];
+    for (const n of names) {
+      // Normalize name to lowercase
+      const normalizedName = n.toLowerCase();
+      
+      const p = await tx.permission.upsert({
+        where: { name: normalizedName },
+        update: {},
+        create: { name: normalizedName },
+      });
+      out.push(p);
+    }
+    return out;
+  });
+};
+
+export const createPermission = async (name: string, description?: string) => {
+  // Normalize name to lowercase
+  const normalizedName = name.toLowerCase();
+
+  // Check for duplicate permission (case-insensitive)
+  const existing = await prisma.permission.findUnique({ where: { name: normalizedName } });
+  if (existing) throw new Error('Permission already exists');
+
+  return prisma.permission.create({ 
+    data: { name: normalizedName, description: description || normalizedName } 
+  });
 };
