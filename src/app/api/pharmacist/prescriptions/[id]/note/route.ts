@@ -4,11 +4,11 @@ import { prisma } from '@/lib/prisma';
 import { createAudit } from '@/services/audit.service';
 
 // PATCH /api/pharmacist/prescriptions/:id/note
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const res = await requirePermission(req, 'pharmacy.read');
     const actorId = res.session?.user?.id ?? null;
-    const id = params.id;
+    const { id } = await params;
     const body = await req.json();
     const note = typeof body.note === 'string' ? body.note.trim() : '';
     if (!note) return NextResponse.json({ error: 'note is required' }, { status: 400 });

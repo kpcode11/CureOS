@@ -4,14 +4,14 @@ import { prisma } from '@/lib/prisma';
 import { createAudit } from '@/services/audit.service';
 
 // PATCH /api/pharmacist/prescriptions/:id/undo-dispense
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requirePermission(req, 'pharmacy.dispense');
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const id = params.id;
+  const { id } = await params;
   const existing = await prisma.prescription.findUnique({ where: { id } });
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   if (!existing.dispensed) return NextResponse.json({ error: 'Not dispensed' }, { status: 400 });

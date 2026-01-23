@@ -3,14 +3,14 @@ import { requirePermission } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/pharmacist/prescriptions/:id
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requirePermission(req, 'pharmacy.read');
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const id = params.id;
+  const { id } = await params;
   const rec = await prisma.prescription.findUnique({
     where: { id },
     include: {
