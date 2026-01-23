@@ -1,57 +1,11 @@
-src/app/(auth)/login/page.tsx:
+/* surgery.service.ts — restored minimal backend stub (original implementation was overwritten accidentally) */
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/router';
-import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
-import { useAuth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 
-const LoginPage = () => {
-  const router = useRouter();
-  const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await login(email, password);
-      router.push('/dashboard/doctor'); // Redirect to doctor's dashboard after login
-    } catch (err) {
-      setError('Invalid email or password');
-    }
-  };
-
-  return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-2xl font-bold">Login</h1>
-      {error && <p className="text-red-500">{error}</p>}
-      <Form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <Button type="submit">Login</Button>
-      </Form>
-    </div>
-  );
+export const listSurgeries = async () => {
+  return prisma.surgery.findMany({ take: 100, orderBy: { scheduledAt: 'desc' } });
 };
 
-export default LoginPage;
+export const createSurgery = async (data: { doctorId: string; patientName: string; surgeryType: string; scheduledAt: string }) => {
+  return prisma.surgery.create({ data: { doctorId: data.doctorId, patientName: data.patientName, surgeryType: data.surgeryType, scheduledAt: new Date(data.scheduledAt) } });
+};

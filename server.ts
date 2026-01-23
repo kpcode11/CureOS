@@ -9,20 +9,41 @@ const port = 3000;
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
-app.prepare().then(() => {
+app.prepare().then(async () => {
   const httpServer = createServer(handler);
   
+  const allowedOrigin = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
   const io = new Server(httpServer, {
     cors: {
-      origin: '*',
+      origin: allowedOrigin,
       methods: ['GET', 'POST'],
     },
   });
 
+  // lightweight auth on socket handshake: accept `token` in auth payload or cookie
+  const { getToken } = await import('next-auth/jwt');
+
+  io.use(async (socket, nextFn) => {
+    try {
+      const token = (socket.handshake.auth && (socket.handshake.auth.token || socket.handshake.auth.accessToken)) || socket.handshake.headers?.authorization?.split(' ')[1];
+      if (!token) return nextFn(new Error('Unauthorized'));
+      // validate token using next-auth's getToken helper
+      const fakeReq: any = { headers: { authorization: `Bearer ${token}` } };
+      const jwt = await getToken({ req: fakeReq, secret: process.env.NEXTAUTH_SECRET });
+      if (!jwt?.sub && !jwt?.id) return nextFn(new Error('Unauthorized'));
+      // attach minimal user info for handlers
+      (socket as any).user = { id: jwt.id ?? jwt.sub, role: jwt.role, permissions: jwt.permissions ?? [] };
+      return nextFn();
+    } catch (err) {
+      return nextFn(new Error('Unauthorized'));
+    }
+  });
+
   io.on('connection', (socket) => {
-    console.log('Client connected:', socket.id);
+    console.log('Client connected (auth):', socket.id, (socket as any).user?.id);
 
     socket.on('emergency-alert', (data) => {
+      // optionally enforce permission server-side
       io.emit('emergency-alert', data);
     });
 
@@ -43,25 +64,3 @@ app.prepare().then(() => {
     console.log(`> Ready on http://${hostname}:${port}`);
   });
 });
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="mb-4 p-2 border rounded"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="mb-4 p-2 border rounded"
-        />
-        <Button type="submit">Login</Button>
-      </Form>
-    </div>
-  );
-};
-
-export default LoginPage;
