@@ -2,6 +2,7 @@
   "name": "cureos-hospital-system",
   "version": "0.1.0",
   "private": true,
+
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,11 +10,15 @@
     "lint": "next lint",
     "test": "vitest",
     "migrate:dev": "prisma migrate dev",
-    "prisma:seed": "tsx prisma/seed-rbac.ts",
     "postinstall": "prisma generate",
     "prisma:regen": "node scripts/fix-prisma-temp.js",
     "verify:neon": "node scripts/verify-neon.js"
   },
+
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
+  
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
     "@prisma/client": "^5.20.0",
@@ -59,7 +64,7 @@
     "prisma": "^5.20.0",
     "supertest": "^6.3.3",
     "tailwindcss": "^3.4.0",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5.3.0",
     "vitest": "^4.0.18"
