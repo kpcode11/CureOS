@@ -11,8 +11,8 @@ const protectedRoutes = [
 
 // Routes that require specific permissions
 const permissionRequiredRoutes: Record<string, string[]> = {
-  '/admin/rbac': ['roles.manage', 'users.manage'],
-  '/admin': ['roles.manage'],
+  '/admin/rbac': ['admin.roles.manage', 'admin.users.read'],
+  '/admin': ['admin.roles.manage'],
 };
 
 export default withAuth(

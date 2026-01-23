@@ -30,7 +30,7 @@ export function AuthPage() {
 				email,
 				password,
 				redirect: true,
-				callbackUrl: "/admin",
+				callbackUrl: "/",
 			});
 
 			if (!result?.ok) {
@@ -146,7 +146,7 @@ export function AuthPage() {
 					<div className="p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
 						<strong>Dev Credentials:</strong><br/>
 						Email: admin@neon.example<br/>
-						Password: N3on$Adm1n!x9Qv7sR2#tY4P
+						Password: Admin123!
 					</div>
 				</div>
 			</div>

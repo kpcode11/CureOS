@@ -4,9 +4,9 @@ import { prisma } from '@/lib/prisma';
 import { requirePermission } from '@/lib/authorization';
 import { createAudit } from '@/services/audit.service';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    await requirePermission(undefined, 'users.manage');
+    await requirePermission(req, 'admin.users.read');
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
@@ -16,7 +16,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    await requirePermission(undefined, 'users.manage');
+    await requirePermission(req, 'admin.users.create');
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }

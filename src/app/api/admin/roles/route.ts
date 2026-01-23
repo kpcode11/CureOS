@@ -5,7 +5,7 @@ import { createAudit } from '@/services/audit.service';
 
 export async function GET(req: Request) {
   try {
-    await requirePermission(undefined, 'roles.manage');
+    await requirePermission(req, 'admin.roles.manage');
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
@@ -15,7 +15,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    await requirePermission(undefined, 'roles.manage');
+    await requirePermission(req, 'admin.roles.manage');
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
