@@ -269,7 +269,6 @@ model Incident {
   updatedAt   DateTime       @updatedAt
 }
 
-/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model Permission {
   id              String           @id @default(cuid())
   name            String           @unique
@@ -279,7 +278,6 @@ model Permission {
   rolePermissions RolePermission[]
 }
 
-/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model RoleEntity {
   id              String           @id @default(cuid())
   name            String           @unique
@@ -287,7 +285,6 @@ model RoleEntity {
   isSystemRole    Boolean          @default(false)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  isSystemRole    Boolean          @default(false)
   rolePermissions RolePermission[]
   users           User[]
 }
