@@ -80,6 +80,8 @@ export default function AppointmentBooking() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [loadingPatients, setLoadingPatients] = useState(true);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
   const [loadingAppointments, setLoadingAppointments] = useState(true);
@@ -97,7 +99,7 @@ export default function AppointmentBooking() {
   useEffect(() => {
     fetchPatients();
     fetchDoctors();
-    loadMockAppointments();
+    fetchAppointments();
   }, []);
 
   const loadMockAppointments = () => {
@@ -249,6 +251,18 @@ export default function AppointmentBooking() {
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    
+    // Update selectedPatient when patientId changes
+    if (field === "patientId") {
+      const patient = patients.find((p) => p.id === value);
+      setSelectedPatient(patient || null);
+    }
+    
+    // Update selectedDoctor when doctorId changes
+    if (field === "doctorId") {
+      const doctor = doctors.find((d) => d.id === value);
+      setSelectedDoctor(doctor || null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -256,7 +270,29 @@ export default function AppointmentBooking() {
     setIsSubmitting(true);
 
     try {
+      // Validate form data
+      if (!formData.patientId || !formData.doctorId || !formData.date || !formData.time) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields (Patient, Doctor, Date, Time)",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const dateTime = new Date(`${formData.date}T${formData.time}`);
+
+      // Check if date is in the past
+      if (dateTime < new Date()) {
+        toast({
+          title: "Invalid Date",
+          description: "Cannot book appointment in the past",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
       const response = await fetch("/api/appointments", {
         method: "POST",
@@ -273,28 +309,59 @@ export default function AppointmentBooking() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to book appointment");
+        const errorData = await response.json();
+        const errorMsg = errorData.error || "Failed to book appointment";
+        throw new Error(errorMsg);
       }
 
       const appointment = await response.json();
       setBookedAppointment(appointment);
 
       // Refresh appointments list
-      // fetchAppointments();
+      fetchAppointments();
 
       toast({
-        title: "Appointment Booked Successfully!",
-        description: `Appointment scheduled for ${new Date(appointment.dateTime).toLocaleString()}`,
+        title: "✅ Appointment Booked Successfully!",
+        description: `Appointment scheduled for ${new Date(appointment.dateTime).toLocaleString()} with ${appointment.doctor.user.name}`,
       });
-    } catch (error) {
+
+      // Reset form
+      handleReset();
+
+      // Switch to list tab to show new appointment
+      setTimeout(() => setActiveTab("list"), 500);
+    } catch (error: any) {
+      const errorMsg = error?.message || "Unknown error occurred";
       toast({
-        title: "Booking Failed",
-        description:
-          "There was an error booking the appointment. Please try again.",
+        title: "❌ Booking Failed",
+        description: errorMsg,
         variant: "destructive",
       });
+      console.error("Appointment booking error:", error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const fetchAppointments = async () => {
+    try {
+      setLoadingAppointments(true);
+      const response = await fetch("/api/appointments");
+      if (response.ok) {
+        const data = await response.json();
+        setAppointments(data);
+        console.log("Fetched appointments:", data);
+      } else {
+        console.error("Failed to fetch appointments:", response.status);
+        // Fall back to mock appointments if API fails
+        loadMockAppointments();
+      }
+    } catch (error) {
+      console.error("Failed to fetch appointments:", error);
+      // Fall back to mock appointments if API fails
+      loadMockAppointments();
+    } finally {
+      setLoadingAppointments(false);
     }
   };
 

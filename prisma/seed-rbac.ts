@@ -99,6 +99,14 @@ async function main() {
     'billing.claim.manage',
     'billing.discount.approve',
 
+    // Appointment Module (3)
+    'appointment.create',
+    'appointment.read',
+    'appointment.update',
+
+    // Doctor Module (1)
+    'doctor.read',
+
     // Beds/Inventory Module (3)
     'beds.status.read',
     'beds.assign.manage',
@@ -149,6 +157,10 @@ async function main() {
     RECEPTIONIST: [
       // Patient registration & management
       'patient.create', 'patient.read', 'patient.update', 'patient.history.read',
+      // Appointment scheduling
+      'appointment.create', 'appointment.read', 'appointment.update',
+      // Doctor information for scheduling
+      'doctor.read',
       // Bed management
       'beds.status.read', 'beds.assign.manage',
       // View own permissions
@@ -327,12 +339,12 @@ async function main() {
 
   const adminUser = await prisma.user.upsert({
     where: { email: adminEmail },
-    update: { password: hashed, role: 'ADMIN', roleEntityId: roleMap.ADMINISTRATOR.id },
+    update: { password: hashed, role: 'ADMIN' as unknown as any, roleEntityId: roleMap.ADMINISTRATOR.id },
     create: {
       email: adminEmail,
       password: hashed,
       name: 'CureOS Administrator',
-      role: 'ADMIN',
+      role: 'ADMIN' as unknown as any,
       roleEntityId: roleMap.ADMINISTRATOR.id,
     },
   });
@@ -363,18 +375,62 @@ async function main() {
       where: { email: testUser.email },
       update: { 
         password: testHashedPassword, 
-        role: testUser.role, 
+        role: testUser.role as unknown as any, 
         roleEntityId: role.id 
       },
       create: {
         email: testUser.email,
         password: testHashedPassword,
         name: testUser.name,
-        role: testUser.role,
+        role: testUser.role as unknown as any,
         roleEntityId: role.id,
       },
     });
     console.log(`  ✓ ${testUser.email} (${testUser.role})`);
+  }
+  console.log('');
+
+  // ========== CREATE DUMMY DOCTORS ==========
+  console.log('📋 Creating dummy doctors...');
+  // Create dummy doctors with separate user accounts
+  const dummyDoctors = [
+    { email: 'cardio-doc@hospital.com', name: 'Dr. John Doe', specialization: 'Cardiology', license: 'LIC001' },
+    { email: 'derm-doc@hospital.com', name: 'Dr. Sarah Johnson', specialization: 'Dermatology', license: 'LIC002' },
+    { email: 'neuro-doc@hospital.com', name: 'Dr. Michael Chen', specialization: 'Neurology', license: 'LIC003' },
+    { email: 'ortho-doc@hospital.com', name: 'Dr. Emily Davis', specialization: 'Orthopedics', license: 'LIC004' },
+    { email: 'peds-doc@hospital.com', name: 'Dr. Robert Wilson', specialization: 'Pediatrics', license: 'LIC005' },
+  ];
+
+  const doctorRole = await prisma.roleEntity.findFirst({
+    where: { name: 'DOCTOR' },
+  });
+
+  for (const docData of dummyDoctors) {
+    // Create or update doctor user
+    const doctorUser = await prisma.user.upsert({
+      where: { email: docData.email },
+      update: { name: docData.name },
+      create: {
+        email: docData.email,
+        name: docData.name,
+        password: await bcrypt.hash('password123', 10),
+        role: 'DOCTOR' as unknown as any,
+        roleEntityId: doctorRole?.id,
+      },
+    });
+
+    // Create or update doctor record
+    await prisma.doctor.upsert({
+      where: { licenseNumber: docData.license },
+      update: { specialization: docData.specialization },
+      create: {
+        specialization: docData.specialization,
+        licenseNumber: docData.license,
+        userId: doctorUser.id,
+      },
+    });
+
+    console.log(`  ✓ ${docData.name} (${docData.specialization})`);
   }
   console.log('');
 
