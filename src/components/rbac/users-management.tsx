@@ -75,6 +75,17 @@ export default function UsersManagement() {
   };
 
   const handleDelete = async (userId: string) => {
+    const user = users.find((u) => u.id === userId);
+    
+    // Prevent deleting admin user
+    if (user?.roleEntityId) {
+      const userRole = roles.find((r) => r.id === user.roleEntityId);
+      if (userRole?.name?.toLowerCase() === 'admin') {
+        setFormError('Cannot delete admin user');
+        return;
+      }
+    }
+    
     if (!confirm('Are you sure you want to delete this user?')) return;
     try {
       await deleteUser(userId);
@@ -149,8 +160,17 @@ export default function UsersManagement() {
                         </button>
                         <button
                           onClick={() => handleDelete(user.id)}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded transition"
-                          title="Delete"
+                          disabled={user.roleEntityId && roles.find((r) => r.id === user.roleEntityId)?.name?.toLowerCase() === 'admin'}
+                          className={`p-1 rounded transition ${
+                            user.roleEntityId && roles.find((r) => r.id === user.roleEntityId)?.name?.toLowerCase() === 'admin'
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-red-600 hover:bg-red-50'
+                          }`}
+                          title={
+                            user.roleEntityId && roles.find((r) => r.id === user.roleEntityId)?.name?.toLowerCase() === 'admin'
+                              ? 'Cannot delete admin user'
+                              : 'Delete'
+                          }
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
