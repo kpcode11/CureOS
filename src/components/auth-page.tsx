@@ -83,10 +83,10 @@ export function AuthPage() {
 					<Logo className="h-5 lg:hidden" />
 					<div className="flex flex-col space-y-1">
 						<h1 className="font-bold text-2xl tracking-wide">
-							Admin Login (Dev)
+							Login (Dev)
 						</h1>
 						<p className="text-base text-muted-foreground">
-							Enter admin credentials to access RBAC
+							Enter credentials to access CureOS
 						</p>
 					</div>
 

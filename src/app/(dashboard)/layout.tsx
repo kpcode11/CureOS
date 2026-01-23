@@ -23,11 +23,13 @@ import { signOut, useSession, SessionProvider } from "next-auth/react";
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { data: session } = useSession();
-  const userRole = session?.user?.role || "ADMIN";
+  const { data: session, status } = useSession();
+  const userRole = session?.user?.role;
 
   // Role-based sidebar items
   const getSidebarItems = () => {
+    if (!userRole) return [];
+    
     switch (userRole) {
       case "RECEPTIONIST":
         return [
