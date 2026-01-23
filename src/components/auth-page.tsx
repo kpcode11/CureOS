@@ -30,7 +30,7 @@ export function AuthPage() {
 				email,
 				password,
 				redirect: true,
-				callbackUrl: "/admin",
+				callbackUrl: "/",
 			});
 
 			if (!result?.ok) {
