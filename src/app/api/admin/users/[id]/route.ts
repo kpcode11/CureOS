@@ -6,7 +6,7 @@ import { createAudit } from '@/services/audit.service';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
-    await requirePermission(undefined, 'users.manage');
+    await requirePermission(req, 'admin.users.read');
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
@@ -18,7 +18,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   let session: any = null;
   try {
-    const res = await requirePermission(req, 'users.manage');
+    const res = await requirePermission(req, 'admin.users.update');
     session = res.session;
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -41,7 +41,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   let session: any = null;
   try {
-    const res = await requirePermission(req, 'users.manage');
+    const res = await requirePermission(req, 'admin.users.delete');
     session = res.session;
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
