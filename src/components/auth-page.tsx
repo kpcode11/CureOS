@@ -10,8 +10,39 @@ import {
 import { AtSignIcon, ChevronLeftIcon } from "lucide-react";
 import type React from "react";
 import { FloatingPaths } from "@/components/floating-paths";
+import { signIn } from "next-auth/react";
+import { useState } from "react";
 
 export function AuthPage() {
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState("");
+
+	const handleCredentialsLogin = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setError("");
+		setIsLoading(true);
+
+		try {
+			const result = await signIn("credentials", {
+				email,
+				password,
+				redirect: true,
+				callbackUrl: "/admin",
+			});
+
+			if (!result?.ok) {
+				setError("Invalid email or password");
+			}
+		} catch (err) {
+			setError("Login failed. Please try again.");
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
 	return (
 		<main className="relative md:h-screen md:overflow-hidden lg:grid lg:grid-cols-2">
 			<div className="relative hidden h-full flex-col border-r bg-secondary p-10 lg:flex dark:bg-secondary/20">
@@ -52,68 +83,71 @@ export function AuthPage() {
 					<Logo className="h-5 lg:hidden" />
 					<div className="flex flex-col space-y-1">
 						<h1 className="font-bold text-2xl tracking-wide">
-							Sign In or Join Now!
+							Admin Login (Dev)
 						</h1>
 						<p className="text-base text-muted-foreground">
-							login or create your CureOS account.
+							Enter admin credentials to access RBAC
 						</p>
 					</div>
-					<div className="space-y-2">
-						<Button className="w-full" size="lg" type="button">
-							<GoogleIcon />
-							Continue with Google
-						</Button>
-						<Button className="w-full" size="lg" type="button">
-							<AppleIcon />
-							Continue with Apple
-						</Button>
-						<Button className="w-full" size="lg" type="button">
-							<GithubIcon />
-							Continue with GitHub
-						</Button>
-					</div>
 
-					<div className="flex w-full items-center justify-center">
-						<div className="h-px w-full bg-border" />
-						<span className="px-2 text-muted-foreground text-xs">OR</span>
-						<div className="h-px w-full bg-border" />
-					</div>
+					{error && (
+						<div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded text-sm">
+							{error}
+						</div>
+					)}
 
-					<form className="space-y-2">
-						<p className="text-start text-muted-foreground text-xs">
-							Enter your email address to sign in or create an account
-						</p>
-						<InputGroup>
-							<InputGroupInput
-								placeholder="your.email@example.com"
-								type="email"
-							/>
-							<InputGroupAddon>
-								<AtSignIcon />
-							</InputGroupAddon>
-						</InputGroup>
+					<form onSubmit={handleCredentialsLogin} className="space-y-3">
+						<div>
+							<label className="text-xs text-muted-foreground block mb-1">Email</label>
+							<InputGroup>
+								<InputGroupInput
+									placeholder="admin@neon.example"
+									type="email"
+									value={email}
+									onChange={(e) => setEmail(e.target.value)}
+									disabled={isLoading}
+									required
+								/>
+								<InputGroupAddon>
+									<AtSignIcon />
+								</InputGroupAddon>
+							</InputGroup>
+						</div>
 
-						<Button className="w-full" type="button">
-							Continue With Email
+						<div>
+							<label className="text-xs text-muted-foreground block mb-1">Password</label>
+							<InputGroup>
+								<InputGroupInput
+									placeholder="Password"
+									type={showPassword ? "text" : "password"}
+									value={password}
+									onChange={(p) => setPassword(p.target.value)}
+									disabled={isLoading}
+									required
+								/>
+								<InputGroupAddon
+									onClick={() => setShowPassword(!showPassword)}
+									className="cursor-pointer"
+								>
+									{showPassword ? "Hide" : "Show"}
+								</InputGroupAddon>
+							</InputGroup>
+						</div>
+
+						<Button 
+							className="w-full" 
+							type="submit"
+							disabled={isLoading}
+						>
+							{isLoading ? "Logging in..." : "Login as Admin"}
 						</Button>
 					</form>
-					<p className="mt-8 text-muted-foreground text-sm">
-						By clicking continue, you agree to our{" "}
-						<a
-							className="underline underline-offset-4 hover:text-primary"
-							href="#"
-						>
-							Terms of Service
-						</a>{" "}
-						and{" "}
-						<a
-							className="underline underline-offset-4 hover:text-primary"
-							href="#"
-						>
-							Privacy Policy
-						</a>
-						.
-					</p>
+
+					<div className="p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+						<strong>Dev Credentials:</strong><br/>
+						Email: admin@neon.example<br/>
+						Password: N3on$Adm1n!x9Qv7sR2#tY4P
+					</div>
 				</div>
 			</div>
 		</main>
