@@ -134,3 +134,58 @@ Built with ❤️ by [Your Name]
 ## Support
 
 For support, email your-email@example.com or open an issue in the repository.
+
+---
+
+## Authentication & Access Control (RBAC, emergency override, audit) 🔐
+
+This repository now includes a production-ready backend implementation for:
+
+- `Users`, `RoleEntity` (roles), `Permission` (atomic permissions)
+- JWT augmentation with `permissions` claim
+- Emergency override workflow (time-limited, single-use tokens)
+- Immutable `AuditLog` records for sensitive actions
+
+How to apply schema + seed (local dev):
+
+1. Ensure your `.env` has a valid `DATABASE_URL` and `NEXTAUTH_SECRET`.
+2. Run migrations and seed:
+
+```bash
+# create migration and apply to your DB
+npx prisma migrate dev --name add-rbac-audit-override
+# seed RBAC + initial admin user
+npm run prisma:seed
+```
+
+API endpoints (backend only — admin permissions required):
+
+- `POST /api/auth/override` — request an emergency override (body: `{ reason, targetUserId?, ttlMinutes? }`) → returns `{ token, expiresAt }`
+- `GET  /api/admin/roles/:id` — get single role (requires `roles.manage`)
+- `PUT  /api/admin/roles/:id` — update role name and permissions (requires `roles.manage`) — body: `{ name?, permissions?: string[] }`
+- `DELETE /api/admin/roles/:id` — delete role (requires `roles.manage`, cannot delete `ADMIN` or roles with users)`
+- `GET  /api/admin/roles` — list roles (requires `roles.manage`)
+- `POST /api/admin/roles` — create role with permissions (requires `roles.manage`)
+- `GET  /api/admin/permissions` — list permissions (requires `roles.manage`)
+- `POST /api/admin/permissions` — bulk create permissions (requires `roles.manage`)
+- `GET  /api/admin/users` — list users (requires `users.manage`)
+- `POST /api/admin/users` — create user (requires `users.manage`)
+- `GET  /api/admin/audit` — read audit log (requires `audit.read`)
+
+Security notes:
+- Emergency override token must be supplied in the `x-override-token` header for actions that allow overrides.
+- Socket.IO connections require a valid session JWT (passed as `auth.token` or `Authorization: Bearer <jwt>`); server enforces origin via `NEXT_PUBLIC_APP_URL`. (See `server.ts`.)
+- All overrides and permission changes are written to `AuditLog`.
+
+If you'd like, I can open a PR that runs the migration against a disposable test database and add CI to run the new unit/integration tests.
+
+---
+
+Neon (Postgres) — quick notes
+- Set `DATABASE_URL` to your Neon branch URL, include `?pgbouncer=true&sslmode=require&schema=public`.
+- To repair local Prisma client issues on Windows/OneDrive: `npm run prisma:regen` — it removes temp files and regenerates the client.
+- To verify a Neon DB after migrations: set `DATABASE_URL` and run `npm run verify:neon`.
+
+CI
+- The repository includes a GitHub Actions workflow that will run migrations against a Neon staging DB (when `NEON_DATABASE_URL` secret is provided) and run integration tests.
+

@@ -10,11 +10,13 @@ declare module 'next-auth' {
       email: string;
       name: string;
       role: string;
+      permissions?: string[];
     };
   }
 
   interface User {
     role: string;
+    permissions?: string[];
   }
 }
 
@@ -22,6 +24,7 @@ declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
     role: string;
+    permissions?: string[];
   }
 }
 
@@ -40,6 +43,7 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
+          include: { roleEntity: { include: { rolePermissions: { include: { permission: true } } } } },
         });
 
         if (!user || !user.password) {
@@ -55,12 +59,17 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Invalid credentials');
         }
 
+        const permissions = (
+          user.roleEntity?.rolePermissions?.map((rp) => rp.permission.name) ?? []
+        );
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,
-        };
+          permissions,
+        } as any;
       },
     }),
   ],
@@ -73,8 +82,9 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
-        token.id = user.id;
+        token.role = (user as any).role;
+        token.id = (user as any).id;
+        token.permissions = (user as any).permissions ?? [];
       }
       return token;
     },
@@ -82,8 +92,10 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.role = token.role;
         session.user.id = token.id;
+        (session.user as any).permissions = (token as any).permissions ?? [];
       }
       return session;
     },
   },
 };
+
