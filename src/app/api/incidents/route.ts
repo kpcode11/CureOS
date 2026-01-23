@@ -16,7 +16,13 @@ export async function POST(req: Request) {
   try {
     const res = await requirePermission(req, 'incidents.create');
     const body = await req.json();
-    const rec = await prisma.incident.create({ data: { patientId: body.patientId ?? '', description: body.description ?? '', severity: body.severity ?? 'LOW' } });
+    const rec = await prisma.incident.create({ 
+      data: { 
+        type: body.type ?? 'INCIDENT',
+        description: body.description ?? '', 
+        severity: body.severity ?? 'LOW' 
+      } 
+    });
     return NextResponse.json(rec);
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
