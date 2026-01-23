@@ -32,6 +32,14 @@ Welcome to CureOS Hospital Management System documentation. This guide will help
 - [Feature Showcase](./guides/08-feature-showcase.md) - System capabilities
 - [Delivery Summary](./guides/09-delivery-summary.md) - Project completion status
 
+### 👨‍⚕️ Doctor Module (Phase 1 + 2 Complete)
+- [Doctor Module Summary](./DOCTOR_MODULE_SUMMARY.md) - Overview and statistics
+- [Doctor Quick Reference](./DOCTOR_QUICK_REFERENCE.md) - Copy-paste examples
+- [Doctor Phase 1 Complete](./DOCTOR_PHASE1_COMPLETE.md) - Backend API reference
+- [Doctor Phase 2 Complete](./DOCTOR_PHASE2_COMPLETE.md) - Frontend components
+- [Doctor File Inventory](./DOCTOR_FILE_INVENTORY.md) - All files created
+- [Phase 2 Verification Report](./PHASE2_VERIFICATION_REPORT.md) - Quality assurance
+
 ---
 
 ## 📖 Documentation Structure

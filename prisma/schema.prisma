@@ -141,19 +141,20 @@ model EMR {
 }
 
 model Prescription {
-  id           String      @id @default(cuid())
-  patientId    String
-  doctorId     String
-  pharmacistId String?
-  medications  Json
-  instructions String
-  dispensed    Boolean     @default(false)
-  dispensedAt  DateTime?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  doctor       Doctor      @relation(fields: [doctorId], references: [id])
-  patient      Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  pharmacist   Pharmacist? @relation(fields: [pharmacistId], references: [id])
+  id               String      @id @default(cuid())
+  patientId        String
+  doctorId         String
+  pharmacistId     String?
+  medications      Json
+  instructions     String
+  dispensed        Boolean     @default(false)
+  dispensedAt      DateTime?
+  pharmacistNotes  String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  doctor           Doctor      @relation(fields: [doctorId], references: [id])
+  patient          Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  pharmacist       Pharmacist? @relation(fields: [pharmacistId], references: [id])
 }
 
 model LabTest {
@@ -163,6 +164,8 @@ model LabTest {
   testType    String
   results     Json?
   status      LabTestStatus @default(PENDING)
+  instructions String?
+  priority    String        @default("ROUTINE") // ROUTINE or URGENT
   orderedAt   DateTime      @default(now())
   completedAt DateTime?
   createdAt   DateTime      @default(now())
@@ -172,16 +175,17 @@ model LabTest {
 }
 
 model Surgery {
-  id          String        @id @default(cuid())
-  doctorId    String
-  patientName String
-  surgeryType String
-  scheduledAt DateTime
-  status      SurgeryStatus @default(SCHEDULED)
-  notes       String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  doctor      Doctor        @relation(fields: [doctorId], references: [id])
+  id              String        @id @default(cuid())
+  doctorId        String
+  patientName     String
+  surgeryType     String
+  scheduledAt     DateTime
+  status          SurgeryStatus @default(SCHEDULED)
+  notes           String?
+  anesthesiologist String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  doctor          Doctor        @relation(fields: [doctorId], references: [id])
 }
 
 model Bed {
