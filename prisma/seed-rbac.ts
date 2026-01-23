@@ -344,12 +344,12 @@ async function main() {
 
   const adminUser = await prisma.user.upsert({
     where: { email: adminEmail },
-    update: { password: hashed, role: 'ADMIN', roleEntityId: roleMap.ADMINISTRATOR.id },
+    update: { password: hashed, role: 'ADMIN' as unknown as any, roleEntityId: roleMap.ADMINISTRATOR.id },
     create: {
       email: adminEmail,
       password: hashed,
       name: 'CureOS Administrator',
-      role: 'ADMIN',
+      role: 'ADMIN' as unknown as any,
       roleEntityId: roleMap.ADMINISTRATOR.id,
     },
   });
@@ -385,14 +385,14 @@ async function main() {
       where: { email: testUser.email },
       update: { 
         password: testHashedPassword, 
-        role: testUser.role, 
+        role: testUser.role as unknown as any, 
         roleEntityId: role.id 
       },
       create: {
         email: testUser.email,
         password: testHashedPassword,
         name: testUser.name,
-        role: testUser.role,
+        role: testUser.role as unknown as any,
         roleEntityId: role.id,
       },
     });
