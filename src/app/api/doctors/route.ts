@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
   try {
-    await requirePermission(req, "doctors.read");
+    await requirePermission(req, "doctor.read");
   } catch (err) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

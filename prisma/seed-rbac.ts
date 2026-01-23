@@ -99,6 +99,14 @@ async function main() {
     'billing.claim.manage',
     'billing.discount.approve',
 
+    // Appointment Module (3)
+    'appointment.create',
+    'appointment.read',
+    'appointment.update',
+
+    // Doctor Module (1)
+    'doctor.read',
+
     // Beds/Inventory Module (3)
     'beds.status.read',
     'beds.assign.manage',
@@ -149,6 +157,10 @@ async function main() {
     RECEPTIONIST: [
       // Patient registration & management
       'patient.create', 'patient.read', 'patient.update', 'patient.history.read',
+      // Appointment scheduling
+      'appointment.create', 'appointment.read', 'appointment.update',
+      // Doctor information for scheduling
+      'doctor.read',
       // Bed management
       'beds.status.read', 'beds.assign.manage',
       // View own permissions
@@ -322,22 +334,115 @@ async function main() {
   }
 
   const adminEmail = envAdminEmail ?? 'admin@neon.example';
-  const adminPassword = envAdminPassword ?? 'Admin123!';
+  const adminPassword = envAdminPassword;
+  
+  if (!adminPassword) {
+    throw new Error('RBAC_ADMIN_PASSWORD environment variable must be set before seeding');
+  }
+  
   const hashed = await bcrypt.hash(adminPassword, 10);
 
   const adminUser = await prisma.user.upsert({
     where: { email: adminEmail },
-    update: { password: hashed, role: 'ADMIN', roleEntityId: roleMap.ADMINISTRATOR.id },
+    update: { password: hashed, role: 'ADMIN' as unknown as any, roleEntityId: roleMap.ADMINISTRATOR.id },
     create: {
       email: adminEmail,
       password: hashed,
       name: 'CureOS Administrator',
-      role: 'ADMIN',
+      role: 'ADMIN' as unknown as any,
       roleEntityId: roleMap.ADMINISTRATOR.id,
     },
   });
 
   console.log(`✅ Created/updated admin user: ${adminUser.email}\n`);
+
+  // ========== CREATE TEST USERS FOR EACH ROLE ==========
+  const testUsers = [
+    { email: 'keshav@example.com', name: 'Keshav Sharma', role: 'RECEPTIONIST' },
+    { email: 'doctor@example.com', name: 'Dr. John Doe', role: 'DOCTOR' },
+    { email: 'nurse@example.com', name: 'Jane Smith', role: 'NURSE' },
+    { email: 'pharmacist@example.com', name: 'Alex Johnson', role: 'PHARMACIST' },
+    { email: 'labtech@example.com', name: 'Rita Patel', role: 'LAB_TECH' },
+  ];
+
+  const testPassword = process.env.RBAC_TEST_PASSWORD;
+  
+  if (!testPassword) {
+    throw new Error('RBAC_TEST_PASSWORD environment variable must be set before seeding');
+  }
+  
+  const testHashedPassword = await bcrypt.hash(testPassword, 10);
+
+  console.log('📝 Creating/Updating test users with roles...');
+  for (const testUser of testUsers) {
+    const role = roleMap[testUser.role];
+    if (!role) {
+      console.warn(`⚠️  Role ${testUser.role} not found, skipping ${testUser.email}`);
+      continue;
+    }
+
+    await prisma.user.upsert({
+      where: { email: testUser.email },
+      update: { 
+        password: testHashedPassword, 
+        role: testUser.role as unknown as any, 
+        roleEntityId: role.id 
+      },
+      create: {
+        email: testUser.email,
+        password: testHashedPassword,
+        name: testUser.name,
+        role: testUser.role as unknown as any,
+        roleEntityId: role.id,
+      },
+    });
+    console.log(`  ✓ ${testUser.email} (${testUser.role})`);
+  }
+  console.log('');
+
+  // ========== CREATE DUMMY DOCTORS ==========
+  console.log('📋 Creating dummy doctors...');
+  // Create dummy doctors with separate user accounts
+  const dummyDoctors = [
+    { email: 'cardio-doc@hospital.com', name: 'Dr. John Doe', specialization: 'Cardiology', license: 'LIC001' },
+    { email: 'derm-doc@hospital.com', name: 'Dr. Sarah Johnson', specialization: 'Dermatology', license: 'LIC002' },
+    { email: 'neuro-doc@hospital.com', name: 'Dr. Michael Chen', specialization: 'Neurology', license: 'LIC003' },
+    { email: 'ortho-doc@hospital.com', name: 'Dr. Emily Davis', specialization: 'Orthopedics', license: 'LIC004' },
+    { email: 'peds-doc@hospital.com', name: 'Dr. Robert Wilson', specialization: 'Pediatrics', license: 'LIC005' },
+  ];
+
+  const doctorRole = await prisma.roleEntity.findFirst({
+    where: { name: 'DOCTOR' },
+  });
+
+  for (const docData of dummyDoctors) {
+    // Create or update doctor user
+    const doctorUser = await prisma.user.upsert({
+      where: { email: docData.email },
+      update: { name: docData.name },
+      create: {
+        email: docData.email,
+        name: docData.name,
+        password: await bcrypt.hash(process.env.RBAC_DOCTOR_PASSWORD || 'temp', 10),
+        role: 'DOCTOR' as unknown as any,
+        roleEntityId: doctorRole?.id,
+      },
+    });
+
+    // Create or update doctor record
+    await prisma.doctor.upsert({
+      where: { licenseNumber: docData.license },
+      update: { specialization: docData.specialization },
+      create: {
+        specialization: docData.specialization,
+        licenseNumber: docData.license,
+        userId: doctorUser.id,
+      },
+    });
+
+    console.log(`  ✓ ${docData.name} (${docData.specialization})`);
+  }
+  console.log('');
 
   // ========== SEED COMPLETE - SUMMARY ==========
   console.log('╔════════════════════════════════════════════════════════════╗');
@@ -345,7 +450,7 @@ async function main() {
   console.log('╠════════════════════════════════════════════════════════════╣');
   console.log(`║ Permissions: ${allPermissions.length}`.padEnd(62) + '║');
   console.log(`║ Roles: ${Object.keys(roleMap).length} (Admin, Doctor, Nurse, Pharmacist, Lab Tech, ...)`.padEnd(62) + '║');
-  console.log(`║ Users: 1 Administrator`.padEnd(62) + '║');
+  console.log(`║ Users: 6 (1 Admin + 5 Test Users)`.padEnd(62) + '║');
   console.log('╠════════════════════════════════════════════════════════════╣');
   console.log('║ Role Summary:'.padEnd(62) + '║');
   for (const [roleName, perms] of Object.entries(rolePermissions)) {
@@ -353,14 +458,10 @@ async function main() {
     console.log(`║   ${summary}`.padEnd(62) + '║');
   }
   console.log('╠════════════════════════════════════════════════════════════╣');
-  if (!isProdLike) {
-    console.log(`║ 🔐 Admin Credentials:                                      ║`);
-    console.log(`║    Email: ${adminEmail}`.padEnd(62) + '║');
-    console.log(`║    Password: ${adminPassword}`.padEnd(62) + '║');
-    console.log('║ ⚠️  CHANGE credentials before production deployment        ║');
-  } else {
-    console.log('║ ✓ Production mode - admin password not displayed           ║');
-  }
+  console.log('║ ⚠️  IMPORTANT: Set these environment variables before seeding:║');
+  console.log('║  - RBAC_ADMIN_PASSWORD                                      ║');
+  console.log('║  - RBAC_TEST_PASSWORD                                       ║');
+  console.log('║  - RBAC_DOCTOR_PASSWORD                                     ║');
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 }
 

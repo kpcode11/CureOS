@@ -12,6 +12,7 @@ import {
   FileText,
   Users,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,18 +55,33 @@ export default function PatientSearch() {
 
   useEffect(() => {
     fetchPatients();
+    
+    // Set up visibility change listener to refresh when page becomes visible
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('Page became visible, refreshing patients...');
+        fetchPatients();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   const fetchPatients = async () => {
     try {
       setLoading(true);
       const response = await fetch("/api/patients");
-      if (response.ok) {
-        const data = await response.json();
-        setPatients(data);
+      if (!response.ok) {
+        console.error('Failed to fetch patients:', response.status, response.statusText);
+        return;
       }
+      const data = await response.json();
+      console.log('Fetched patients:', data);
+      setPatients(data || []);
     } catch (error) {
       console.error("Failed to fetch patients:", error);
+      setPatients([]);
     } finally {
       setLoading(false);
     }
@@ -109,14 +125,25 @@ export default function PatientSearch() {
               Search and manage patient records
             </p>
           </div>
-          <Button
-            onClick={() => router.push("/receptionist/registration")}
-            className="gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg"
-            size="lg"
-          >
-            <Plus className="h-5 w-5" />
-            New Patient
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={fetchPatients}
+              variant="outline"
+              className="gap-2"
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              {loading ? 'Refreshing...' : 'Refresh'}
+            </Button>
+            <Button
+              onClick={() => router.push("/receptionist/registration")}
+              className="gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg"
+              size="lg"
+            >
+              <Plus className="h-5 w-5" />
+              New Patient
+            </Button>
+          </div>
         </div>
 
         {/* Search Bar */}
