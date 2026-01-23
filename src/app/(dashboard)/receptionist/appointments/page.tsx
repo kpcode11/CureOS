@@ -382,7 +382,7 @@ export default function AppointmentBooking() {
       string,
       "default" | "success" | "warning" | "destructive"
     > = {
-      SCHEDULED: "info",
+      SCHEDULED: "default",
       COMPLETED: "success",
       CANCELLED: "destructive",
       NO_SHOW: "warning",
