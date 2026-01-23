@@ -94,6 +94,10 @@ export default function AppointmentBooking() {
     notes: "",
   });
 
+  // derived selections for the summary panel (prevent undefined refs)
+  const selectedPatient = patients.find((p) => p.id === formData.patientId) ?? null;
+  const selectedDoctor = doctors.find((d) => d.id === formData.doctorId) ?? null;
+
   useEffect(() => {
     fetchPatients();
     fetchDoctors();
@@ -313,7 +317,7 @@ export default function AppointmentBooking() {
   const getStatusBadge = (status: string) => {
     const variants: Record<
       string,
-      "default" | "success" | "warning" | "destructive"
+      "default" | "success" | "warning" | "destructive" | "info"
     > = {
       SCHEDULED: "info",
       COMPLETED: "success",
