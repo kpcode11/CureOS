@@ -13,6 +13,7 @@ import {
   ArrowLeft,
   UserPlus,
   CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,11 +36,43 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
+// Validation helpers
+const validateEmail = (email: string): boolean => {
+  if (!email) return true; // Email is optional
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const validatePhone = (phone: string): boolean => {
+  const phoneRegex = /^[0-9+\s\-()]{10,}$/;
+  return phoneRegex.test(phone);
+};
+
+const validateName = (name: string): boolean => {
+  const nameRegex = /^[a-zA-Z\s'-]{2,50}$/;
+  return nameRegex.test(name);
+};
+
+const calculateAge = (dateOfBirth: string): number => {
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+  return age;
+};
+
 export default function PatientRegistration() {
   const router = useRouter();
   const { toast } = useToast();
   const [registeredPatient, setRegisteredPatient] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -55,37 +88,143 @@ export default function PatientRegistration() {
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error for this field when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    // Required field validation
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "First name is required";
+    } else if (!validateName(formData.firstName.trim())) {
+      newErrors.firstName =
+        "First name should contain only letters, spaces, hyphens, and apostrophes (2-50 characters)";
+    }
+
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Last name is required";
+    } else if (!validateName(formData.lastName.trim())) {
+      newErrors.lastName =
+        "Last name should contain only letters, spaces, hyphens, and apostrophes (2-50 characters)";
+    }
+
+    if (!formData.gender) {
+      newErrors.gender = "Gender is required";
+    }
+
+    if (!formData.dateOfBirth) {
+      newErrors.dateOfBirth = "Date of birth is required";
+    } else {
+      const age = calculateAge(formData.dateOfBirth);
+      if (age < 0) {
+        newErrors.dateOfBirth = "Date of birth cannot be in the future";
+      } else if (age > 150) {
+        newErrors.dateOfBirth = "Please enter a valid date of birth";
+      }
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else if (!validatePhone(formData.phone.trim())) {
+      newErrors.phone =
+        "Please enter a valid phone number (at least 10 digits)";
+    }
+
+    // Optional field validation (only if provided)
+    if (formData.email && !validateEmail(formData.email.trim())) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (formData.emergencyContact && !validatePhone(formData.emergencyContact.trim())) {
+      newErrors.emergencyContact =
+        "Please enter a valid emergency contact number";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate form before submission
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fix the errors in the form and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
+      // Prepare data with proper formatting
+      const payload = {
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        gender: formData.gender,
+        dateOfBirth: formData.dateOfBirth,
+        phone: formData.phone.trim(),
+        email: formData.email.trim() || null,
+        bloodType: formData.bloodType || null,
+        address: formData.address.trim() || null,
+        emergencyContact: formData.emergencyContact.trim() || null,
+      };
+
       const response = await fetch("/api/patients", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to register patient");
+        const errorData = await response.json();
+        const errorMessage = errorData.error || "Failed to register patient";
+        
+        // Better error messages for specific cases
+        let displayMessage = errorMessage;
+        if (response.status === 403) {
+          displayMessage = "Permission denied: You don't have permission to register patients. Please log out and log back in.";
+        } else if (response.status === 400) {
+          displayMessage = errorMessage; // Validation errors are already descriptive
+        } else if (response.status === 500) {
+          displayMessage = "Server error occurred while registering patient. Please try again.";
+        }
+        
+        throw new Error(displayMessage);
       }
 
       const patient = await response.json();
       setRegisteredPatient(patient);
 
       toast({
-        title: "Patient Registered Successfully!",
-        description: `${patient.firstName} ${patient.lastName} has been registered.`,
+        title: "✓ Patient Registered Successfully!",
+        description: `${patient.firstName} ${patient.lastName} (ID: ${patient.id.slice(0, 8)}) has been registered.`,
       });
-    } catch (error) {
+      
+      // Auto-dismiss success after 2 seconds and show next steps
+      setTimeout(() => {
+        console.log('Patient registered:', patient);
+      }, 2000);
+    } catch (error: any) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      console.error('Registration error:', errorMessage);
       toast({
-        title: "Registration Failed",
-        description:
-          "There was an error registering the patient. Please try again.",
+        title: "❌ Registration Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -214,9 +353,16 @@ export default function PatientRegistration() {
                         onChange={(e) =>
                           handleChange("firstName", e.target.value)
                         }
-                        required
-                        className="border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                        className={`border-slate-300 focus:border-blue-500 focus:ring-blue-500 ${
+                          errors.firstName ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                        }`}
                       />
+                      {errors.firstName && (
+                        <div className="flex items-center gap-1 text-sm text-red-500">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.firstName}
+                        </div>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label
@@ -232,9 +378,16 @@ export default function PatientRegistration() {
                         onChange={(e) =>
                           handleChange("lastName", e.target.value)
                         }
-                        required
-                        className="border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                        className={`border-slate-300 focus:border-blue-500 focus:ring-blue-500 ${
+                          errors.lastName ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                        }`}
                       />
+                      {errors.lastName && (
+                        <div className="flex items-center gap-1 text-sm text-red-500">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.lastName}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -247,7 +400,6 @@ export default function PatientRegistration() {
                         value={formData.gender}
                         onValueChange={(value) => handleChange("gender", value)}
                         className="flex gap-4"
-                        required
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="male" id="male" />
@@ -277,6 +429,12 @@ export default function PatientRegistration() {
                           </Label>
                         </div>
                       </RadioGroup>
+                      {errors.gender && (
+                        <div className="flex items-center gap-1 text-sm text-red-500">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.gender}
+                        </div>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label
@@ -286,7 +444,7 @@ export default function PatientRegistration() {
                         Date of Birth <span className="text-red-500">*</span>
                       </Label>
                       <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                         <Input
                           id="dob"
                           type="date"
@@ -294,10 +452,17 @@ export default function PatientRegistration() {
                           onChange={(e) =>
                             handleChange("dateOfBirth", e.target.value)
                           }
-                          required
-                          className="pl-10 border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                          className={`pl-10 border-slate-300 focus:border-blue-500 focus:ring-blue-500 ${
+                            errors.dateOfBirth ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                          }`}
                         />
                       </div>
+                      {errors.dateOfBirth && (
+                        <div className="flex items-center gap-1 text-sm text-red-500">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.dateOfBirth}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -310,7 +475,7 @@ export default function PatientRegistration() {
                         Phone Number <span className="text-red-500">*</span>
                       </Label>
                       <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                         <Input
                           id="phone"
                           type="tel"
@@ -319,10 +484,17 @@ export default function PatientRegistration() {
                           onChange={(e) =>
                             handleChange("phone", e.target.value)
                           }
-                          className="pl-10 border-slate-300 focus:border-blue-500 focus:ring-blue-500"
-                          required
+                          className={`pl-10 border-slate-300 focus:border-blue-500 focus:ring-blue-500 ${
+                            errors.phone ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                          }`}
                         />
                       </div>
+                      {errors.phone && (
+                        <div className="flex items-center gap-1 text-sm text-red-500">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.phone}
+                        </div>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label
@@ -332,7 +504,7 @@ export default function PatientRegistration() {
                         Email Address
                       </Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                         <Input
                           id="email"
                           type="email"
@@ -341,9 +513,17 @@ export default function PatientRegistration() {
                           onChange={(e) =>
                             handleChange("email", e.target.value)
                           }
-                          className="pl-10 border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                          className={`pl-10 border-slate-300 focus:border-blue-500 focus:ring-blue-500 ${
+                            errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                          }`}
                         />
                       </div>
+                      {errors.email && (
+                        <div className="flex items-center gap-1 text-sm text-red-500">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.email}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -422,7 +602,7 @@ export default function PatientRegistration() {
                         Emergency Contact
                       </Label>
                       <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                         <Input
                           id="emergency"
                           type="tel"
@@ -431,12 +611,20 @@ export default function PatientRegistration() {
                           onChange={(e) =>
                             handleChange("emergencyContact", e.target.value)
                           }
-                          className="pl-10 border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                          className={`pl-10 border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 ${
+                            errors.emergencyContact ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                          }`}
                         />
                       </div>
                       <p className="text-xs text-slate-500">
                         Relative or friend to contact in emergencies
                       </p>
+                      {errors.emergencyContact && (
+                        <div className="flex items-center gap-1 text-sm text-red-500">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.emergencyContact}
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

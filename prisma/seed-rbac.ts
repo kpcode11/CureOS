@@ -339,13 +339,52 @@ async function main() {
 
   console.log(`✅ Created/updated admin user: ${adminUser.email}\n`);
 
+  // ========== CREATE TEST USERS FOR EACH ROLE ==========
+  const testUsers = [
+    { email: 'keshav@example.com', name: 'Keshav Sharma', role: 'RECEPTIONIST' },
+    { email: 'doctor@example.com', name: 'Dr. John Doe', role: 'DOCTOR' },
+    { email: 'nurse@example.com', name: 'Jane Smith', role: 'NURSE' },
+    { email: 'pharmacist@example.com', name: 'Alex Johnson', role: 'PHARMACIST' },
+    { email: 'labtech@example.com', name: 'Rita Patel', role: 'LAB_TECH' },
+  ];
+
+  const testPassword = 'Test123!';
+  const testHashedPassword = await bcrypt.hash(testPassword, 10);
+
+  console.log('📝 Creating/Updating test users with roles...');
+  for (const testUser of testUsers) {
+    const role = roleMap[testUser.role];
+    if (!role) {
+      console.warn(`⚠️  Role ${testUser.role} not found, skipping ${testUser.email}`);
+      continue;
+    }
+
+    await prisma.user.upsert({
+      where: { email: testUser.email },
+      update: { 
+        password: testHashedPassword, 
+        role: testUser.role, 
+        roleEntityId: role.id 
+      },
+      create: {
+        email: testUser.email,
+        password: testHashedPassword,
+        name: testUser.name,
+        role: testUser.role,
+        roleEntityId: role.id,
+      },
+    });
+    console.log(`  ✓ ${testUser.email} (${testUser.role})`);
+  }
+  console.log('');
+
   // ========== SEED COMPLETE - SUMMARY ==========
   console.log('╔════════════════════════════════════════════════════════════╗');
   console.log('║         RBAC SEEDING COMPLETE - HOSPITAL SYSTEM            ║');
   console.log('╠════════════════════════════════════════════════════════════╣');
   console.log(`║ Permissions: ${allPermissions.length}`.padEnd(62) + '║');
   console.log(`║ Roles: ${Object.keys(roleMap).length} (Admin, Doctor, Nurse, Pharmacist, Lab Tech, ...)`.padEnd(62) + '║');
-  console.log(`║ Users: 1 Administrator`.padEnd(62) + '║');
+  console.log(`║ Users: 6 (1 Admin + 5 Test Users)`.padEnd(62) + '║');
   console.log('╠════════════════════════════════════════════════════════════╣');
   console.log('║ Role Summary:'.padEnd(62) + '║');
   for (const [roleName, perms] of Object.entries(rolePermissions)) {
@@ -357,9 +396,11 @@ async function main() {
     console.log(`║ 🔐 Admin Credentials:                                      ║`);
     console.log(`║    Email: ${adminEmail}`.padEnd(62) + '║');
     console.log(`║    Password: ${adminPassword}`.padEnd(62) + '║');
+    console.log('║ 🔐 Test User Credentials (all roles):                     ║');
+    console.log(`║    Password: Test123! (for all test users)                ║`);
     console.log('║ ⚠️  CHANGE credentials before production deployment        ║');
   } else {
-    console.log('║ ✓ Production mode - admin password not displayed           ║');
+    console.log('║ ✓ Production mode - passwords not displayed               ║');
   }
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 }

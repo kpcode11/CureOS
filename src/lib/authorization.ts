@@ -18,7 +18,15 @@ export async function requirePermission(req: Request | NextRequest | undefined, 
   const session = await getSession(req);
   const sid = session?.user?.id ?? actorId ?? null;
 
-  if (session?.user?.permissions?.includes(permission)) return { session, usedOverride: false };
+  console.log(`[requirePermission] Checking permission "${permission}" for user ${session?.user?.email} (role: ${session?.user?.role})`);
+  console.log(`[requirePermission] User permissions:`, session?.user?.permissions);
+
+  if (session?.user?.permissions?.includes(permission)) {
+    console.log(`[requirePermission] ✓ Permission granted`);
+    return { session, usedOverride: false };
+  }
+
+  console.log(`[requirePermission] ✗ Permission denied - "${permission}" not found in user permissions`);
 
   // try emergency override (token expected in header 'x-override-token')
   try {
@@ -29,6 +37,6 @@ export async function requirePermission(req: Request | NextRequest | undefined, 
     await createAudit({ actorId: sid, action: 'emergency.override.used', resource: 'EmergencyOverride', resourceId: override.id, meta: { reason: override.reason } });
     return { session: session ?? null, usedOverride: true };
   } catch (err) {
-    throw new Error('Forbidden');
+    throw new Error(`Forbidden: User does not have permission "${permission}"`);
   }
 }
