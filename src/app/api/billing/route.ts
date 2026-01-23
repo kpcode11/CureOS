@@ -9,15 +9,7 @@ export async function GET(req: Request) {
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
-
-  const url = new URL(req.url);
-  const patientId = url.searchParams.get('patientId');
-  const status = url.searchParams.get('status');
-  const where: any = {};
-  if (patientId) where.patientId = patientId;
-  if (status) where.status = status;
-
-  const rows = await prisma.billing.findMany({ where, take: 200, orderBy: { createdAt: 'desc' } });
+  const rows = await prisma.billing.findMany({ take: 200, orderBy: { createdAt: 'desc' } });
   return NextResponse.json(rows);
 }
 
