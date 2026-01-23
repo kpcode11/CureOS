@@ -334,7 +334,12 @@ async function main() {
   }
 
   const adminEmail = envAdminEmail ?? 'admin@neon.example';
-  const adminPassword = envAdminPassword ?? 'Admin123!';
+  const adminPassword = envAdminPassword;
+  
+  if (!adminPassword) {
+    throw new Error('RBAC_ADMIN_PASSWORD environment variable must be set before seeding');
+  }
+  
   const hashed = await bcrypt.hash(adminPassword, 10);
 
   const adminUser = await prisma.user.upsert({
@@ -360,7 +365,12 @@ async function main() {
     { email: 'labtech@example.com', name: 'Rita Patel', role: 'LAB_TECH' },
   ];
 
-  const testPassword = 'Test123!';
+  const testPassword = process.env.RBAC_TEST_PASSWORD;
+  
+  if (!testPassword) {
+    throw new Error('RBAC_TEST_PASSWORD environment variable must be set before seeding');
+  }
+  
   const testHashedPassword = await bcrypt.hash(testPassword, 10);
 
   console.log('📝 Creating/Updating test users with roles...');
@@ -413,7 +423,7 @@ async function main() {
       create: {
         email: docData.email,
         name: docData.name,
-        password: await bcrypt.hash('password123', 10),
+        password: await bcrypt.hash(process.env.RBAC_DOCTOR_PASSWORD || 'temp', 10),
         role: 'DOCTOR' as unknown as any,
         roleEntityId: doctorRole?.id,
       },
@@ -448,16 +458,10 @@ async function main() {
     console.log(`║   ${summary}`.padEnd(62) + '║');
   }
   console.log('╠════════════════════════════════════════════════════════════╣');
-  if (!isProdLike) {
-    console.log(`║ 🔐 Admin Credentials:                                      ║`);
-    console.log(`║    Email: ${adminEmail}`.padEnd(62) + '║');
-    console.log(`║    Password: ${adminPassword}`.padEnd(62) + '║');
-    console.log('║ 🔐 Test User Credentials (all roles):                     ║');
-    console.log(`║    Password: Test123! (for all test users)                ║`);
-    console.log('║ ⚠️  CHANGE credentials before production deployment        ║');
-  } else {
-    console.log('║ ✓ Production mode - passwords not displayed               ║');
-  }
+  console.log('║ ⚠️  IMPORTANT: Set these environment variables before seeding:║');
+  console.log('║  - RBAC_ADMIN_PASSWORD                                      ║');
+  console.log('║  - RBAC_TEST_PASSWORD                                       ║');
+  console.log('║  - RBAC_DOCTOR_PASSWORD                                     ║');
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 }
 
