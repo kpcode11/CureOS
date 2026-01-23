@@ -17,7 +17,15 @@ export async function POST(req: Request) {
     const res = await requirePermission(req, 'inventory.update');
     const actorId = res.session?.user?.id ?? null;
     const body = await req.json();
-    const rec = await prisma.inventory.create({ data: { itemName: body.itemName, category: body.category ?? 'general', quantity: body.quantity ?? 0, unit: body.unit ?? 'ea' } });
+    const rec = await prisma.inventory.create({ 
+      data: { 
+        itemName: body.itemName,
+        category: body.category ?? 'general',
+        quantity: body.quantity ?? 0,
+        minStock: body.minStock ?? 10,
+        unit: body.unit ?? 'ea'
+      } 
+    });
     return NextResponse.json(rec);
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

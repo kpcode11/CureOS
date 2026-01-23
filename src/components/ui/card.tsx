@@ -76,26 +76,3 @@ const CardFooter = React.forwardRef<
 CardFooter.displayName = "CardFooter";
 
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="mb-4 p-2 border border-gray-300 rounded"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="mb-4 p-2 border border-gray-300 rounded"
-        />
-        <Button type="submit">Login</Button>
-      </Form>
-    </div>
-  );
-};
-
-export default LoginPage;

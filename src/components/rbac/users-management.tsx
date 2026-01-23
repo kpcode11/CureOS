@@ -160,7 +160,7 @@ export default function UsersManagement() {
                         </button>
                         <button
                           onClick={() => handleDelete(user.id)}
-                          disabled={user.roleEntityId && roles.find((r) => r.id === user.roleEntityId)?.name?.toLowerCase() === 'admin'}
+                          disabled={!!(user.roleEntityId && roles.find((r) => r.id === user.roleEntityId)?.name?.toLowerCase() === 'admin')}
                           className={`p-1 rounded transition ${
                             user.roleEntityId && roles.find((r) => r.id === user.roleEntityId)?.name?.toLowerCase() === 'admin'
                               ? 'text-gray-300 cursor-not-allowed'
