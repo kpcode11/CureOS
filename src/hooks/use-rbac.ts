@@ -19,6 +19,7 @@ export interface RoleEntity {
   id: string;
   name: string;
   description?: string;
+  isSystemRole: boolean;
   createdAt: string;
   updatedAt: string;
   rolePermissions: RolePermission[];

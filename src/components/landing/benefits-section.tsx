@@ -41,7 +41,7 @@ export function BenefitsSection() {
 
   const itemVariants = {
     hidden: { opacity: 0, x: -20 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: 'easeOut' } }
+    visible: { opacity: 1, x: 0, transition: { duration: 0.5 } }
   };
 
   return (
