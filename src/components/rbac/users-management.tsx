@@ -80,7 +80,7 @@ export default function UsersManagement() {
     // Prevent deleting admin user
     if (user?.roleEntityId) {
       const userRole = roles.find((r) => r.id === user.roleEntityId);
-      if (userRole?.name?.toLowerCase() === 'admin') {
+      if (userRole?.name === 'ADMINISTRATOR') {
         setFormError('Cannot delete admin user');
         return;
       }
@@ -160,14 +160,14 @@ export default function UsersManagement() {
                         </button>
                         <button
                           onClick={() => handleDelete(user.id)}
-                          disabled={!!(user.roleEntityId && roles.find((r) => r.id === user.roleEntityId)?.name?.toLowerCase() === 'admin')}
+                          disabled={!!(user.roleEntityId && roles.find((r) => r.id === user.roleEntityId)?.name === 'ADMINISTRATOR')}
                           className={`p-1 rounded transition ${
-                            user.roleEntityId && roles.find((r) => r.id === user.roleEntityId)?.name?.toLowerCase() === 'admin'
+                            user.roleEntityId && roles.find((r) => r.id === user.roleEntityId)?.name === 'ADMINISTRATOR'
                               ? 'text-gray-300 cursor-not-allowed'
                               : 'text-red-600 hover:bg-red-50'
                           }`}
                           title={
-                            user.roleEntityId && roles.find((r) => r.id === user.roleEntityId)?.name?.toLowerCase() === 'admin'
+                            user.roleEntityId && roles.find((r) => r.id === user.roleEntityId)?.name === 'ADMINISTRATOR'
                               ? 'Cannot delete admin user'
                               : 'Delete'
                           }

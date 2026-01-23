@@ -75,12 +75,12 @@ export default function RolesManagement() {
   };
 
   const systemRoles = useMemo(
-    () => roles.filter((r) => ['ADMIN', 'DOCTOR', 'NURSE', 'PHARMACIST', 'LAB_TECH', 'RECEPTIONIST', 'EMERGENCY'].includes(r.name)),
+    () => roles.filter((r) => r.isSystemRole),
     [roles]
   );
 
   const customRoles = useMemo(
-    () => roles.filter((r) => !['ADMIN', 'DOCTOR', 'NURSE', 'PHARMACIST', 'LAB_TECH', 'RECEPTIONIST', 'EMERGENCY'].includes(r.name)),
+    () => roles.filter((r) => !r.isSystemRole),
     [roles]
   );
 
@@ -122,15 +122,14 @@ export default function RolesManagement() {
                     >
                       Edit
                     </button>
-                    {role.name !== 'ADMIN' && (
-                      <button
-                        onClick={() => handleDelete(role.id)}
-                        className="p-1 text-red-600 hover:bg-red-50 rounded transition"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleDelete(role.id)}
+                      disabled={role.isSystemRole || role.name === 'ADMINISTRATOR'}
+                      className="p-1 text-red-600 hover:bg-red-50 disabled:text-gray-400 disabled:cursor-not-allowed rounded transition"
+                      title={role.name === 'ADMINISTRATOR' ? "Admin role cannot be deleted" : role.isSystemRole ? "System roles cannot be deleted" : "Delete"}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">

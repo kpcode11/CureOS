@@ -271,7 +271,8 @@ async function main() {
       prisma.roleEntity.create({
         data: {
           name: roleName,
-          description: roleDescriptions[roleName]
+          description: roleDescriptions[roleName],
+          isSystemRole: true
         }
       })
     )
