@@ -18,6 +18,7 @@ interface Appointment {
   createdAt: string;
 }
 
+
 export default function DoctorAppointmentsPage() {
   const { data: session } = useSession();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
