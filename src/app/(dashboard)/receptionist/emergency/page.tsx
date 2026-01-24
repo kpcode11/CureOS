@@ -2,7 +2,7 @@
 
 import { EmergencyDashboard } from '@/components/dashboards/emergency-dashboard';
 
-export default function EmergencyPage() {
+export default function ReceptionistEmergencyPage() {
   return (
     <div className="p-8">
       <EmergencyDashboard />

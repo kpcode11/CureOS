@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useDoctor, Appointment, Prescription, Surgery } from '@/hooks/use-doctor';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Activity, Users, Calendar, AlertCircle, Loader } from 'lucide-react';
+import { Activity, Users, Calendar, AlertCircle, Loader, AlertTriangle } from 'lucide-react';
 
 export function DoctorDashboard() {
   const { getPatients, getAppointments, getPrescriptions, getSurgeries, loading } = useDoctor();
@@ -149,9 +149,12 @@ export function DoctorDashboard() {
               Manage Surgeries
             </Button>
           </Link>
-          <Button className="w-full" variant="outline" disabled>
-            Request Break-Glass Access
-          </Button>
+          <Link href="/doctor/emergency">
+            <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Emergency Department
+            </Button>
+          </Link>
         </CardContent>
       </Card>
 

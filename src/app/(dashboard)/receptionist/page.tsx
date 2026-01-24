@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { UserPlus, Users, Calendar, FileText, Activity } from "lucide-react";
+import { UserPlus, Users, Calendar, FileText, Activity, AlertTriangle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -64,15 +64,17 @@ export default function ReceptionistPage() {
             </Card>
           </Link>
 
-          <Card className="cursor-pointer hover:shadow-xl transition-shadow duration-300 border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100">
-            <CardHeader>
-              <div className="h-12 w-12 rounded-full bg-orange-600 flex items-center justify-center mb-2">
-                <FileText className="h-6 w-6 text-white" />
-              </div>
-              <CardTitle className="text-xl">Reports</CardTitle>
-              <CardDescription>View daily reports</CardDescription>
-            </CardHeader>
-          </Card>
+          <Link href="/receptionist/emergency">
+            <Card className="cursor-pointer hover:shadow-xl transition-shadow duration-300 border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-full bg-red-600 flex items-center justify-center mb-2">
+                  <AlertTriangle className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-xl">Emergency</CardTitle>
+                <CardDescription>Emergency department</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
         </div>
 
         {/* Stats */}
