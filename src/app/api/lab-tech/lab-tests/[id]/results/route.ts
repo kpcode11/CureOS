@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { createAudit } from '@/services/audit.service';
 
 // PATCH /api/lab-tech/lab-tests/:id/results
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: { id: string } | Promise<{ id: string }> }) {
   let actorId: string | null = null;
   try {
     const res: any = await requirePermission(req, 'lab.result.enter');
@@ -13,7 +13,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const id = params.id;
+  const { id } = await params;
   const body = await req.json().catch(() => ({}));
   if (!body || typeof body.results === 'undefined') return NextResponse.json({ error: 'results required' }, { status: 400 });
 
