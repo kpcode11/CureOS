@@ -11,10 +11,15 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 
   const id = params.id;
-  const rec = await prisma.labTest.findUnique({
-    where: { id },
-    include: { patient: { select: { id: true, firstName: true, lastName: true, dateOfBirth: true, gender: true, phone: true } } }
-  });
-  if (!rec) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  return NextResponse.json(rec);
+  try {
+    const rec = await prisma.labTest.findUnique({
+      where: { id },
+      include: { patient: { select: { id: true, firstName: true, lastName: true, dateOfBirth: true, gender: true, phone: true } } }
+    });
+    if (!rec) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    return NextResponse.json(rec);
+  } catch (err) {
+    console.error('lab-test detail GET error', err);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }

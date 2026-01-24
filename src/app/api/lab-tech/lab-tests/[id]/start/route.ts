@@ -14,11 +14,18 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 
   const id = params.id;
-  const before = await prisma.labTest.findUnique({ where: { id } });
-  if (!before) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  if (before.status !== 'PENDING') return NextResponse.json({ error: 'Invalid status transition' }, { status: 409 });
+  try {
+    const before = await prisma.labTest.findUnique({ where: { id } });
+    if (!before) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    if (before.status !== 'PENDING') return NextResponse.json({ error: 'Invalid status transition' }, { status: 409 });
 
-  const updated = await prisma.labTest.update({ where: { id }, data: { status: 'IN_PROGRESS', startedAt: new Date() } });
-  await createAudit({ actorId, action: 'labtest.start', resource: 'LabTest', resourceId: id, before, after: updated });
-  return NextResponse.json(updated);
+    // resolve labTech entity from session (optional)
+    const labTech = actorId ? await prisma.labTech.findUnique({ where: { userId: actorId } }) : null;
+    const updated = await prisma.labTest.update({ where: { id }, data: { status: 'IN_PROGRESS', labTechId: labTech?.id ?? undefined } });
+    await createAudit({ actorId, action: 'labtest.start', resource: 'LabTest', resourceId: id, before, after: updated });
+    return NextResponse.json(updated);
+  } catch (err) {
+    console.error('lab-test start PATCH error', err);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }

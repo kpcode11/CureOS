@@ -17,6 +17,11 @@ export async function GET(req: Request) {
   if (resource) where.resource = resource;
   if (actorId) where.actorId = actorId;
 
-  const rows = await prisma.auditLog.findMany({ where, orderBy: { createdAt: 'desc' }, take: 200 });
-  return NextResponse.json(rows);
+  try {
+    const rows = await prisma.auditLog.findMany({ where, orderBy: { createdAt: 'desc' }, take: 200 });
+    return NextResponse.json(rows);
+  } catch (err) {
+    console.error('lab-tech audit-logs GET error', err);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }

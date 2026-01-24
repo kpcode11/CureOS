@@ -10,7 +10,12 @@ export async function GET(req: Request, { params }: { params: { patientId: strin
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const p = await prisma.patient.findUnique({ where: { id: params.patientId }, select: { id: true, firstName: true, lastName: true, dateOfBirth: true, gender: true, phone: true, bloodType: true } });
-  if (!p) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  return NextResponse.json(p);
+  try {
+    const p = await prisma.patient.findUnique({ where: { id: params.patientId }, select: { id: true, firstName: true, lastName: true, dateOfBirth: true, gender: true, phone: true, bloodType: true } });
+    if (!p) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    return NextResponse.json(p);
+  } catch (err) {
+    console.error('lab-tech patient GET error', err);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }

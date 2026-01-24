@@ -10,6 +10,11 @@ export async function GET(req: Request, { params }: { params: { patientId: strin
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const rows = await prisma.labTest.findMany({ where: { patientId: params.patientId }, orderBy: { orderedAt: 'desc' } });
-  return NextResponse.json(rows);
+  try {
+    const rows = await prisma.labTest.findMany({ where: { patientId: params.patientId }, orderBy: { orderedAt: 'desc' } });
+    return NextResponse.json(rows);
+  } catch (err) {
+    console.error('lab-tech patient lab-tests GET error', err);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }
