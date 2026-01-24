@@ -29,16 +29,25 @@ export function AuthPage() {
 			const result = await signIn("credentials", {
 				email,
 				password,
-				redirect: true,
-				callbackUrl: "/",
+				redirect: false, // Don't auto-redirect, handle manually
 			});
 
-			if (!result?.ok) {
+			// Explicit check for success
+			if (result?.error) {
 				setError("Invalid email or password");
+				setIsLoading(false);
+				return;
+			}
+
+			if (result?.ok) {
+				// Only redirect on successful login
+				window.location.href = "/";
+			} else {
+				setError("Invalid email or password");
+				setIsLoading(false);
 			}
 		} catch (err) {
 			setError("Login failed. Please try again.");
-		} finally {
 			setIsLoading(false);
 		}
 	};
