@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireDoctor, writeAudit, getRequestIp } from "@/lib/doctorAuth";
-import { LabTestStatus, BillingStatus } from "@prisma/client";
 
 type Params = { params: { appointmentId: string } };
 
@@ -45,8 +44,9 @@ export async function POST(req: Request, { params }: Params) {
         data: tests.map((testType) => ({
           patientId: appt.patientId,
           testType,
-          status: LabTestStatus.PENDING,
-          orderedAt: now,
+          testName: testType,
+          status: "PENDING",           // ✅ String, not enum
+          priority: "NORMAL",          // ✅ Added required field
         })),
       });
 
@@ -56,7 +56,7 @@ export async function POST(req: Request, { params }: Params) {
           patientId: appt.patientId,
           amount: total,
           description: `Lab Tests: ${tests.join(", ")} [DoctorId: ${doctor.id}]`,
-          status: BillingStatus.PENDING,
+          status: "PENDING",           // ✅ String, not enum
           dueDate: due,
         },
       });

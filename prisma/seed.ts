@@ -61,12 +61,29 @@ async function main() {
     },
     });
 
+    // 5. Create LAB_TECH user
+    const labTech = await prisma.user.upsert({
+    where: { email: "labtech@cureos.com" },
+    update: {
+        role: "LAB_TECH",
+        password: hashedPassword, // Use same hashed password
+    },
+    create: {
+        email: "labtech@cureos.com",
+        password: hashedPassword,
+        name: "Lab Technician",
+        role: "LAB_TECH",
+    },
+    });
 
-  console.log("✅ Seed completed");
-  console.log("Doctor login:");
-  console.log("Email:", email);
-  console.log("Password:", password);
-  console.log("Appointment ID:", appointment.id);
+    console.log("✅ Seed completed");
+    console.log("Doctor login:");
+    console.log("Email:", email);
+    console.log("Password:", password);
+    console.log("\n🔬 LAB_TECH login:");
+    console.log("Email: labtech@cureos.com");
+    console.log("Password: Doctor@123");
+    console.log("\nAppointment ID:", appointment.id);
 }
 
 main()

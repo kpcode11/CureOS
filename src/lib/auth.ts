@@ -1,4 +1,5 @@
-import { NextAuthOptions } from 'next-auth';
+// src/lib/auth.ts
+import { NextAuthOptions, getServerSession } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from './prisma';
 import bcrypt from 'bcryptjs';
@@ -43,7 +44,15 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
-          include: { roleEntity: { include: { rolePermissions: { include: { permission: true } } } } },
+          include: {
+            roleEntity: {
+              include: {
+                rolePermissions: {
+                  include: { permission: true },
+                },
+              },
+            },
+          },
         });
 
         if (!user || !user.password) {
@@ -52,16 +61,25 @@ export const authOptions: NextAuthOptions = {
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
-          user.password
+          user.password,
         );
 
         if (!isPasswordValid) {
           throw new Error('Invalid credentials');
         }
 
-        const permissions = (
-          user.roleEntity?.rolePermissions?.map((rp) => rp.permission.name) ?? []
-        );
+        const permissions =
+          user.roleEntity?.rolePermissions?.map(
+            (rp) => rp.permission.name,
+          ) ?? [];
+
+        // 🔍 ADD THESE 6 DEBUG LINES HERE:
+        console.log('🔍 AUTH DEBUG (authorize):');
+        console.log('User ID:', user.id);
+        console.log('User role:', user.role);
+        console.log('roleEntity exists?', !!user.roleEntity);
+        console.log('rolePermissions count:', user.roleEntity?.rolePermissions?.length || 0);
+        console.log('Raw permissions:', permissions);
 
         return {
           id: user.id,
@@ -85,7 +103,9 @@ export const authOptions: NextAuthOptions = {
   },
   cookies: {
     sessionToken: {
-      name: `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.session-token`,
+      name: `${
+        process.env.NODE_ENV === 'production' ? '__Secure-' : ''
+      }next-auth.session-token`,
       options: {
         httpOnly: true,
         sameSite: 'lax',
@@ -94,7 +114,9 @@ export const authOptions: NextAuthOptions = {
       },
     },
     callbackUrl: {
-      name: `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.callback-url`,
+      name: `${
+        process.env.NODE_ENV === 'production' ? '__Secure-' : ''
+      }next-auth.callback-url`,
       options: {
         httpOnly: true,
         sameSite: 'lax',
@@ -114,12 +136,35 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role;
-        session.user.id = token.id;
+        session.user.role = token.role as string;
+        (session.user as any).id = token.id;
         (session.user as any).permissions = (token as any).permissions ?? [];
+        
+        console.log('=== SESSION DEBUG ===');
+        console.log('Token permissions:', (token as any).permissions);
+        console.log('Session permissions:', (session.user as any).permissions);
+        console.log('User ID:', token.id);
       }
       return session;
     },
   },
 };
 
+/**
+ * Helper to get current authenticated user on the server
+ * Use this in app router API routes (route.ts)
+ */
+export async function getCurrentUser() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    throw new Error('Unauthorized');
+  }
+
+  return {
+    id: (session.user as any).id as string,
+    email: session.user.email,
+    name: session.user.name,
+    role: session.user.role,
+    permissions: (session.user as any).permissions as string[] | undefined,
+  };
+}

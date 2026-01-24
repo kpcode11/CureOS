@@ -91,8 +91,9 @@ model LabTech {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  labTests   LabTest[]
+  labTests   LabTest[] @relation("LabTechTests")
 }
+
 
 model Receptionist {
   id           String        @id @default(cuid())
@@ -155,21 +156,35 @@ model Prescription {
   patient      Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
   pharmacist   Pharmacist? @relation(fields: [pharmacistId], references: [id])
 }
-
 model LabTest {
-  id          String        @id @default(cuid())
-  patientId   String
-  labTechId   String?
-  testType    String
-  results     Json?
-  status      LabTestStatus @default(PENDING)
-  orderedAt   DateTime      @default(now())
-  completedAt DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  labTech     LabTech?      @relation(fields: [labTechId], references: [id])
-  patient     Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  id            String    @id @default(cuid())
+  patientId     String
+  patient       Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  testName      String
+  testType      String?
+  priority      String    @default("NORMAL")
+  status        String    @default("PENDING")
+  
+  results       Json?
+  
+  labTechId     String?
+  labTech       LabTech?  @relation("LabTechTests", fields: [labTechId], references: [id], onDelete: SetNull)
+  
+  startedAt     DateTime?
+  completedAt   DateTime?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([patientId])
+  @@index([status])
+  @@index([labTechId])
 }
+
+
+
+
 
 model Surgery {
   id          String        @id @default(cuid())
@@ -269,7 +284,7 @@ model Incident {
   updatedAt   DateTime       @updatedAt
 }
 
-/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit [https://pris.ly/d/expression-indexes](https://pris.ly/d/expression-indexes) for more info.
 model Permission {
   id              String           @id @default(cuid())
   name            String           @unique
@@ -279,7 +294,7 @@ model Permission {
   rolePermissions RolePermission[]
 }
 
-/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit [https://pris.ly/d/expression-indexes](https://pris.ly/d/expression-indexes) for more info.
 model RoleEntity {
   id              String           @id @default(cuid())
   name            String           @unique

@@ -16,7 +16,7 @@ export async function GET(req: Request, { params }: Params) {
         receptionist: {
           include: { user: { select: { name: true, email: true } } },
         },
-        doctor: true, // optional but usually exists
+        doctor: true,
       },
     });
 
@@ -24,7 +24,7 @@ export async function GET(req: Request, { params }: Params) {
       return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
     }
 
-    // 2) Pull clinical/ops records by patientId (works even without appointment relations)
+    // 2) Pull clinical/ops records by patientId
     const patientId = appointment.patientId;
 
     const [emrs, labTests, prescriptions, billings] = await Promise.all([
@@ -35,7 +35,7 @@ export async function GET(req: Request, { params }: Params) {
       }),
       prisma.labTest.findMany({
         where: { patientId },
-        orderBy: { orderedAt: "desc" },
+        orderBy: { createdAt: "desc" },  // ✅ Changed from orderedAt
         take: 20,
       }),
       prisma.prescription.findMany({
