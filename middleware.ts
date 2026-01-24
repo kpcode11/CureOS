@@ -19,15 +19,16 @@ const protectedRoutes = [
 const permissionRequiredRoutes: Record<string, string[]> = {
   '/admin/rbac': ['admin.roles.manage', 'admin.users.read'],
   '/admin': ['admin.roles.manage'],
+  '/emergency': ['emergency.read', 'emergency.create', 'emergency.request'],
 };
 
 // Role-based route restrictions
 const roleRouteMap: Record<string, string[]> = {
-  'ADMIN': ['/admin'],
-  'DOCTOR': ['/doctor'],
-  'NURSE': ['/nurse'],
+  'ADMIN': ['/admin', '/emergency'],
+  'DOCTOR': ['/doctor', '/emergency'],
+  'NURSE': ['/nurse', '/emergency'],
   'PHARMACIST': ['/pharmacist'],
-  'RECEPTIONIST': ['/receptionist'],
+  'RECEPTIONIST': ['/receptionist', '/emergency'],
   'LAB_TECH': ['/lab-tech'],
   'EMERGENCY': ['/emergency'],
 };
