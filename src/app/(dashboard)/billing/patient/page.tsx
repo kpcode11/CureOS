@@ -1,22 +1,23 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion } from 'motion/react';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "motion/react";
+import { Search, User, ArrowRight, Users } from "lucide-react";
 import {
-  Search,
-  User,
-  ArrowRight,
-  Users
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function PatientSearchPage() {
   const router = useRouter();
-  const [patientId, setPatientId] = useState('');
+  const [patientId, setPatientId] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -66,7 +67,9 @@ export default function PatientSearchPage() {
                   <Search className="w-12 h-12 text-white" />
                 </div>
               </div>
-              <CardTitle className="text-3xl text-center">Find Patient Bills</CardTitle>
+              <CardTitle className="text-3xl text-center">
+                Find Patient Bills
+              </CardTitle>
               <CardDescription className="text-center text-lg mt-2">
                 Enter a patient ID to view their complete billing history
               </CardDescription>
@@ -90,7 +93,8 @@ export default function PatientSearchPage() {
                     />
                   </div>
                   <p className="text-sm text-slate-600 mt-2">
-                    Enter the unique patient identifier to search their billing records
+                    Enter the unique patient identifier to search their billing
+                    records
                   </p>
                 </div>
 
@@ -115,7 +119,9 @@ export default function PatientSearchPage() {
               </form>
 
               <div className="mt-8 pt-8 border-t">
-                <h3 className="font-semibold text-slate-900 mb-4">Quick Tips</h3>
+                <h3 className="font-semibold text-slate-900 mb-4">
+                  Quick Tips
+                </h3>
                 <ul className="space-y-2 text-sm text-slate-600">
                   <li className="flex items-start gap-2">
                     <span className="text-purple-600 font-bold">•</span>
@@ -123,7 +129,9 @@ export default function PatientSearchPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-purple-600 font-bold">•</span>
-                    <span>You can also search using MRN (Medical Record Number)</span>
+                    <span>
+                      You can also search using MRN (Medical Record Number)
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-purple-600 font-bold">•</span>

@@ -1,23 +1,29 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { motion } from 'motion/react';
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion } from "motion/react";
 import {
   ArrowLeft,
   Edit,
   DollarSign,
   Save,
   AlertCircle,
-  FileText
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+  FileText,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 export default function UpdateAmountPage() {
   const params = useParams();
@@ -27,8 +33,8 @@ export default function UpdateAmountPage() {
   const [saving, setSaving] = useState(false);
   const [bill, setBill] = useState<any>(null);
   const [formData, setFormData] = useState({
-    amount: '',
-    description: ''
+    amount: "",
+    description: "",
   });
 
   useEffect(() => {
@@ -43,11 +49,11 @@ export default function UpdateAmountPage() {
         setBill(data);
         setFormData({
           amount: data.amount.toString(),
-          description: data.description
+          description: data.description,
         });
       }
     } catch (error) {
-      console.error('Error fetching bill:', error);
+      console.error("Error fetching bill:", error);
     } finally {
       setLoading(false);
     }
@@ -55,13 +61,13 @@ export default function UpdateAmountPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const newAmount = parseFloat(formData.amount);
     if (isNaN(newAmount) || newAmount <= 0) {
       toast({
-        title: 'Invalid Amount',
-        description: 'Please enter a valid amount',
-        variant: 'destructive',
+        title: "Invalid Amount",
+        description: "Please enter a valid amount",
+        variant: "destructive",
       });
       return;
     }
@@ -69,18 +75,18 @@ export default function UpdateAmountPage() {
     setSaving(true);
     try {
       const res = await fetch(`/api/billing/${params.id}/update-amount`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: newAmount,
-          description: formData.description
-        })
+          description: formData.description,
+        }),
       });
 
       if (res.ok) {
         toast({
-          title: 'Success',
-          description: 'Bill amount updated successfully',
+          title: "Success",
+          description: "Bill amount updated successfully",
         });
         setTimeout(() => {
           router.push(`/billing/${params.id}`);
@@ -88,16 +94,16 @@ export default function UpdateAmountPage() {
       } else {
         const error = await res.json();
         toast({
-          title: 'Update Failed',
-          description: error.error || 'Failed to update bill amount',
-          variant: 'destructive',
+          title: "Update Failed",
+          description: error.error || "Failed to update bill amount",
+          variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'An error occurred while updating the bill',
-        variant: 'destructive',
+        title: "Error",
+        description: "An error occurred while updating the bill",
+        variant: "destructive",
       });
     } finally {
       setSaving(false);
@@ -136,8 +142,12 @@ export default function UpdateAmountPage() {
               <Edit className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">Update Bill Amount</h1>
-              <p className="text-slate-600 mt-1">Modify invoice amount and description</p>
+              <h1 className="text-3xl font-bold text-slate-900">
+                Update Bill Amount
+              </h1>
+              <p className="text-slate-600 mt-1">
+                Modify invoice amount and description
+              </p>
             </div>
           </div>
         </div>
@@ -155,7 +165,9 @@ export default function UpdateAmountPage() {
               <Card className="border-none shadow-lg">
                 <CardHeader className="bg-gradient-to-r from-orange-50 to-blue-50">
                   <CardTitle className="text-2xl">Edit Bill Details</CardTitle>
-                  <CardDescription>Update the amount and description for this invoice</CardDescription>
+                  <CardDescription>
+                    Update the amount and description for this invoice
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
                   <form onSubmit={handleSubmit} className="space-y-6">
@@ -170,7 +182,9 @@ export default function UpdateAmountPage() {
                           type="number"
                           step="0.01"
                           value={formData.amount}
-                          onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, amount: e.target.value })
+                          }
                           className="pl-10 text-lg h-12"
                           placeholder="0.00"
                           required
@@ -188,7 +202,12 @@ export default function UpdateAmountPage() {
                       <Textarea
                         id="description"
                         value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
+                        }
                         className="mt-2 min-h-[120px]"
                         placeholder="Enter bill description"
                         required
@@ -234,12 +253,16 @@ export default function UpdateAmountPage() {
                 <CardContent className="p-6 space-y-4">
                   <div className="flex justify-between items-center pb-4 border-b">
                     <span className="text-slate-600">Invoice ID</span>
-                    <span className="font-mono font-semibold">{params.id?.toString().slice(0, 8)}</span>
+                    <span className="font-mono font-semibold">
+                      {params.id?.toString().slice(0, 8)}
+                    </span>
                   </div>
 
                   <div className="flex justify-between items-center pb-4 border-b">
                     <span className="text-slate-600">Patient ID</span>
-                    <span className="font-semibold">{bill?.patientId.slice(0, 8)}</span>
+                    <span className="font-semibold">
+                      {bill?.patientId.slice(0, 8)}
+                    </span>
                   </div>
 
                   <div className="flex justify-between items-center pb-4 border-b">
@@ -249,9 +272,13 @@ export default function UpdateAmountPage() {
 
                   <div className="pt-4">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-lg font-semibold text-slate-900">Current Amount</span>
+                      <span className="text-lg font-semibold text-slate-900">
+                        Current Amount
+                      </span>
                     </div>
-                    <p className="text-3xl font-bold text-blue-600">₹{bill?.amount.toLocaleString()}</p>
+                    <p className="text-3xl font-bold text-blue-600">
+                      ₹{bill?.amount.toLocaleString()}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -269,9 +296,12 @@ export default function UpdateAmountPage() {
                       <AlertCircle className="w-5 h-5 text-orange-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-2">Important</h3>
+                      <h3 className="font-semibold text-slate-900 mb-2">
+                        Important
+                      </h3>
                       <p className="text-sm text-slate-600">
-                        Changes to the bill amount will be logged in the audit trail. Ensure accuracy before saving.
+                        Changes to the bill amount will be logged in the audit
+                        trail. Ensure accuracy before saving.
                       </p>
                     </div>
                   </div>

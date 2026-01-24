@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import { motion } from 'motion/react';
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { motion } from "motion/react";
 import {
   User,
   ArrowLeft,
@@ -15,28 +15,50 @@ import {
   FileText,
   Calendar,
   ArrowRight,
-  TrendingUp
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+  TrendingUp,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface BillingRecord {
   id: string;
   patientId: string;
   amount: number;
   description: string;
-  status: 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
+  status: "PENDING" | "PAID" | "OVERDUE" | "CANCELLED";
   dueDate: string;
   paidAt: string | null;
   createdAt: string;
 }
 
 const statusConfig = {
-  PENDING: { color: 'bg-yellow-50 text-yellow-700 border-yellow-200', icon: Clock, label: 'Pending' },
-  PAID: { color: 'bg-green-50 text-green-700 border-green-200', icon: CheckCircle2, label: 'Paid' },
-  OVERDUE: { color: 'bg-red-50 text-red-700 border-red-200', icon: AlertCircle, label: 'Overdue' },
-  CANCELLED: { color: 'bg-gray-50 text-gray-700 border-gray-200', icon: AlertCircle, label: 'Cancelled' }
+  PENDING: {
+    color: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    icon: Clock,
+    label: "Pending",
+  },
+  PAID: {
+    color: "bg-green-50 text-green-700 border-green-200",
+    icon: CheckCircle2,
+    label: "Paid",
+  },
+  OVERDUE: {
+    color: "bg-red-50 text-red-700 border-red-200",
+    icon: AlertCircle,
+    label: "Overdue",
+  },
+  CANCELLED: {
+    color: "bg-gray-50 text-gray-700 border-gray-200",
+    icon: AlertCircle,
+    label: "Cancelled",
+  },
 };
 
 export default function PatientBillingPage() {
@@ -57,7 +79,7 @@ export default function PatientBillingPage() {
         setBills(data);
       }
     } catch (error) {
-      console.error('Error fetching patient bills:', error);
+      console.error("Error fetching patient bills:", error);
     } finally {
       setLoading(false);
     }
@@ -65,9 +87,13 @@ export default function PatientBillingPage() {
 
   const stats = {
     total: bills.reduce((sum, b) => sum + b.amount, 0),
-    pending: bills.filter(b => b.status === 'PENDING').reduce((sum, b) => sum + b.amount, 0),
-    paid: bills.filter(b => b.status === 'PAID').reduce((sum, b) => sum + b.amount, 0),
-    overdue: bills.filter(b => b.status === 'OVERDUE').length
+    pending: bills
+      .filter((b) => b.status === "PENDING")
+      .reduce((sum, b) => sum + b.amount, 0),
+    paid: bills
+      .filter((b) => b.status === "PAID")
+      .reduce((sum, b) => sum + b.amount, 0),
+    overdue: bills.filter((b) => b.status === "OVERDUE").length,
   };
 
   return (
@@ -95,8 +121,12 @@ export default function PatientBillingPage() {
                 <User className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-slate-900">Patient Billing History</h1>
-                <p className="text-slate-600 mt-1">Patient ID: {params.patientId}</p>
+                <h1 className="text-3xl font-bold text-slate-900">
+                  Patient Billing History
+                </h1>
+                <p className="text-slate-600 mt-1">
+                  Patient ID: {params.patientId}
+                </p>
               </div>
             </div>
             <Badge className="bg-blue-100 text-blue-700 border-blue-300 border px-4 py-2 text-base">
@@ -118,8 +148,12 @@ export default function PatientBillingPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-purple-100 text-sm font-medium">Total Billed</p>
-                  <p className="text-3xl font-bold mt-2">₹{stats.total.toLocaleString()}</p>
+                  <p className="text-purple-100 text-sm font-medium">
+                    Total Billed
+                  </p>
+                  <p className="text-3xl font-bold mt-2">
+                    ₹{stats.total.toLocaleString()}
+                  </p>
                 </div>
                 <div className="p-3 bg-white/20 rounded-lg">
                   <CreditCard className="w-8 h-8" />
@@ -137,7 +171,9 @@ export default function PatientBillingPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-600 text-sm font-medium">Pending</p>
-                  <p className="text-2xl font-bold text-slate-900 mt-2">₹{stats.pending.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-2">
+                    ₹{stats.pending.toLocaleString()}
+                  </p>
                 </div>
                 <div className="p-3 bg-yellow-100 rounded-lg">
                   <Clock className="w-8 h-8 text-yellow-600" />
@@ -151,7 +187,9 @@ export default function PatientBillingPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-600 text-sm font-medium">Paid</p>
-                  <p className="text-2xl font-bold text-slate-900 mt-2">₹{stats.paid.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-2">
+                    ₹{stats.paid.toLocaleString()}
+                  </p>
                 </div>
                 <div className="p-3 bg-green-100 rounded-lg">
                   <CheckCircle2 className="w-8 h-8 text-green-600" />
@@ -164,8 +202,12 @@ export default function PatientBillingPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-600 text-sm font-medium">Overdue Bills</p>
-                  <p className="text-3xl font-bold text-slate-900 mt-2">{stats.overdue}</p>
+                  <p className="text-slate-600 text-sm font-medium">
+                    Overdue Bills
+                  </p>
+                  <p className="text-3xl font-bold text-slate-900 mt-2">
+                    {stats.overdue}
+                  </p>
                 </div>
                 <div className="p-3 bg-red-100 rounded-lg">
                   <AlertCircle className="w-8 h-8 text-red-600" />
@@ -185,7 +227,8 @@ export default function PatientBillingPage() {
             <CardHeader>
               <CardTitle className="text-2xl">Invoice History</CardTitle>
               <CardDescription>
-                Complete billing history for patient {params.patientId?.toString().slice(0, 8)}
+                Complete billing history for patient{" "}
+                {params.patientId?.toString().slice(0, 8)}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -196,7 +239,9 @@ export default function PatientBillingPage() {
               ) : bills.length === 0 ? (
                 <div className="text-center py-12">
                   <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                  <p className="text-slate-600 text-lg">No bills found for this patient</p>
+                  <p className="text-slate-600 text-lg">
+                    No bills found for this patient
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -217,38 +262,62 @@ export default function PatientBillingPage() {
                                   <h3 className="font-bold text-lg text-slate-900">
                                     Invoice #{bill.id.slice(0, 8).toUpperCase()}
                                   </h3>
-                                  <Badge className={`${statusConfig[bill.status].color} border flex items-center gap-1`}>
+                                  <Badge
+                                    className={`${statusConfig[bill.status].color} border flex items-center gap-1`}
+                                  >
                                     <StatusIcon className="w-3 h-3" />
                                     {statusConfig[bill.status].label}
                                   </Badge>
                                 </div>
-                                <p className="text-slate-600 mb-3">{bill.description}</p>
+                                <p className="text-slate-600 mb-3">
+                                  {bill.description}
+                                </p>
                                 <div className="flex items-center gap-6 text-sm text-slate-500">
                                   <div className="flex items-center gap-1">
                                     <Calendar className="w-4 h-4" />
-                                    <span>Created: {new Date(bill.createdAt).toLocaleDateString()}</span>
+                                    <span>
+                                      Created:{" "}
+                                      {new Date(
+                                        bill.createdAt,
+                                      ).toLocaleDateString()}
+                                    </span>
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <Clock className="w-4 h-4" />
-                                    <span>Due: {new Date(bill.dueDate).toLocaleDateString()}</span>
+                                    <span>
+                                      Due:{" "}
+                                      {new Date(
+                                        bill.dueDate,
+                                      ).toLocaleDateString()}
+                                    </span>
                                   </div>
                                   {bill.paidAt && (
                                     <div className="flex items-center gap-1">
                                       <CheckCircle2 className="w-4 h-4" />
-                                      <span>Paid: {new Date(bill.paidAt).toLocaleDateString()}</span>
+                                      <span>
+                                        Paid:{" "}
+                                        {new Date(
+                                          bill.paidAt,
+                                        ).toLocaleDateString()}
+                                      </span>
                                     </div>
                                   )}
                                 </div>
                               </div>
                               <div className="flex items-center gap-6">
                                 <div className="text-right">
-                                  <p className="text-sm text-slate-600 mb-1">Amount</p>
+                                  <p className="text-sm text-slate-600 mb-1">
+                                    Amount
+                                  </p>
                                   <p className="text-2xl font-bold text-purple-600">
                                     ₹{bill.amount.toLocaleString()}
                                   </p>
                                 </div>
                                 <Link href={`/billing/${bill.id}`}>
-                                  <Button variant="ghost" className="text-purple-600 hover:text-purple-700 hover:bg-purple-50">
+                                  <Button
+                                    variant="ghost"
+                                    className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                                  >
                                     View
                                     <ArrowRight className="w-4 h-4 ml-1" />
                                   </Button>

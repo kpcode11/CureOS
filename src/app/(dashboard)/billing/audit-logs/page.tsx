@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
+import { useEffect, useState } from "react";
+import { motion } from "motion/react";
 import {
   Shield,
   Search,
@@ -9,12 +9,18 @@ import {
   FileText,
   Clock,
   User,
-  Activity
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+  Activity,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 interface AuditLog {
   id: string;
@@ -29,8 +35,8 @@ interface AuditLog {
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [actionFilter, setActionFilter] = useState('ALL');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [actionFilter, setActionFilter] = useState("ALL");
 
   useEffect(() => {
     fetchAuditLogs();
@@ -39,42 +45,44 @@ export default function AuditLogsPage() {
   const fetchAuditLogs = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/billing/audit-logs');
+      const res = await fetch("/api/billing/audit-logs");
       if (res.ok) {
         const data = await res.json();
         setLogs(data);
       }
     } catch (error) {
-      console.error('Error fetching audit logs:', error);
+      console.error("Error fetching audit logs:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredLogs = logs.filter(log => {
-    const matchesSearch = 
+  const filteredLogs = logs.filter((log) => {
+    const matchesSearch =
       log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.resourceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (log.actorId && log.actorId.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesFilter = actionFilter === 'ALL' || log.action.includes(actionFilter);
-    
+      (log.actorId &&
+        log.actorId.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesFilter =
+      actionFilter === "ALL" || log.action.includes(actionFilter);
+
     return matchesSearch && matchesFilter;
   });
 
   const actionColors: Record<string, string> = {
-    create: 'bg-green-50 text-green-700 border-green-200',
-    update: 'bg-blue-50 text-blue-700 border-blue-200',
-    delete: 'bg-red-50 text-red-700 border-red-200',
-    pay: 'bg-purple-50 text-purple-700 border-purple-200',
-    status: 'bg-orange-50 text-orange-700 border-orange-200'
+    create: "bg-green-50 text-green-700 border-green-200",
+    update: "bg-blue-50 text-blue-700 border-blue-200",
+    delete: "bg-red-50 text-red-700 border-red-200",
+    pay: "bg-purple-50 text-purple-700 border-purple-200",
+    status: "bg-orange-50 text-orange-700 border-orange-200",
   };
 
   const getActionColor = (action: string) => {
     for (const [key, color] of Object.entries(actionColors)) {
       if (action.toLowerCase().includes(key)) return color;
     }
-    return 'bg-gray-50 text-gray-700 border-gray-200';
+    return "bg-gray-50 text-gray-700 border-gray-200";
   };
 
   return (
@@ -114,8 +122,12 @@ export default function AuditLogsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-600 text-sm font-medium">Total Events</p>
-                  <p className="text-3xl font-bold text-slate-900 mt-2">{logs.length}</p>
+                  <p className="text-slate-600 text-sm font-medium">
+                    Total Events
+                  </p>
+                  <p className="text-3xl font-bold text-slate-900 mt-2">
+                    {logs.length}
+                  </p>
                 </div>
                 <div className="p-3 bg-blue-100 rounded-lg">
                   <Activity className="w-8 h-8 text-blue-600" />
@@ -130,9 +142,13 @@ export default function AuditLogsPage() {
                 <div>
                   <p className="text-slate-600 text-sm font-medium">Today</p>
                   <p className="text-3xl font-bold text-slate-900 mt-2">
-                    {logs.filter(l => 
-                      new Date(l.createdAt).toDateString() === new Date().toDateString()
-                    ).length}
+                    {
+                      logs.filter(
+                        (l) =>
+                          new Date(l.createdAt).toDateString() ===
+                          new Date().toDateString(),
+                      ).length
+                    }
                   </p>
                 </div>
                 <div className="p-3 bg-green-100 rounded-lg">
@@ -148,7 +164,7 @@ export default function AuditLogsPage() {
                 <div>
                   <p className="text-slate-600 text-sm font-medium">Creates</p>
                   <p className="text-3xl font-bold text-slate-900 mt-2">
-                    {logs.filter(l => l.action.includes('create')).length}
+                    {logs.filter((l) => l.action.includes("create")).length}
                   </p>
                 </div>
                 <div className="p-3 bg-purple-100 rounded-lg">
@@ -164,7 +180,7 @@ export default function AuditLogsPage() {
                 <div>
                   <p className="text-slate-600 text-sm font-medium">Updates</p>
                   <p className="text-3xl font-bold text-slate-900 mt-2">
-                    {logs.filter(l => l.action.includes('update')).length}
+                    {logs.filter((l) => l.action.includes("update")).length}
                   </p>
                 </div>
                 <div className="p-3 bg-orange-100 rounded-lg">
@@ -195,17 +211,21 @@ export default function AuditLogsPage() {
                   />
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  {['ALL', 'create', 'update', 'pay', 'status'].map((action) => (
-                    <Button
-                      key={action}
-                      variant={actionFilter === action ? 'default' : 'outline'}
-                      onClick={() => setActionFilter(action)}
-                      className={actionFilter === action ? 'bg-blue-600' : ''}
-                    >
-                      <Filter className="w-4 h-4 mr-2" />
-                      {action.toUpperCase()}
-                    </Button>
-                  ))}
+                  {["ALL", "create", "update", "pay", "status"].map(
+                    (action) => (
+                      <Button
+                        key={action}
+                        variant={
+                          actionFilter === action ? "default" : "outline"
+                        }
+                        onClick={() => setActionFilter(action)}
+                        className={actionFilter === action ? "bg-blue-600" : ""}
+                      >
+                        <Filter className="w-4 h-4 mr-2" />
+                        {action.toUpperCase()}
+                      </Button>
+                    ),
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -240,12 +260,24 @@ export default function AuditLogsPage() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-slate-200">
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">Timestamp</th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">Action</th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">Resource</th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">Resource ID</th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">Actor</th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">Details</th>
+                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                          Timestamp
+                        </th>
+                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                          Action
+                        </th>
+                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                          Resource
+                        </th>
+                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                          Resource ID
+                        </th>
+                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                          Actor
+                        </th>
+                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                          Details
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -261,7 +293,9 @@ export default function AuditLogsPage() {
                             {new Date(log.createdAt).toLocaleString()}
                           </td>
                           <td className="py-4 px-4">
-                            <Badge className={`${getActionColor(log.action)} border`}>
+                            <Badge
+                              className={`${getActionColor(log.action)} border`}
+                            >
                               {log.action}
                             </Badge>
                           </td>
@@ -275,14 +309,16 @@ export default function AuditLogsPage() {
                           </td>
                           <td className="py-4 px-4">
                             <span className="text-slate-600">
-                              {log.actorId ? log.actorId.slice(0, 8) : 'System'}
+                              {log.actorId ? log.actorId.slice(0, 8) : "System"}
                             </span>
                           </td>
                           <td className="py-4 px-4">
                             <span className="text-sm text-slate-500">
-                              {log.meta && typeof log.meta === 'object' 
-                                ? Object.entries(log.meta).map(([k, v]) => `${k}: ${v}`).join(', ')
-                                : 'No details'}
+                              {log.meta && typeof log.meta === "object"
+                                ? Object.entries(log.meta)
+                                    .map(([k, v]) => `${k}: ${v}`)
+                                    .join(", ")
+                                : "No details"}
                             </span>
                           </td>
                         </motion.tr>

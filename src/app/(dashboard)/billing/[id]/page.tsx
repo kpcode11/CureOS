@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { motion } from 'motion/react';
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion } from "motion/react";
 import {
   ArrowLeft,
   CreditCard,
@@ -17,18 +17,24 @@ import {
   Edit,
   Wallet,
   Settings,
-  Download
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+  Download,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface BillingRecord {
   id: string;
   patientId: string;
   amount: number;
   description: string;
-  status: 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
+  status: "PENDING" | "PAID" | "OVERDUE" | "CANCELLED";
   dueDate: string;
   paidAt: string | null;
   createdAt: string;
@@ -36,10 +42,26 @@ interface BillingRecord {
 }
 
 const statusConfig = {
-  PENDING: { color: 'bg-yellow-50 text-yellow-700 border-yellow-200', icon: Clock, label: 'Pending' },
-  PAID: { color: 'bg-green-50 text-green-700 border-green-200', icon: CheckCircle2, label: 'Paid' },
-  OVERDUE: { color: 'bg-red-50 text-red-700 border-red-200', icon: AlertCircle, label: 'Overdue' },
-  CANCELLED: { color: 'bg-gray-50 text-gray-700 border-gray-200', icon: AlertCircle, label: 'Cancelled' }
+  PENDING: {
+    color: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    icon: Clock,
+    label: "Pending",
+  },
+  PAID: {
+    color: "bg-green-50 text-green-700 border-green-200",
+    icon: CheckCircle2,
+    label: "Paid",
+  },
+  OVERDUE: {
+    color: "bg-red-50 text-red-700 border-red-200",
+    icon: AlertCircle,
+    label: "Overdue",
+  },
+  CANCELLED: {
+    color: "bg-gray-50 text-gray-700 border-gray-200",
+    icon: AlertCircle,
+    label: "Cancelled",
+  },
 };
 
 export default function BillingDetailPage() {
@@ -59,10 +81,10 @@ export default function BillingDetailPage() {
         const data = await res.json();
         setBill(data);
       } else {
-        console.error('Failed to fetch bill details');
+        console.error("Failed to fetch bill details");
       }
     } catch (error) {
-      console.error('Error fetching bill:', error);
+      console.error("Error fetching bill:", error);
     } finally {
       setLoading(false);
     }
@@ -82,8 +104,12 @@ export default function BillingDetailPage() {
         <Card className="max-w-md">
           <CardContent className="p-8 text-center">
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Bill Not Found</h2>
-            <p className="text-slate-600 mb-6">The bill you're looking for doesn't exist.</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">
+              Bill Not Found
+            </h2>
+            <p className="text-slate-600 mb-6">
+              The bill you're looking for doesn't exist.
+            </p>
             <Link href="/billing">
               <Button className="bg-blue-600 hover:bg-blue-700">
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -123,11 +149,17 @@ export default function BillingDetailPage() {
                 <CreditCard className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-slate-900">Invoice Details</h1>
-                <p className="text-slate-600 mt-1">Invoice #{bill.id.slice(0, 8).toUpperCase()}</p>
+                <h1 className="text-3xl font-bold text-slate-900">
+                  Invoice Details
+                </h1>
+                <p className="text-slate-600 mt-1">
+                  Invoice #{bill.id.slice(0, 8).toUpperCase()}
+                </p>
               </div>
             </div>
-            <Badge className={`${statusConfig[bill.status].color} border px-4 py-2 text-lg`}>
+            <Badge
+              className={`${statusConfig[bill.status].color} border px-4 py-2 text-lg`}
+            >
               <StatusIcon className="w-5 h-5 mr-2" />
               {statusConfig[bill.status].label}
             </Badge>
@@ -148,7 +180,9 @@ export default function BillingDetailPage() {
               <Card className="border-none shadow-lg">
                 <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
                   <CardTitle className="text-2xl">Invoice Summary</CardTitle>
-                  <CardDescription>Complete billing information</CardDescription>
+                  <CardDescription>
+                    Complete billing information
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -157,7 +191,9 @@ export default function BillingDetailPage() {
                         <User className="w-4 h-4" />
                         <span className="text-sm font-medium">Patient ID</span>
                       </div>
-                      <p className="text-lg font-semibold text-slate-900">{bill.patientId}</p>
+                      <p className="text-lg font-semibold text-slate-900">
+                        {bill.patientId}
+                      </p>
                     </div>
 
                     <div className="space-y-2">
@@ -165,7 +201,9 @@ export default function BillingDetailPage() {
                         <DollarSign className="w-4 h-4" />
                         <span className="text-sm font-medium">Amount</span>
                       </div>
-                      <p className="text-3xl font-bold text-blue-600">₹{bill.amount.toLocaleString()}</p>
+                      <p className="text-3xl font-bold text-blue-600">
+                        ₹{bill.amount.toLocaleString()}
+                      </p>
                     </div>
 
                     <div className="space-y-2">
@@ -174,10 +212,10 @@ export default function BillingDetailPage() {
                         <span className="text-sm font-medium">Due Date</span>
                       </div>
                       <p className="text-lg font-semibold text-slate-900">
-                        {new Date(bill.dueDate).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
+                        {new Date(bill.dueDate).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
                         })}
                       </p>
                     </div>
@@ -188,10 +226,10 @@ export default function BillingDetailPage() {
                         <span className="text-sm font-medium">Created On</span>
                       </div>
                       <p className="text-lg font-semibold text-slate-900">
-                        {new Date(bill.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
+                        {new Date(bill.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
                         })}
                       </p>
                     </div>
@@ -202,18 +240,23 @@ export default function BillingDetailPage() {
                       <FileText className="w-4 h-4 mt-1" />
                       <span className="text-sm font-medium">Description</span>
                     </div>
-                    <p className="text-slate-900 text-lg leading-relaxed">{bill.description}</p>
+                    <p className="text-slate-900 text-lg leading-relaxed">
+                      {bill.description}
+                    </p>
                   </div>
 
                   {bill.paidAt && (
                     <div className="pt-4 border-t">
                       <div className="flex items-center gap-2 text-green-600 mb-2">
                         <CheckCircle2 className="w-5 h-5" />
-                        <span className="font-medium">Paid on {new Date(bill.paidAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}</span>
+                        <span className="font-medium">
+                          Paid on{" "}
+                          {new Date(bill.paidAt).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -241,7 +284,9 @@ export default function BillingDetailPage() {
                         <div className="w-0.5 h-full bg-slate-200 mt-2" />
                       </div>
                       <div className="flex-1 pb-4">
-                        <p className="font-semibold text-slate-900">Invoice Created</p>
+                        <p className="font-semibold text-slate-900">
+                          Invoice Created
+                        </p>
                         <p className="text-sm text-slate-600">
                           {new Date(bill.createdAt).toLocaleString()}
                         </p>
@@ -257,7 +302,9 @@ export default function BillingDetailPage() {
                           <div className="w-0.5 h-full bg-slate-200 mt-2" />
                         </div>
                         <div className="flex-1 pb-4">
-                          <p className="font-semibold text-slate-900">Last Updated</p>
+                          <p className="font-semibold text-slate-900">
+                            Last Updated
+                          </p>
                           <p className="text-sm text-slate-600">
                             {new Date(bill.updatedAt).toLocaleString()}
                           </p>
@@ -273,7 +320,9 @@ export default function BillingDetailPage() {
                           </div>
                         </div>
                         <div className="flex-1">
-                          <p className="font-semibold text-slate-900">Payment Received</p>
+                          <p className="font-semibold text-slate-900">
+                            Payment Received
+                          </p>
                           <p className="text-sm text-slate-600">
                             {new Date(bill.paidAt).toLocaleString()}
                           </p>
@@ -298,7 +347,7 @@ export default function BillingDetailPage() {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-3">
-                  {bill.status === 'PENDING' && (
+                  {bill.status === "PENDING" && (
                     <Link href={`/billing/${bill.id}/pay`}>
                       <Button className="w-full bg-green-600 hover:bg-green-700 shadow-md">
                         <Wallet className="w-4 h-4 mr-2" />
@@ -351,9 +400,12 @@ export default function BillingDetailPage() {
                       <FileText className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-2">Need Help?</h3>
+                      <h3 className="font-semibold text-slate-900 mb-2">
+                        Need Help?
+                      </h3>
                       <p className="text-sm text-slate-600">
-                        Contact billing support for assistance with this invoice or payment processing.
+                        Contact billing support for assistance with this invoice
+                        or payment processing.
                       </p>
                     </div>
                   </div>
