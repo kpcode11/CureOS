@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { motion } from 'motion/react';
-import { 
-  CreditCard, 
-  DollarSign, 
-  Search, 
-  Filter, 
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { motion } from "motion/react";
+import {
+  CreditCard,
+  DollarSign,
+  Search,
+  Filter,
   Plus,
   Clock,
   CheckCircle2,
@@ -15,19 +15,25 @@ import {
   XCircle,
   ArrowRight,
   TrendingUp,
-  FileText
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+  FileText,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 interface BillingRecord {
   id: string;
   patientId: string;
   amount: number;
   description: string;
-  status: 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
+  status: "PENDING" | "PAID" | "OVERDUE" | "CANCELLED";
   dueDate: string;
   paidAt: string | null;
   createdAt: string;
@@ -38,17 +44,33 @@ interface BillingRecord {
 }
 
 const statusConfig = {
-  PENDING: { color: 'bg-yellow-50 text-yellow-700 border-yellow-200', icon: Clock, label: 'Pending' },
-  PAID: { color: 'bg-green-50 text-green-700 border-green-200', icon: CheckCircle2, label: 'Paid' },
-  OVERDUE: { color: 'bg-red-50 text-red-700 border-red-200', icon: AlertCircle, label: 'Overdue' },
-  CANCELLED: { color: 'bg-gray-50 text-gray-700 border-gray-200', icon: XCircle, label: 'Cancelled' }
+  PENDING: {
+    color: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    icon: Clock,
+    label: "Pending",
+  },
+  PAID: {
+    color: "bg-green-50 text-green-700 border-green-200",
+    icon: CheckCircle2,
+    label: "Paid",
+  },
+  OVERDUE: {
+    color: "bg-red-50 text-red-700 border-red-200",
+    icon: AlertCircle,
+    label: "Overdue",
+  },
+  CANCELLED: {
+    color: "bg-gray-50 text-gray-700 border-gray-200",
+    icon: XCircle,
+    label: "Cancelled",
+  },
 };
 
 export default function BillingPage() {
   const [bills, setBills] = useState<BillingRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
   useEffect(() => {
     fetchBills();
@@ -57,50 +79,52 @@ export default function BillingPage() {
   const fetchBills = async () => {
     setLoading(true);
     try {
-      const url = statusFilter !== 'ALL' 
-        ? `/api/billing?status=${statusFilter}` 
-        : '/api/billing';
+      const url =
+        statusFilter !== "ALL"
+          ? `/api/billing?status=${statusFilter}`
+          : "/api/billing";
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setBills(data);
       }
     } catch (error) {
-      console.error('Error fetching bills:', error);
+      console.error("Error fetching bills:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredBills = bills.filter(bill => 
-    bill.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    bill.patientId.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBills = bills.filter(
+    (bill) =>
+      bill.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      bill.patientId.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const stats = {
     total: bills.reduce((sum, b) => sum + b.amount, 0),
-    pending: bills.filter(b => b.status === 'PENDING').length,
-    paid: bills.filter(b => b.status === 'PAID').length,
-    overdue: bills.filter(b => b.status === 'OVERDUE').length
+    pending: bills.filter((b) => b.status === "PENDING").length,
+    paid: bills.filter((b) => b.status === "PAID").length,
+    overdue: bills.filter((b) => b.status === "OVERDUE").length,
   };
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
+      transition: { staggerChildren: 0.1 },
+    },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
       {/* Hero Header */}
-      <motion.div 
+      <motion.div
         className="relative bg-white border-b"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -134,7 +158,7 @@ export default function BillingPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
           variants={containerVariants}
           initial="hidden"
@@ -145,8 +169,12 @@ export default function BillingPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-blue-100 text-sm font-medium">Total Revenue</p>
-                    <p className="text-3xl font-bold mt-2">₹{stats.total.toLocaleString()}</p>
+                    <p className="text-blue-100 text-sm font-medium">
+                      Total Revenue
+                    </p>
+                    <p className="text-3xl font-bold mt-2">
+                      ₹{stats.total.toLocaleString()}
+                    </p>
                   </div>
                   <div className="p-3 bg-white/20 rounded-lg">
                     <DollarSign className="w-8 h-8" />
@@ -165,8 +193,12 @@ export default function BillingPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-600 text-sm font-medium">Pending</p>
-                    <p className="text-3xl font-bold text-slate-900 mt-2">{stats.pending}</p>
+                    <p className="text-slate-600 text-sm font-medium">
+                      Pending
+                    </p>
+                    <p className="text-3xl font-bold text-slate-900 mt-2">
+                      {stats.pending}
+                    </p>
                   </div>
                   <div className="p-3 bg-yellow-100 rounded-lg">
                     <Clock className="w-8 h-8 text-yellow-600" />
@@ -182,7 +214,9 @@ export default function BillingPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-slate-600 text-sm font-medium">Paid</p>
-                    <p className="text-3xl font-bold text-slate-900 mt-2">{stats.paid}</p>
+                    <p className="text-3xl font-bold text-slate-900 mt-2">
+                      {stats.paid}
+                    </p>
                   </div>
                   <div className="p-3 bg-green-100 rounded-lg">
                     <CheckCircle2 className="w-8 h-8 text-green-600" />
@@ -197,8 +231,12 @@ export default function BillingPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-600 text-sm font-medium">Overdue</p>
-                    <p className="text-3xl font-bold text-slate-900 mt-2">{stats.overdue}</p>
+                    <p className="text-slate-600 text-sm font-medium">
+                      Overdue
+                    </p>
+                    <p className="text-3xl font-bold text-slate-900 mt-2">
+                      {stats.overdue}
+                    </p>
                   </div>
                   <div className="p-3 bg-red-100 rounded-lg">
                     <AlertCircle className="w-8 h-8 text-red-600" />
@@ -210,7 +248,7 @@ export default function BillingPage() {
         </motion.div>
 
         {/* Quick Links */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -221,7 +259,9 @@ export default function BillingPage() {
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <AlertCircle className="w-5 h-5 text-red-600" />
-                  <span className="font-semibold text-slate-900">View Overdue Bills</span>
+                  <span className="font-semibold text-slate-900">
+                    View Overdue Bills
+                  </span>
                 </div>
                 <ArrowRight className="w-5 h-5 text-slate-400" />
               </CardContent>
@@ -233,7 +273,9 @@ export default function BillingPage() {
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <FileText className="w-5 h-5 text-blue-600" />
-                  <span className="font-semibold text-slate-900">Audit Logs</span>
+                  <span className="font-semibold text-slate-900">
+                    Audit Logs
+                  </span>
                 </div>
                 <ArrowRight className="w-5 h-5 text-slate-400" />
               </CardContent>
@@ -245,7 +287,9 @@ export default function BillingPage() {
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Search className="w-5 h-5 text-purple-600" />
-                  <span className="font-semibold text-slate-900">Search by Patient</span>
+                  <span className="font-semibold text-slate-900">
+                    Search by Patient
+                  </span>
                 </div>
                 <ArrowRight className="w-5 h-5 text-slate-400" />
               </CardContent>
@@ -273,17 +317,21 @@ export default function BillingPage() {
                   />
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  {['ALL', 'PENDING', 'PAID', 'OVERDUE', 'CANCELLED'].map((status) => (
-                    <Button
-                      key={status}
-                      variant={statusFilter === status ? 'default' : 'outline'}
-                      onClick={() => setStatusFilter(status)}
-                      className={statusFilter === status ? 'bg-blue-600' : ''}
-                    >
-                      <Filter className="w-4 h-4 mr-2" />
-                      {status}
-                    </Button>
-                  ))}
+                  {["ALL", "PENDING", "PAID", "OVERDUE", "CANCELLED"].map(
+                    (status) => (
+                      <Button
+                        key={status}
+                        variant={
+                          statusFilter === status ? "default" : "outline"
+                        }
+                        onClick={() => setStatusFilter(status)}
+                        className={statusFilter === status ? "bg-blue-600" : ""}
+                      >
+                        <Filter className="w-4 h-4 mr-2" />
+                        {status}
+                      </Button>
+                    ),
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -318,13 +366,27 @@ export default function BillingPage() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-slate-200">
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">Invoice ID</th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">Patient ID</th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">Description</th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">Amount</th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">Due Date</th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">Status</th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">Actions</th>
+                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                          Invoice ID
+                        </th>
+                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                          Patient ID
+                        </th>
+                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                          Description
+                        </th>
+                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                          Amount
+                        </th>
+                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                          Due Date
+                        </th>
+                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                          Status
+                        </th>
+                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -360,14 +422,20 @@ export default function BillingPage() {
                               {new Date(bill.dueDate).toLocaleDateString()}
                             </td>
                             <td className="py-4 px-4">
-                              <Badge className={`${statusConfig[bill.status].color} border flex items-center gap-1 w-fit`}>
+                              <Badge
+                                className={`${statusConfig[bill.status].color} border flex items-center gap-1 w-fit`}
+                              >
                                 <StatusIcon className="w-3 h-3" />
                                 {statusConfig[bill.status].label}
                               </Badge>
                             </td>
                             <td className="py-4 px-4">
                               <Link href={`/billing/${bill.id}`}>
-                                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                >
                                   View Details
                                   <ArrowRight className="w-4 h-4 ml-1" />
                                 </Button>
