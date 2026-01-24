@@ -5,10 +5,12 @@ import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNurse } from "@/hooks/use-nurse";
 
 export default function NursingRecordDetail(){
   const params = useParams() as any;
   const id = params.id as string;
+  const { getNursingRecord, updateNursingRecord } = useNurse();
   const [rec, setRec] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState('');
@@ -19,8 +21,7 @@ export default function NursingRecordDetail(){
   const fetchRec = async () => {
     setLoading(true);
     try{
-      const res = await fetch(`/api/nurse/nursing-records/${id}`);
-      const data = await res.json();
+      const data = await getNursingRecord(id);
       setRec(data);
       setNotes(data?.notes ?? '');
       setBp(data?.vitals?.bp ?? '');
@@ -33,8 +34,7 @@ export default function NursingRecordDetail(){
       const body: any = {};
       if (notes) body.notes = notes;
       if (bp) body.vitals = { bp };
-      const res = await fetch(`/api/nurse/nursing-records/${id}`, { method: 'PATCH', headers: { 'content-type':'application/json' }, body: JSON.stringify(body) });
-      if (!res.ok) throw new Error('save failed');
+      await updateNursingRecord(id, body);
       router.back();
     }catch(err){ alert('Unable to save'); console.error(err); }
   };

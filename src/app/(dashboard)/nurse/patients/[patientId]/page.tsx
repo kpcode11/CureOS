@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useNurse } from "@/hooks/use-nurse";
 
 export default function NursePatientPage(){
   const params = useParams() as any;
   const patientId = params.patientId as string;
+  const { getPatient, getPatientBed, getPatientEmr, getPatientLabTests } = useNurse();
   const [patient, setPatient] = useState<any>(null);
   const [bed, setBed] = useState<any>(null);
   const [emr, setEmr] = useState<any[]>([]);
@@ -17,16 +19,16 @@ export default function NursePatientPage(){
   useEffect(()=>{ fetchAll(); }, [patientId]);
   const fetchAll = async () => {
     try{
-      const [pRes, bRes, eRes, lRes] = await Promise.all([
-        fetch(`/api/nurse/patients/${patientId}`),
-        fetch(`/api/nurse/patients/${patientId}/bed`),
-        fetch(`/api/nurse/patients/${patientId}/emr`),
-        fetch(`/api/nurse/patients/${patientId}/lab-tests`),
+      const [p, b, e, l] = await Promise.all([
+        getPatient(patientId).catch(()=>null),
+        getPatientBed(patientId).catch(()=>null),
+        getPatientEmr(patientId).catch(()=>[]),
+        getPatientLabTests(patientId).catch(()=>[]),
       ]);
-      if (pRes.ok) setPatient(await pRes.json());
-      if (bRes.ok) setBed(await bRes.json());
-      if (eRes.ok) setEmr(await eRes.json());
-      if (lRes.ok) setLabs(await lRes.json());
+      setPatient(p);
+      setBed(b);
+      setEmr(e || []);
+      setLabs(l || []);
     }catch(err){ console.error(err); }
   };
 

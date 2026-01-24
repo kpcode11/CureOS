@@ -1,54 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, Home, UserCheck, LogOut } from "lucide-react";
-
-interface Assignment {
-  id: string;
-  bed: { id: string; bedNumber: string; ward: string } | null;
-  patient: { id: string; firstName: string; lastName: string } | null;
-  nurse?: { id: string } | null;
-  assignedAt: string;
-}
+import { Loader2, Home } from "lucide-react";
+import { useNurse } from "@/hooks/use-nurse";
 
 export default function BedAssignmentsPage() {
-  const [rows, setRows] = useState<Assignment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { assignments, assignmentsLoading, fetchAssignments, dischargeAssignment } = useNurse();
   const router = useRouter();
 
-  useEffect(() => {
-    fetchAssignments();
-  }, []);
-
-  const fetchAssignments = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/nurse/bed-assignments');
-      const data = await res.json();
-      setRows(data || []);
-    } catch (err) {
-      console.error(err);
-      setRows([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const discharge = async (id: string) => {
-    if (!confirm('Confirm discharge for this assignment?')) return;
-    try {
-      const res = await fetch(`/api/nurse/bed-assignments/${id}/discharge`, { method: 'PATCH' });
-      if (!res.ok) throw new Error('failed');
-      await fetchAssignments();
-    } catch (err) {
-      alert('Unable to discharge — check console');
-      console.error(err);
-    }
-  };
+  useEffect(() => { fetchAssignments().catch(()=>undefined); }, [fetchAssignments]);
 
   return (
     <div className="p-6 min-h-screen">
@@ -67,10 +31,10 @@ export default function BedAssignmentsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Active assignments</CardTitle>
-            <CardDescription>{rows.length} active</CardDescription>
+            <CardDescription>{assignments.length} active</CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {assignmentsLoading ? (
               <div className="py-12 flex items-center justify-center"><Loader2 className="animate-spin mr-3"/>Loading…</div>
             ) : (
               <div className="overflow-x-auto">
@@ -85,7 +49,7 @@ export default function BedAssignmentsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {rows.map(r => (
+                    {assignments.map(r => (
                       <TableRow key={r.id}>
                         <TableCell className="font-mono text-sm">{r.id.slice(0,8).toUpperCase()}</TableCell>
                         <TableCell>{r.bed ? `${r.bed.bedNumber} — ${r.bed.ward}` : '—'}</TableCell>
@@ -94,12 +58,12 @@ export default function BedAssignmentsPage() {
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button variant="ghost" onClick={() => router.push(`/nurse/patients/${r.patient?.id}`)}>View</Button>
-                            <Button className="bg-red-600 text-white" onClick={() => discharge(r.id)}>Discharge</Button>
+                            <Button className="bg-red-600 text-white" onClick={() => { if (!confirm('Confirm discharge for this assignment?')) return; dischargeAssignment(r.id).catch(()=>undefined); }}>Discharge</Button>
                           </div>
                         </TableCell>
                       </TableRow>
                     ))}
-                    {rows.length === 0 && (
+                    {assignments.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={5} className="h-32 text-center text-slate-500">No active assignments</TableCell>
                       </TableRow>

@@ -7,39 +7,21 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Loader2, Plus } from "lucide-react";
-
-interface Record { id: string; nurseId: string; patientName: string; vitals: any; createdAt: string }
+import { useNurse } from "@/hooks/use-nurse";
 
 export default function NursingRecordsPage(){
-  const [rows, setRows] = useState<Record[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { records, recordsLoading, fetchNursingRecords, createNursingRecord } = useNurse();
   const [patientName, setPatientName] = useState('');
   const [bp, setBp] = useState('');
   const [hr, setHr] = useState('');
   const router = useRouter();
 
-  useEffect(()=>{ fetchRecords(); }, []);
-
-  const fetchRecords = async () => {
-    setLoading(true);
-    try{
-      const q = patientName ? `?patientName=${encodeURIComponent(patientName)}` : '';
-      const res = await fetch(`/api/nurse/nursing-records${q}`);
-      const data = await res.json();
-      setRows(data || []);
-    }catch(err){ console.error(err); setRows([]); }
-    setLoading(false);
-  };
+  useEffect(()=>{ fetchNursingRecords().catch(()=>undefined); }, [fetchNursingRecords]);
 
   const createRecord = async () => {
     if (!bp && !hr) return alert('provide at least one vital');
-    try{
-      const body = { nurseId: null, patientName: patientName || 'Unknown', vitals: { bp, hr } } as any;
-      const res = await fetch('/api/nurse/nursing-records', { method: 'POST', headers: { 'content-type':'application/json' }, body: JSON.stringify(body) });
-      if (!res.ok) throw new Error('create failed');
-      setBp(''); setHr(''); setPatientName('');
-      await fetchRecords();
-    }catch(err){ alert('Unable to create nursing record'); console.error(err); }
+    await createNursingRecord({ nurseId: null, patientName: patientName || 'Unknown', vitals: { bp, hr } });
+    setBp(''); setHr(''); setPatientName('');
   };
 
   return (
@@ -51,7 +33,7 @@ export default function NursingRecordsPage(){
             <p className="text-slate-600">Vitals and nursing notes</p>
           </div>
           <div className="flex gap-3">
-            <Button onClick={fetchRecords} variant="outline">Refresh</Button>
+            <Button onClick={() => fetchNursingRecords()} variant="outline">Refresh</Button>
             <Button onClick={() => router.push('/nurse/nursing-records')} className="bg-emerald-600 text-white"><Plus className="mr-2"/>New</Button>
           </div>
         </div>
@@ -74,10 +56,10 @@ export default function NursingRecordsPage(){
         <Card>
           <CardHeader>
             <CardTitle>Recent records</CardTitle>
-            <CardDescription>{rows.length} records</CardDescription>
+            <CardDescription>{records.length} records</CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? <div className="py-12 flex items-center justify-center"><Loader2 className="animate-spin"/></div> : (
+            {recordsLoading ? <div className="py-12 flex items-center justify-center"><Loader2 className="animate-spin"/></div> : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -90,7 +72,7 @@ export default function NursingRecordsPage(){
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {rows.map(r => (
+                    {records.map(r => (
                       <TableRow key={r.id}>
                         <TableCell className="font-mono">{r.id.slice(0,8).toUpperCase()}</TableCell>
                         <TableCell>{r.patientName}</TableCell>
