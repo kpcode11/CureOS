@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { PatientListComponent } from '@/components/doctor/patient-list';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
+import { useState } from "react";
+import Link from "next/link";
+import { PatientListComponent } from "@/components/doctor/patient-list";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 
 export default function DoctorPatientsPage() {
   return (
@@ -14,8 +14,8 @@ export default function DoctorPatientsPage() {
           {/* Header with Back Button */}
           <div className="flex items-center gap-4">
             <Link href="/doctor">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="icon"
                 className="hover:bg-gray-100 transition-colors"
               >
@@ -23,8 +23,12 @@ export default function DoctorPatientsPage() {
               </Button>
             </Link>
             <div className="flex flex-col gap-1">
-              <h1 className="text-4xl font-semibold tracking-tight text-gray-900">My Patients</h1>
-              <p className="text-base text-gray-600">Manage and view patient records</p>
+              <h1 className="text-4xl font-semibold tracking-tight text-gray-900">
+                My Patients
+              </h1>
+              <p className="text-base text-gray-600">
+                Manage and view patient records
+              </p>
             </div>
           </div>
 

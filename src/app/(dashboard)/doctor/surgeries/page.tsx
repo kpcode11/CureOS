@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useDoctor, Surgery } from '@/hooks/use-doctor';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, Calendar, User, Loader, AlertCircle } from 'lucide-react';
-import { SurgeryFormComponent } from '@/components/doctor/surgery-form';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useDoctor, Surgery } from "@/hooks/use-doctor";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, Calendar, User, Loader, AlertCircle } from "lucide-react";
+import { SurgeryFormComponent } from "@/components/doctor/surgery-form";
 
 export default function DoctorSurgeriesPage() {
   const { getSurgeries, getPatients, loading } = useDoctor();
   const [surgeries, setSurgeries] = useState<Surgery[]>([]);
   const [patients, setPatients] = useState<Record<string, string>>({});
   const [showForm, setShowForm] = useState(false);
-  const [selectedPatientId, setSelectedPatientId] = useState<string>('');
+  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function DoctorSurgeriesPage() {
     const loadData = async () => {
       const [surgeriesData, patientsData] = await Promise.all([
         getSurgeries({}),
-        getPatients()
+        getPatients(),
       ]);
 
       setSurgeries(surgeriesData);
@@ -44,16 +44,16 @@ export default function DoctorSurgeriesPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'SCHEDULED':
-        return 'bg-blue-100 text-blue-800';
-      case 'IN_PROGRESS':
-        return 'bg-orange-100 text-orange-800';
-      case 'COMPLETED':
-        return 'bg-green-100 text-green-800';
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800';
+      case "SCHEDULED":
+        return "bg-blue-100 text-blue-800";
+      case "IN_PROGRESS":
+        return "bg-orange-100 text-orange-800";
+      case "COMPLETED":
+        return "bg-green-100 text-green-800";
+      case "CANCELLED":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -65,8 +65,8 @@ export default function DoctorSurgeriesPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <Link href="/doctor">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="icon"
                   className="hover:bg-gray-100 transition-colors"
                 >
@@ -74,15 +74,19 @@ export default function DoctorSurgeriesPage() {
                 </Button>
               </Link>
               <div className="flex flex-col gap-1">
-                <h1 className="text-4xl font-semibold tracking-tight text-gray-900">Surgeries</h1>
-                <p className="text-base text-gray-600">Schedule and manage surgeries</p>
+                <h1 className="text-4xl font-semibold tracking-tight text-gray-900">
+                  Surgeries
+                </h1>
+                <p className="text-base text-gray-600">
+                  Schedule and manage surgeries
+                </p>
               </div>
             </div>
-            <Button 
+            <Button
               onClick={() => setShowForm(!showForm)}
               className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md"
             >
-              {showForm ? 'Close Form' : 'Schedule Surgery'}
+              {showForm ? "Close Form" : "Schedule Surgery"}
             </Button>
           </div>
 
@@ -90,11 +94,15 @@ export default function DoctorSurgeriesPage() {
           {showForm && (
             <Card className="border-2 border-blue-200 shadow-lg bg-gradient-to-br from-blue-50 to-white">
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-semibold text-gray-900">Schedule New Surgery</CardTitle>
+                <CardTitle className="text-xl font-semibold text-gray-900">
+                  Schedule New Surgery
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Select Patient *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Select Patient *
+                  </label>
                   <select
                     value={selectedPatientId}
                     onChange={(e) => setSelectedPatientId(e.target.value)}
@@ -115,12 +123,12 @@ export default function DoctorSurgeriesPage() {
                     patientName={patients[selectedPatientId]}
                     onSuccess={() => {
                       setShowForm(false);
-                      setSelectedPatientId('');
+                      setSelectedPatientId("");
                       getSurgeries({}).then(setSurgeries);
                     }}
                     onCancel={() => {
                       setShowForm(false);
-                      setSelectedPatientId('');
+                      setSelectedPatientId("");
                     }}
                   />
                 )}
@@ -135,7 +143,9 @@ export default function DoctorSurgeriesPage() {
                 <CardContent className="flex items-center justify-center py-16">
                   <div className="flex flex-col items-center gap-3">
                     <Loader className="h-8 w-8 animate-spin text-blue-600" />
-                    <p className="text-sm text-gray-600">Loading surgeries...</p>
+                    <p className="text-sm text-gray-600">
+                      Loading surgeries...
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -145,14 +155,18 @@ export default function DoctorSurgeriesPage() {
               <Card className="border-gray-200 shadow-sm">
                 <CardContent className="flex flex-col items-center justify-center py-20">
                   <Calendar className="h-16 w-16 text-gray-300 mb-4" />
-                  <p className="text-base text-gray-600 font-medium">No surgeries scheduled</p>
-                  <p className="text-sm text-gray-500 mt-1">Schedule a surgery to get started</p>
+                  <p className="text-base text-gray-600 font-medium">
+                    No surgeries scheduled
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Schedule a surgery to get started
+                  </p>
                 </CardContent>
               </Card>
             )}
 
             {surgeries.map((surgery) => (
-              <Card 
+              <Card
                 key={surgery.id}
                 className="border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 hover:border-gray-300"
               >
@@ -165,30 +179,40 @@ export default function DoctorSurgeriesPage() {
                           <Calendar className="h-5 w-5 text-purple-600" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900">{surgery.surgeryType}</h3>
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(surgery.status)}`}>
-                            {surgery.status.replace('_', ' ')}
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {surgery.surgeryType}
+                          </h3>
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(surgery.status)}`}
+                          >
+                            {surgery.status.replace("_", " ")}
                           </span>
                         </div>
                       </div>
-                      
+
                       {/* Surgery Details */}
                       <div className="space-y-2">
                         <p className="text-sm text-gray-600 flex items-center gap-2">
                           <User className="h-4 w-4 text-gray-400" />
-                          <span className="font-medium">Patient:</span> {surgery.patientName}
+                          <span className="font-medium">Patient:</span>{" "}
+                          {surgery.patientName}
                         </p>
                         <p className="text-sm text-gray-600 flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-gray-400" />
-                          <span className="font-medium">Scheduled:</span> {new Date(surgery.scheduledAt).toLocaleString()}
+                          <span className="font-medium">Scheduled:</span>{" "}
+                          {new Date(surgery.scheduledAt).toLocaleString()}
                         </p>
                       </div>
-                      
+
                       {/* Notes Section */}
                       {surgery.notes && (
                         <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 p-4 rounded-xl border border-gray-200">
-                          <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">Notes</p>
-                          <p className="text-sm text-gray-800 leading-relaxed">{surgery.notes}</p>
+                          <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                            Notes
+                          </p>
+                          <p className="text-sm text-gray-800 leading-relaxed">
+                            {surgery.notes}
+                          </p>
                         </div>
                       )}
                     </div>

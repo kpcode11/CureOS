@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import { PrescriptionFormComponent } from '@/components/doctor/prescription-form';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { PrescriptionFormComponent } from "@/components/doctor/prescription-form";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 
 export default function PrescribePage() {
   const params = useParams();
@@ -17,15 +17,17 @@ export default function PrescribePage() {
           {/* Header with Back Button */}
           <div className="flex items-center gap-4">
             <Link href={`/doctor/patients/${patientId}`}>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="icon"
                 className="hover:bg-gray-100 transition-colors"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <h1 className="text-4xl font-semibold tracking-tight text-gray-900">Create Prescription</h1>
+            <h1 className="text-4xl font-semibold tracking-tight text-gray-900">
+              Create Prescription
+            </h1>
           </div>
 
           {/* Form Container */}

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { DoctorDashboard } from '@/components/dashboards/doctor-dashboard';
+import { DoctorDashboard } from "@/components/dashboards/doctor-dashboard";
 
 export default function DoctorPage() {
   return (

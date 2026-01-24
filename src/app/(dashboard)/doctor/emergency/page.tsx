@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { EmergencyDashboard } from '@/components/dashboards/emergency-dashboard';
+import { EmergencyDashboard } from "@/components/dashboards/emergency-dashboard";
 
 export default function DoctorEmergencyPage() {
   return (

@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import { LabOrderFormComponent } from '@/components/doctor/lab-order-form';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { LabOrderFormComponent } from "@/components/doctor/lab-order-form";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 
 export default function LabOrderPage() {
   const params = useParams();
@@ -17,15 +17,17 @@ export default function LabOrderPage() {
           {/* Header with Back Button */}
           <div className="flex items-center gap-4">
             <Link href={`/doctor/patients/${patientId}`}>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="icon"
                 className="hover:bg-gray-100 transition-colors"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <h1 className="text-4xl font-semibold tracking-tight text-gray-900">Order Lab Test</h1>
+            <h1 className="text-4xl font-semibold tracking-tight text-gray-900">
+              Order Lab Test
+            </h1>
           </div>
 
           {/* Form Container */}

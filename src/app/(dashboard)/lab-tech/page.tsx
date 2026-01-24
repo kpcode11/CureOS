@@ -1,12 +1,13 @@
-'use client';
+"use client";
 
-import React from 'react';
+import { LabTechDashboard } from "@/components/dashboards/lab-tech-dashboard";
 
 export default function LabTechPage() {
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold">Lab Technician Dashboard</h1>
-      <p className="mt-4 text-gray-600">Welcome to the lab technician dashboard.</p>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <LabTechDashboard />
+      </div>
     </div>
   );
 }
