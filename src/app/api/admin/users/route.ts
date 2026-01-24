@@ -23,7 +23,55 @@ export async function POST(req: Request) {
   const { email, password, name, role, roleEntityId } = await req.json();
   if (!email || !password) return NextResponse.json({ error: 'email & password required' }, { status: 400 });
   const hashed = await bcrypt.hash(password, 10);
-  const user = await prisma.user.create({ data: { email, password: hashed, name: name ?? '', role: role ?? 'RECEPTIONIST', roleEntityId } });
-  await createAudit({ actorId: null, action: 'user.create', resource: 'User', resourceId: user.id, meta: { email, role, roleEntityId } });
+  
+  // Determine final role and roleEntityId
+  let finalRole = role;
+  let finalRoleEntityId = roleEntityId;
+
+  // If roleEntityId is provided but role is not, look up the role name
+  if (finalRoleEntityId && !finalRole) {
+    const roleEntity = await prisma.roleEntity.findUnique({ 
+      where: { id: finalRoleEntityId },
+      select: { name: true }
+    });
+    if (roleEntity) {
+      finalRole = roleEntity.name;
+    }
+  }
+
+  // If role is provided but roleEntityId is not, look up the roleEntityId
+  if (!finalRoleEntityId && finalRole) {
+    const roleEntity = await prisma.roleEntity.findUnique({ 
+      where: { name: finalRole },
+      select: { id: true }
+    });
+    if (roleEntity) {
+      finalRoleEntityId = roleEntity.id;
+    }
+  }
+
+  // Default to RECEPTIONIST if no role is specified
+  if (!finalRole) {
+    finalRole = 'RECEPTIONIST';
+  }
+
+  const user = await prisma.user.create({ 
+    data: { 
+      email, 
+      password: hashed, 
+      name: name ?? '', 
+      role: finalRole, 
+      roleEntityId: finalRoleEntityId 
+    } 
+  });
+  
+  await createAudit({ 
+    actorId: null, 
+    action: 'user.create', 
+    resource: 'User', 
+    resourceId: user.id, 
+    meta: { email, role: finalRole, roleEntityId: finalRoleEntityId } 
+  });
+  
   return NextResponse.json({ id: user.id, email: user.email });
 }
