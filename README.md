@@ -1,191 +1,176 @@
-# Cureos Hospital Management System
+# CureOS - Hospital Information System
 
-A comprehensive hospital management system built with Next.js, TypeScript, and Prisma.
+A comprehensive Hospital Information System (HIS) built with **Next.js 15**, **React 19**, and **TypeScript**, featuring real-time analytics, role-based access control, and modern Apple HCI-inspired UI/UX.
 
-## Features
+## ✨ Current Features
 
-- 🏥 **Multi-Role Support**: Admin, Doctor, Nurse, Pharmacist, Lab Tech, Receptionist, Emergency
-- 👥 **Patient Management**: Complete EMR system with patient records
-- 💊 **Pharmacy Management**: Prescription tracking and dispensing
-- 🧪 **Laboratory**: Lab test orders and results management
-- 🛏️ **Bed Management**: Track bed availability and assignments
-- 💰 **Billing & Insurance**: Comprehensive billing and insurance management
-- 🚨 **Emergency Management**: Real-time emergency case tracking
-- 🔔 **Real-time Notifications**: WebSocket-based live updates
-- 🔐 **Secure Authentication**: NextAuth.js with role-based access control
+### Core Capabilities
+- 🏥 **22 Hospital Modules**: Complete coverage across 5 functional domains (Clinical, Administrative, Financial, Lab, Support)
+- 👥 **Multi-Role Support**: Admin, Doctor, Nurse, Pharmacist, Lab Tech, Receptionist, Emergency
+- 📊 **Real-time Analytics Dashboard**: 7-department analytics with live data visualization
+- 🔐 **Advanced RBAC**: Role-based access control with granular permission management
+- 💬 **Professional Sidebar Navigation**: Dynamic role-aware navigation with team switcher
+- 📱 **Responsive Design**: Mobile-first approach with collapsible sidebar
+
+### Department Analytics (7 Modules)
+- **Billing** - Financial operations & revenue tracking
+- **Emergency** - Emergency department operations
+- **Nursing** - Patient care & bed management
+- **Clinical** - EMR & patient records
+- **Pharmacy** - Prescription & inventory management
+- **Laboratory** - Lab tests & results
+- **Surgery** - Operation theater management
+
+### Data & Integration
+- 🗄️ **PostgreSQL Database**: Comprehensive Prisma ORM schema
+- 🔄 **Real-time Updates**: Socket.io integration ready
+- 📈 **Smart Analytics**: 7-day trend analysis with actual database queries
+- 🔐 **Secure Auth**: NextAuth.js v4 with session management
+
+## 🚀 Recent Updates (January 2026)
+
+- ✅ React 19 compatibility (lucide-react v0.408.0)
+- ✅ Gooey morphing tab effects with smooth animations
+- ✅ Professional sidebar-02 component with role-based routes
+- ✅ Logout button in sidebar footer
+- ✅ Real database integration for all analytics
+- ✅ Organized documentation structure
+- ✅ Apple HCI-inspired neutral color scheme
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14 (App Router), React, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes, Prisma ORM
-- **Database**: PostgreSQL (configurable to SQLite)
-- **Authentication**: NextAuth.js
-- **Real-time**: Socket.io
-- **UI Components**: Radix UI, Shadcn/ui
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | Next.js 15, React 19, TypeScript, Tailwind CSS |
+| **UI Components** | shadcn/ui, Framer Motion (motion/react) |
+| **Backend** | Next.js API Routes, NextAuth v4 |
+| **Database** | PostgreSQL, Prisma ORM |
+| **Real-time** | Socket.io |
+| **Icons** | Lucide React v0.408.0 |
 
-## Getting Started
+## 🛠️ Getting Started
 
 ### Prerequisites
-
-- Node.js 18+ 
-- PostgreSQL (or SQLite)
+- Node.js 18+
+- PostgreSQL 14+
 - npm or yarn
 
 ### Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/YOUR_USERNAME/cureos-hospital-system.git
-cd cureos-hospital-system
-```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/CureOS.git
+   cd CureOS
+   ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-3. Set up environment variables:
-```bash
-# Create .env file and add:
-DATABASE_URL="postgresql://postgres:password@localhost:5432/hospital_db"
-NEXTAUTH_SECRET="your-secret-key"
-NEXTAUTH_URL="http://localhost:3000"
-```
+3. **Environment setup:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your database credentials
+   ```
 
-4. Set up the database:
-```bash
-npx prisma generate
-npx prisma db push
-```
+4. **Database setup:**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   npx prisma db seed
+   ```
 
-5. (Optional) Seed the database:
-```bash
-npx prisma db seed
-```
+5. **Run development server:**
+   ```bash
+   npm run dev
+   ```
 
-6. Run the development server:
-```bash
-npm run dev
-```
+   Visit http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) to see the application.
-
-## Database Schema
-
-The system includes models for:
-- Users (with role-based authentication)
-- Patients
-- Doctors, Nurses, Pharmacists, Lab Technicians
-- Appointments
-- EMR (Electronic Medical Records)
-- Prescriptions
-- Lab Tests
-- Surgeries
-- Bed Management
-- Billing & Insurance
-- Emergency Cases
-- Incident Reporting
-- Inventory Management
-
-## Project Structure
+## 📁 Project Structure
 
 ```
-cureos-hospital-system/
-├── prisma/              # Database schema and migrations
-├── public/              # Static assets
+CureOS/
+├── docs/                   # Organized documentation
+│   ├── guides/            # Implementation guides
+│   ├── architecture/       # System architecture
+│   ├── deployment/        # Deployment guides
+│   ├── modules/           # Module documentation
+│   ├── reference/         # API & permission references
+│   └── summaries/         # Project summaries
 ├── src/
-│   ├── app/            # Next.js App Router pages
-│   │   ├── (auth)/     # Authentication pages
-│   │   ├── (dashboard)/# Dashboard pages for different roles
-│   │   └── api/        # API routes
-│   ├── components/     # React components
-│   │   ├── dashboards/ # Role-specific dashboards
-│   │   ├── forms/      # Form components
-│   │   ├── shared/     # Shared components
-│   │   └── ui/         # UI components
-│   ├── hooks/          # Custom React hooks
-│   ├── lib/            # Utility functions and configs
-│   ├── services/       # Business logic and data services
-│   ├── store/          # State management (Zustand)
-│   └── types/          # TypeScript type definitions
-└── server.ts           # Socket.io server
-
+│   ├── app/
+│   │   ├── (auth)/        # Auth pages
+│   │   ├── (dashboard)/   # Role-based dashboards
+│   │   └── api/           # API endpoints
+│   ├── components/
+│   │   ├── admin/         # Admin components
+│   │   ├── dashboards/    # Role dashboards
+│   │   ├── sidebar-02/    # Modern sidebar
+│   │   ├── stats-10/      # Analytics cards
+│   │   ├── gooey-*        # Morphing effects
+│   │   └── ui/            # UI components
+│   ├── hooks/             # Custom hooks
+│   ├── lib/               # Utilities
+│   ├── services/          # Business logic
+│   └── types/             # Type definitions
+├── prisma/
+│   ├── schema.prisma      # Database schema
+│   └── seed-rbac.ts       # Database seed
+└── server.ts              # Socket.io server
 ```
 
-## Available Scripts
+## 🔐 Security & Authentication
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
+### Features
+- **RBAC System**: Role-based access control with atomic permissions
+- **Session Management**: NextAuth.js v4 with JWT enhancement
+- **Emergency Override**: Time-limited, single-use override tokens
+- **Audit Logging**: Immutable audit trail for sensitive operations
+- **Permission Scopes**: Fine-grained permission management
 
-## Contributing
+### Core API Endpoints
+- `GET /api/admin/roles` - List all roles
+- `POST /api/admin/roles` - Create role
+- `GET /api/admin/permissions` - List permissions
+- `GET /api/admin/users` - List users
+- `POST /api/auth/override` - Emergency override request
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## 🎨 UI/UX Highlights
 
-## License
+- **Gooey Morphing Effects**: Smooth tab transitions with SVG filter animations
+- **Real-time Analytics**: 7-day trend visualization with actual database data
+- **Dark Mode**: Full dark mode support across all components
+- **Apple HCI Design**: Clean, minimal, focus-driven interface
+- **Mobile Responsive**: Adaptive layout with collapsible navigation
+- **Performance Optimized**: Lazy loading, code splitting, optimized re-renders
 
-This project is licensed under the MIT License.
-
-## Author
-
-Built with ❤️ by [Your Name]
-
-## Support
-
-For support, email your-email@example.com or open an issue in the repository.
-
----
-
-## Authentication & Access Control (RBAC, emergency override, audit) 🔐
-
-This repository now includes a production-ready backend implementation for:
-
-- `Users`, `RoleEntity` (roles), `Permission` (atomic permissions)
-- JWT augmentation with `permissions` claim
-- Emergency override workflow (time-limited, single-use tokens)
-- Immutable `AuditLog` records for sensitive actions
-
-How to apply schema + seed (local dev):
-
-1. Ensure your `.env` has a valid `DATABASE_URL` and `NEXTAUTH_SECRET`.
-2. Run migrations and seed:
+## 📊 Available Scripts
 
 ```bash
-# create migration and apply to your DB
-npx prisma migrate dev --name add-rbac-audit-override
-# seed RBAC + initial admin user
-npm run prisma:seed
+npm run dev          # Start development server
+npm run build        # Build for production
+npm start           # Start production server
+npm run lint        # Run ESLint
+npm run type-check  # TypeScript type checking
 ```
 
-API endpoints (backend only — admin permissions required):
+## 🤝 Contributing
 
-- `POST /api/auth/override` — request an emergency override (body: `{ reason, targetUserId?, ttlMinutes? }`) → returns `{ token, expiresAt }`
-- `GET  /api/admin/roles/:id` — get single role (requires `roles.manage`)
-- `PUT  /api/admin/roles/:id` — update role name and permissions (requires `roles.manage`) — body: `{ name?, permissions?: string[] }`
-- `DELETE /api/admin/roles/:id` — delete role (requires `roles.manage`, cannot delete `ADMIN` or roles with users)`
-- `GET  /api/admin/roles` — list roles (requires `roles.manage`)
-- `POST /api/admin/roles` — create role with permissions (requires `roles.manage`)
-- `GET  /api/admin/permissions` — list permissions (requires `roles.manage`)
-- `POST /api/admin/permissions` — bulk create permissions (requires `roles.manage`)
-- `GET  /api/admin/users` — list users (requires `users.manage`)
-- `POST /api/admin/users` — create user (requires `users.manage`)
-- `GET  /api/admin/audit` — read audit log (requires `audit.read`)
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request
 
-Security notes:
-- Emergency override token must be supplied in the `x-override-token` header for actions that allow overrides.
-- Socket.IO connections require a valid session JWT (passed as `auth.token` or `Authorization: Bearer <jwt>`); server enforces origin via `NEXT_PUBLIC_APP_URL`. (See `server.ts`.)
-- All overrides and permission changes are written to `AuditLog`.
+## 📄 License
 
-If you'd like, I can open a PR that runs the migration against a disposable test database and add CI to run the new unit/integration tests.
+This project is proprietary - All rights reserved
 
----
+## 💡 Support
 
-Neon (Postgres) — quick notes
-- Set `DATABASE_URL` to your Neon branch URL, include `?pgbouncer=true&sslmode=require&schema=public`.
-- To repair local Prisma client issues on Windows/OneDrive: `npm run prisma:regen` — it removes temp files and regenerates the client.
-- To verify a Neon DB after migrations: set `DATABASE_URL` and run `npm run verify:neon`.
-
-CI
-- The repository includes a GitHub Actions workflow that will run migrations against a Neon staging DB (when `NEON_DATABASE_URL` secret is provided) and run integration tests.
+For questions or issues:
+- Check the [documentation](docs/)
+- Open an issue on GitHub
+- Review the [API Reference](docs/reference/)
 
