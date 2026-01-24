@@ -12,7 +12,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
   try {
     const actorId = (req as any).__session?.user?.id ?? null;
-    const existing = await prisma.billing.findUnique({ where: { id: params.id } });
+    const { id } = await params;
+    const existing = await prisma.billing.findUnique({ where: { id } });
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     if (existing.status === 'PAID') return NextResponse.json({ error: 'Already paid' }, { status: 409 });
 
