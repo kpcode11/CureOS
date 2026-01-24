@@ -172,7 +172,7 @@ export default function GooeyDepartmentDashboard() {
               <span
                 className={`text-xs md:text-sm font-semibold transition-colors ${
                   activeTab === index
-                    ? 'text-blue-600 dark:text-blue-400'
+                    ? 'text-gray-900 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
@@ -193,7 +193,7 @@ export default function GooeyDepartmentDashboard() {
               {activeTab === index && (
                 <motion.div
                   layoutId="active-dept-tab"
-                  className="absolute inset-0 bg-blue-100 dark:bg-blue-900/40"
+                  className="absolute inset-0 bg-gray-100 dark:bg-slate-800"
                   transition={{
                     type: 'spring',
                     bounce: 0.0,
@@ -206,7 +206,7 @@ export default function GooeyDepartmentDashboard() {
         </div>
 
         {/* Content Panel */}
-        <div className="w-full min-h-[150px] md:min-h-[180px] bg-blue-50 dark:bg-slate-900/50 border-t border-gray-200 dark:border-slate-800 mt-0">
+        <div className="w-full min-h-[150px] md:min-h-[180px] bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 mt-0">
           <AnimatePresence mode="popLayout">
             <motion.div
               key={activeTab}
