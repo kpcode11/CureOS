@@ -3,6 +3,8 @@ import { requirePermission } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { createAudit } from '@/services/audit.service';
 
+
+
 export async function GET(req: Request) {
   try {
     await requirePermission(req, 'billing.read');
