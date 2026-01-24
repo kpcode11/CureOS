@@ -1,20 +1,26 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
-import { 
-  Pill, 
-  Package, 
-  AlertTriangle, 
-  Activity, 
-  TrendingUp, 
+import { useEffect, useState } from "react";
+import { motion } from "motion/react";
+import {
+  Pill,
+  Package,
+  AlertTriangle,
+  Activity,
+  TrendingUp,
   Clock,
   CheckCircle,
-  PackageX
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+  PackageX,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface Stats {
   totalPrescriptions: number;
@@ -36,14 +42,17 @@ export default function PharmacistDashboard() {
     const fetchStats = async () => {
       try {
         const [prescriptions, pending, lowStock] = await Promise.all([
-          fetch('/api/pharmacist/prescriptions').then(r => r.json()),
-          fetch('/api/pharmacist/prescriptions?dispensed=false').then(r => r.json()),
-          fetch('/api/pharmacist/inventory/low-stock').then(r => r.json()),
+          fetch("/api/pharmacist/prescriptions").then((r) => r.json()),
+          fetch("/api/pharmacist/prescriptions?dispensed=false").then((r) =>
+            r.json(),
+          ),
+          fetch("/api/pharmacist/inventory/low-stock").then((r) => r.json()),
         ]);
 
         const today = new Date().toDateString();
-        const dispensedToday = prescriptions.filter((p: any) => 
-          p.dispensed && new Date(p.dispensedAt).toDateString() === today
+        const dispensedToday = prescriptions.filter(
+          (p: any) =>
+            p.dispensed && new Date(p.dispensedAt).toDateString() === today,
         ).length;
 
         setStats({
@@ -53,7 +62,7 @@ export default function PharmacistDashboard() {
           dispensedToday,
         });
       } catch (error) {
-        console.error('Failed to fetch stats:', error);
+        console.error("Failed to fetch stats:", error);
       } finally {
         setLoading(false);
       }
@@ -64,64 +73,64 @@ export default function PharmacistDashboard() {
 
   const statCards = [
     {
-      title: 'Pending Dispense',
+      title: "Pending Dispense",
       value: stats.pendingDispense,
-      description: 'Awaiting fulfillment',
+      description: "Awaiting fulfillment",
       icon: Clock,
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-50',
-      link: '/pharmacist/queue',
+      color: "text-amber-600",
+      bgColor: "bg-amber-50",
+      link: "/pharmacist/queue",
     },
     {
-      title: 'Dispensed Today',
+      title: "Dispensed Today",
       value: stats.dispensedToday,
-      description: 'Completed prescriptions',
+      description: "Completed prescriptions",
       icon: CheckCircle,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      link: '/pharmacist/prescriptions',
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+      link: "/pharmacist/prescriptions",
     },
     {
-      title: 'Low Stock Items',
+      title: "Low Stock Items",
       value: stats.lowStockItems,
-      description: 'Needs reordering',
+      description: "Needs reordering",
       icon: PackageX,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
-      link: '/pharmacist/safety-alerts',
+      color: "text-red-600",
+      bgColor: "bg-red-50",
+      link: "/pharmacist/safety-alerts",
     },
     {
-      title: 'Total Prescriptions',
+      title: "Total Prescriptions",
       value: stats.totalPrescriptions,
-      description: 'All time records',
+      description: "All time records",
       icon: Activity,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      link: '/pharmacist/prescriptions',
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      link: "/pharmacist/prescriptions",
     },
   ];
 
   const quickActions = [
     {
-      title: 'Dispense Prescription',
-      description: 'Process pending prescriptions',
+      title: "Dispense Prescription",
+      description: "Process pending prescriptions",
       icon: Pill,
-      href: '/pharmacist/queue',
-      color: 'bg-blue-600 hover:bg-blue-700',
+      href: "/pharmacist/queue",
+      color: "bg-blue-600 hover:bg-blue-700",
     },
     {
-      title: 'Manage Inventory',
-      description: 'Update stock levels',
+      title: "Manage Inventory",
+      description: "Update stock levels",
       icon: Package,
-      href: '/pharmacist/inventory',
-      color: 'bg-emerald-600 hover:bg-emerald-700',
+      href: "/pharmacist/inventory",
+      color: "bg-emerald-600 hover:bg-emerald-700",
     },
     {
-      title: 'Safety Alerts',
-      description: 'Review critical alerts',
+      title: "Safety Alerts",
+      description: "Review critical alerts",
       icon: AlertTriangle,
-      href: '/pharmacist/safety-alerts',
-      color: 'bg-amber-600 hover:bg-amber-700',
+      href: "/pharmacist/safety-alerts",
+      color: "bg-amber-600 hover:bg-amber-700",
     },
   ];
 
@@ -165,7 +174,7 @@ export default function PharmacistDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-3xl font-bold text-slate-900">
-                        {loading ? '...' : stat.value}
+                        {loading ? "..." : stat.value}
                       </div>
                       <p className="text-xs text-slate-500 mt-1">
                         {stat.description}
@@ -186,7 +195,9 @@ export default function PharmacistDashboard() {
         >
           <Card className="border-slate-200">
             <CardHeader>
-              <CardTitle className="text-2xl text-slate-900">Quick Actions</CardTitle>
+              <CardTitle className="text-2xl text-slate-900">
+                Quick Actions
+              </CardTitle>
               <CardDescription>Common pharmacy tasks</CardDescription>
             </CardHeader>
             <CardContent>
@@ -195,10 +206,16 @@ export default function PharmacistDashboard() {
                   const Icon = action.icon;
                   return (
                     <Link key={action.title} href={action.href}>
-                      <div className={`${action.color} text-white p-6 rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105`}>
+                      <div
+                        className={`${action.color} text-white p-6 rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105`}
+                      >
                         <Icon className="w-8 h-8 mb-4" />
-                        <h3 className="text-lg font-semibold mb-1">{action.title}</h3>
-                        <p className="text-sm opacity-90">{action.description}</p>
+                        <h3 className="text-lg font-semibold mb-1">
+                          {action.title}
+                        </h3>
+                        <p className="text-sm opacity-90">
+                          {action.description}
+                        </p>
                       </div>
                     </Link>
                   );
@@ -216,19 +233,26 @@ export default function PharmacistDashboard() {
         >
           <Card className="border-slate-200">
             <CardHeader>
-              <CardTitle className="text-2xl text-slate-900">Recent Activity</CardTitle>
+              <CardTitle className="text-2xl text-slate-900">
+                Recent Activity
+              </CardTitle>
               <CardDescription>Latest pharmacy operations</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {loading ? (
-                  <p className="text-slate-500 text-center py-8">Loading activity...</p>
+                  <p className="text-slate-500 text-center py-8">
+                    Loading activity...
+                  </p>
                 ) : (
                   <div className="text-center py-8">
                     <Activity className="w-12 h-12 text-slate-300 mx-auto mb-4" />
                     <p className="text-slate-500">
-                      View detailed activity in{' '}
-                      <Link href="/pharmacist/prescriptions" className="text-blue-600 hover:underline">
+                      View detailed activity in{" "}
+                      <Link
+                        href="/pharmacist/prescriptions"
+                        className="text-blue-600 hover:underline"
+                      >
                         Prescriptions
                       </Link>
                     </p>

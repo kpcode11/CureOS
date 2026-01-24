@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
-import { 
+import { useEffect, useState } from "react";
+import { motion } from "motion/react";
+import {
   Clock,
   User,
   CheckCircle,
@@ -10,13 +10,19 @@ import {
   AlertCircle,
   ArrowRight,
   Calendar,
-  Stethoscope
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import { useToast } from '@/hooks/use-toast';
+  Stethoscope,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 
 interface PendingPrescription {
   id: string;
@@ -38,19 +44,22 @@ export default function DispenseQueuePage() {
 
   const fetchQueue = async () => {
     try {
-      const response = await fetch('/api/pharmacist/prescriptions?dispensed=false');
+      const response = await fetch(
+        "/api/pharmacist/prescriptions?dispensed=false",
+      );
       const data = await response.json();
       // Sort by oldest first
-      const sorted = data.sort((a: PendingPrescription, b: PendingPrescription) => 
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      const sorted = data.sort(
+        (a: PendingPrescription, b: PendingPrescription) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
       );
       setQueue(sorted);
     } catch (error) {
-      console.error('Failed to fetch queue:', error);
+      console.error("Failed to fetch queue:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to load dispense queue',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to load dispense queue",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -60,27 +69,30 @@ export default function DispenseQueuePage() {
   const handleQuickDispense = async (prescriptionId: string) => {
     setProcessingId(prescriptionId);
     try {
-      const response = await fetch(`/api/pharmacist/prescriptions/${prescriptionId}/dispense`, {
-        method: 'PATCH',
-      });
+      const response = await fetch(
+        `/api/pharmacist/prescriptions/${prescriptionId}/dispense`,
+        {
+          method: "PATCH",
+        },
+      );
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to dispense');
+        throw new Error(error.error || "Failed to dispense");
       }
 
       toast({
-        title: 'Success',
-        description: 'Prescription dispensed successfully',
+        title: "Success",
+        description: "Prescription dispensed successfully",
       });
 
       // Remove from queue
-      setQueue(queue.filter(p => p.id !== prescriptionId));
+      setQueue(queue.filter((p) => p.id !== prescriptionId));
     } catch (error: any) {
       toast({
-        title: 'Error',
+        title: "Error",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } finally {
       setProcessingId(null);
@@ -88,11 +100,11 @@ export default function DispenseQueuePage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -102,16 +114,24 @@ export default function DispenseQueuePage() {
     const diffMs = now - created;
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMins / 60);
-    
+
     if (diffHours > 24) {
       const days = Math.floor(diffHours / 24);
-      return { value: `${days}d`, priority: 'high', color: 'text-red-600' };
+      return { value: `${days}d`, priority: "high", color: "text-red-600" };
     } else if (diffHours > 2) {
-      return { value: `${diffHours}h`, priority: 'medium', color: 'text-amber-600' };
+      return {
+        value: `${diffHours}h`,
+        priority: "medium",
+        color: "text-amber-600",
+      };
     } else if (diffMins > 0) {
-      return { value: `${diffMins}m`, priority: 'low', color: 'text-green-600' };
+      return {
+        value: `${diffMins}m`,
+        priority: "low",
+        color: "text-green-600",
+      };
     }
-    return { value: 'Just now', priority: 'low', color: 'text-green-600' };
+    return { value: "Just now", priority: "low", color: "text-green-600" };
   };
 
   return (
@@ -148,45 +168,68 @@ export default function DispenseQueuePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="border-slate-200">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-slate-600">In Queue</CardTitle>
+                <CardTitle className="text-sm font-medium text-slate-600">
+                  In Queue
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <div className="text-3xl font-bold text-slate-900">{queue.length}</div>
+                  <div className="text-3xl font-bold text-slate-900">
+                    {queue.length}
+                  </div>
                   <Clock className="w-8 h-8 text-blue-600" />
                 </div>
-                <p className="text-xs text-slate-500 mt-2">Pending prescriptions</p>
+                <p className="text-xs text-slate-500 mt-2">
+                  Pending prescriptions
+                </p>
               </CardContent>
             </Card>
 
             <Card className="border-amber-200 bg-amber-50">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-amber-800">Priority</CardTitle>
+                <CardTitle className="text-sm font-medium text-amber-800">
+                  Priority
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div className="text-3xl font-bold text-amber-900">
-                    {queue.filter(p => getWaitTime(p.createdAt).priority === 'high').length}
+                    {
+                      queue.filter(
+                        (p) => getWaitTime(p.createdAt).priority === "high",
+                      ).length
+                    }
                   </div>
                   <AlertCircle className="w-8 h-8 text-amber-600" />
                 </div>
-                <p className="text-xs text-amber-700 mt-2">Older than 24 hours</p>
+                <p className="text-xs text-amber-700 mt-2">
+                  Older than 24 hours
+                </p>
               </CardContent>
             </Card>
 
             <Card className="border-green-200 bg-green-50">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-green-800">Average Wait</CardTitle>
+                <CardTitle className="text-sm font-medium text-green-800">
+                  Average Wait
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div className="text-3xl font-bold text-green-900">
-                    {queue.length > 0 
-                      ? Math.floor(queue.reduce((sum, p) => {
-                          const diffMs = new Date().getTime() - new Date(p.createdAt).getTime();
-                          return sum + diffMs;
-                        }, 0) / queue.length / 60000)
-                      : 0}m
+                    {queue.length > 0
+                      ? Math.floor(
+                          queue.reduce((sum, p) => {
+                            const diffMs =
+                              new Date().getTime() -
+                              new Date(p.createdAt).getTime();
+                            return sum + diffMs;
+                          }, 0) /
+                            queue.length /
+                            60000,
+                        )
+                      : 0}
+                    m
                   </div>
                   <Calendar className="w-8 h-8 text-green-600" />
                 </div>
@@ -213,7 +256,9 @@ export default function DispenseQueuePage() {
             <Card className="border-green-200 bg-green-50">
               <CardContent className="py-16 text-center">
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h3 className="text-2xl font-semibold text-green-900 mb-2">Queue Empty!</h3>
+                <h3 className="text-2xl font-semibold text-green-900 mb-2">
+                  Queue Empty!
+                </h3>
                 <p className="text-green-700 text-lg">
                   All prescriptions have been dispensed. Great work!
                 </p>
@@ -224,7 +269,7 @@ export default function DispenseQueuePage() {
               {queue.map((prescription, index) => {
                 const waitTime = getWaitTime(prescription.createdAt);
                 const isProcessing = processingId === prescription.id;
-                
+
                 return (
                   <motion.div
                     key={prescription.id}
@@ -232,7 +277,9 @@ export default function DispenseQueuePage() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <Card className={`border-slate-200 hover:shadow-lg transition-all duration-300 ${waitTime.priority === 'high' ? 'border-l-4 border-l-red-500' : ''}`}>
+                    <Card
+                      className={`border-slate-200 hover:shadow-lg transition-all duration-300 ${waitTime.priority === "high" ? "border-l-4 border-l-red-500" : ""}`}
+                    >
                       <CardContent className="p-6">
                         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                           {/* Left Section */}
@@ -249,7 +296,9 @@ export default function DispenseQueuePage() {
                                   Created {formatDate(prescription.createdAt)}
                                 </p>
                               </div>
-                              <Badge className={`${waitTime.color} bg-transparent border`}>
+                              <Badge
+                                className={`${waitTime.color} bg-transparent border`}
+                              >
                                 <Clock className="w-3 h-3 mr-1" />
                                 Wait: {waitTime.value}
                               </Badge>
@@ -258,24 +307,36 @@ export default function DispenseQueuePage() {
                             <div className="flex flex-wrap gap-4 text-sm">
                               <div className="flex items-center gap-2 text-slate-600">
                                 <User className="w-4 h-4" />
-                                <span>Patient: {prescription.patientId.slice(0, 8)}</span>
+                                <span>
+                                  Patient: {prescription.patientId.slice(0, 8)}
+                                </span>
                               </div>
                               <div className="flex items-center gap-2 text-slate-600">
                                 <Stethoscope className="w-4 h-4" />
-                                <span>Doctor: {prescription.doctorId.slice(0, 8)}</span>
+                                <span>
+                                  Doctor: {prescription.doctorId.slice(0, 8)}
+                                </span>
                               </div>
                             </div>
                           </div>
 
                           {/* Right Section - Actions */}
                           <div className="flex gap-2 w-full md:w-auto">
-                            <Link href={`/pharmacist/prescriptions/${prescription.id}`} className="flex-1 md:flex-none">
-                              <Button variant="outline" className="w-full border-blue-300 text-blue-600 hover:bg-blue-50">
+                            <Link
+                              href={`/pharmacist/prescriptions/${prescription.id}`}
+                              className="flex-1 md:flex-none"
+                            >
+                              <Button
+                                variant="outline"
+                                className="w-full border-blue-300 text-blue-600 hover:bg-blue-50"
+                              >
                                 View Details
                               </Button>
                             </Link>
                             <Button
-                              onClick={() => handleQuickDispense(prescription.id)}
+                              onClick={() =>
+                                handleQuickDispense(prescription.id)
+                              }
                               disabled={isProcessing}
                               className="flex-1 md:flex-none bg-green-600 hover:bg-green-700"
                             >
@@ -314,11 +375,21 @@ export default function DispenseQueuePage() {
                 <div className="flex items-start gap-3">
                   <Pill className="w-5 h-5 text-blue-600 mt-0.5" />
                   <div className="flex-1">
-                    <h4 className="font-semibold text-blue-900 mb-1">Quick Tips</h4>
+                    <h4 className="font-semibold text-blue-900 mb-1">
+                      Quick Tips
+                    </h4>
                     <ul className="text-sm text-blue-800 space-y-1">
-                      <li>• Process prescriptions in order for best efficiency</li>
-                      <li>• Red border indicates prescriptions waiting over 24 hours</li>
-                      <li>• Use "Quick Dispense" for fast processing or "View Details" for more information</li>
+                      <li>
+                        • Process prescriptions in order for best efficiency
+                      </li>
+                      <li>
+                        • Red border indicates prescriptions waiting over 24
+                        hours
+                      </li>
+                      <li>
+                        • Use "Quick Dispense" for fast processing or "View
+                        Details" for more information
+                      </li>
                     </ul>
                   </div>
                 </div>

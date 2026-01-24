@@ -1,22 +1,28 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
-import { 
-  Search, 
-  Filter, 
-  CheckCircle, 
-  Clock, 
+import { useEffect, useState } from "react";
+import { motion } from "motion/react";
+import {
+  Search,
+  Filter,
+  CheckCircle,
+  Clock,
   Calendar,
   User,
   Pill,
-  Eye
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
+  Eye,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 interface Prescription {
   id: string;
@@ -31,10 +37,14 @@ interface Prescription {
 
 export default function PrescriptionsPage() {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
-  const [filteredPrescriptions, setFilteredPrescriptions] = useState<Prescription[]>([]);
+  const [filteredPrescriptions, setFilteredPrescriptions] = useState<
+    Prescription[]
+  >([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'dispensed'>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "pending" | "dispensed"
+  >("all");
 
   useEffect(() => {
     fetchPrescriptions();
@@ -46,11 +56,11 @@ export default function PrescriptionsPage() {
 
   const fetchPrescriptions = async () => {
     try {
-      const response = await fetch('/api/pharmacist/prescriptions');
+      const response = await fetch("/api/pharmacist/prescriptions");
       const data = await response.json();
       setPrescriptions(data);
     } catch (error) {
-      console.error('Failed to fetch prescriptions:', error);
+      console.error("Failed to fetch prescriptions:", error);
     } finally {
       setLoading(false);
     }
@@ -60,17 +70,18 @@ export default function PrescriptionsPage() {
     let filtered = [...prescriptions];
 
     // Filter by status
-    if (filterStatus === 'pending') {
-      filtered = filtered.filter(p => !p.dispensed);
-    } else if (filterStatus === 'dispensed') {
-      filtered = filtered.filter(p => p.dispensed);
+    if (filterStatus === "pending") {
+      filtered = filtered.filter((p) => !p.dispensed);
+    } else if (filterStatus === "dispensed") {
+      filtered = filtered.filter((p) => p.dispensed);
     }
 
     // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter(p => 
-        p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.patientId.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (p) =>
+          p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.patientId.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
@@ -78,12 +89,12 @@ export default function PrescriptionsPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -135,22 +146,24 @@ export default function PrescriptionsPage() {
                 {/* Status Filter */}
                 <div className="flex gap-2">
                   <Button
-                    variant={filterStatus === 'all' ? 'default' : 'outline'}
-                    onClick={() => setFilterStatus('all')}
+                    variant={filterStatus === "all" ? "default" : "outline"}
+                    onClick={() => setFilterStatus("all")}
                     className="flex-1 md:flex-none"
                   >
                     All
                   </Button>
                   <Button
-                    variant={filterStatus === 'pending' ? 'default' : 'outline'}
-                    onClick={() => setFilterStatus('pending')}
+                    variant={filterStatus === "pending" ? "default" : "outline"}
+                    onClick={() => setFilterStatus("pending")}
                     className="flex-1 md:flex-none"
                   >
                     Pending
                   </Button>
                   <Button
-                    variant={filterStatus === 'dispensed' ? 'default' : 'outline'}
-                    onClick={() => setFilterStatus('dispensed')}
+                    variant={
+                      filterStatus === "dispensed" ? "default" : "outline"
+                    }
+                    onClick={() => setFilterStatus("dispensed")}
                     className="flex-1 md:flex-none"
                   >
                     Dispensed
@@ -160,7 +173,8 @@ export default function PrescriptionsPage() {
 
               {/* Results count */}
               <div className="mt-4 text-sm text-slate-600">
-                Showing {filteredPrescriptions.length} of {prescriptions.length} prescriptions
+                Showing {filteredPrescriptions.length} of {prescriptions.length}{" "}
+                prescriptions
               </div>
             </CardContent>
           </Card>
@@ -210,8 +224,16 @@ export default function PrescriptionsPage() {
                                 Rx #{prescription.id.slice(0, 8)}
                               </h3>
                               <Badge
-                                variant={prescription.dispensed ? 'default' : 'secondary'}
-                                className={prescription.dispensed ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-amber-100 text-amber-800 hover:bg-amber-200'}
+                                variant={
+                                  prescription.dispensed
+                                    ? "default"
+                                    : "secondary"
+                                }
+                                className={
+                                  prescription.dispensed
+                                    ? "bg-green-100 text-green-800 hover:bg-green-200"
+                                    : "bg-amber-100 text-amber-800 hover:bg-amber-200"
+                                }
                               >
                                 {prescription.dispensed ? (
                                   <>
@@ -229,16 +251,24 @@ export default function PrescriptionsPage() {
                             <div className="space-y-1 text-sm text-slate-600">
                               <div className="flex items-center gap-2">
                                 <User className="w-4 h-4" />
-                                <span>Patient ID: {prescription.patientId.slice(0, 8)}</span>
+                                <span>
+                                  Patient ID:{" "}
+                                  {prescription.patientId.slice(0, 8)}
+                                </span>
                               </div>
                               <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4" />
-                                <span>Created: {formatDate(prescription.createdAt)}</span>
+                                <span>
+                                  Created: {formatDate(prescription.createdAt)}
+                                </span>
                               </div>
                               {prescription.dispensedAt && (
                                 <div className="flex items-center gap-2 text-green-600">
                                   <CheckCircle className="w-4 h-4" />
-                                  <span>Dispensed: {formatDate(prescription.dispensedAt)}</span>
+                                  <span>
+                                    Dispensed:{" "}
+                                    {formatDate(prescription.dispensedAt)}
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -248,8 +278,13 @@ export default function PrescriptionsPage() {
 
                       {/* Right Section - Actions */}
                       <div className="flex items-center gap-2">
-                        <Link href={`/pharmacist/prescriptions/${prescription.id}`}>
-                          <Button variant="outline" className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                        <Link
+                          href={`/pharmacist/prescriptions/${prescription.id}`}
+                        >
+                          <Button
+                            variant="outline"
+                            className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                          >
                             <Eye className="w-4 h-4 mr-2" />
                             View Details
                           </Button>

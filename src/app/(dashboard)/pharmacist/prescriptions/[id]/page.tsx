@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { motion } from 'motion/react';
-import { 
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { motion } from "motion/react";
+import {
   ArrowLeft,
   CheckCircle,
   Clock,
@@ -13,13 +13,19 @@ import {
   Pill,
   FileText,
   AlertCircle,
-  Undo2
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import { useToast } from '@/hooks/use-toast';
+  Undo2,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 
 interface PrescriptionDetail {
   id: string;
@@ -50,7 +56,9 @@ export default function PrescriptionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const [prescription, setPrescription] = useState<PrescriptionDetail | null>(null);
+  const [prescription, setPrescription] = useState<PrescriptionDetail | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -63,15 +71,15 @@ export default function PrescriptionDetailPage() {
   const fetchPrescription = async (id: string) => {
     try {
       const response = await fetch(`/api/pharmacist/prescriptions/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch prescription');
+      if (!response.ok) throw new Error("Failed to fetch prescription");
       const data = await response.json();
       setPrescription(data);
     } catch (error) {
-      console.error('Failed to fetch prescription:', error);
+      console.error("Failed to fetch prescription:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to load prescription details',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to load prescription details",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -80,30 +88,33 @@ export default function PrescriptionDetailPage() {
 
   const handleDispense = async () => {
     if (!prescription) return;
-    
+
     setActionLoading(true);
     try {
-      const response = await fetch(`/api/pharmacist/prescriptions/${prescription.id}/dispense`, {
-        method: 'PATCH',
-      });
+      const response = await fetch(
+        `/api/pharmacist/prescriptions/${prescription.id}/dispense`,
+        {
+          method: "PATCH",
+        },
+      );
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to dispense prescription');
+        throw new Error(error.error || "Failed to dispense prescription");
       }
 
       toast({
-        title: 'Success',
-        description: 'Prescription dispensed successfully',
+        title: "Success",
+        description: "Prescription dispensed successfully",
       });
 
       // Refresh data
       await fetchPrescription(prescription.id);
     } catch (error: any) {
       toast({
-        title: 'Error',
+        title: "Error",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } finally {
       setActionLoading(false);
@@ -112,30 +123,33 @@ export default function PrescriptionDetailPage() {
 
   const handleUndoDispense = async () => {
     if (!prescription) return;
-    
+
     setActionLoading(true);
     try {
-      const response = await fetch(`/api/pharmacist/prescriptions/${prescription.id}/undo-dispense`, {
-        method: 'PATCH',
-      });
+      const response = await fetch(
+        `/api/pharmacist/prescriptions/${prescription.id}/undo-dispense`,
+        {
+          method: "PATCH",
+        },
+      );
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to undo dispense');
+        throw new Error(error.error || "Failed to undo dispense");
       }
 
       toast({
-        title: 'Success',
-        description: 'Dispense action reversed successfully',
+        title: "Success",
+        description: "Dispense action reversed successfully",
       });
 
       // Refresh data
       await fetchPrescription(prescription.id);
     } catch (error: any) {
       toast({
-        title: 'Error',
+        title: "Error",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } finally {
       setActionLoading(false);
@@ -143,27 +157,27 @@ export default function PrescriptionDetailPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const parseMedications = () => {
     if (!prescription?.medications) return [];
-    
+
     // Handle different medication formats
     if (Array.isArray(prescription.medications)) {
       return prescription.medications;
     }
-    
-    if (typeof prescription.medications === 'object') {
+
+    if (typeof prescription.medications === "object") {
       return [prescription.medications];
     }
-    
+
     return [];
   };
 
@@ -216,7 +230,10 @@ export default function PrescriptionDetailPage() {
         >
           <div className="space-y-2">
             <Link href="/pharmacist/prescriptions">
-              <Button variant="ghost" className="mb-2 text-slate-600 hover:text-slate-900">
+              <Button
+                variant="ghost"
+                className="mb-2 text-slate-600 hover:text-slate-900"
+              >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Prescriptions
               </Button>
@@ -226,8 +243,8 @@ export default function PrescriptionDetailPage() {
                 Prescription #{prescription.id.slice(0, 8)}
               </h1>
               <Badge
-                variant={prescription.dispensed ? 'default' : 'secondary'}
-                className={`text-base ${prescription.dispensed ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}
+                variant={prescription.dispensed ? "default" : "secondary"}
+                className={`text-base ${prescription.dispensed ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}
               >
                 {prescription.dispensed ? (
                   <>
@@ -253,7 +270,7 @@ export default function PrescriptionDetailPage() {
                 className="bg-green-600 hover:bg-green-700"
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
-                {actionLoading ? 'Processing...' : 'Dispense'}
+                {actionLoading ? "Processing..." : "Dispense"}
               </Button>
             )}
             {prescription.dispensed && (
@@ -263,7 +280,7 @@ export default function PrescriptionDetailPage() {
                 variant="destructive"
               >
                 <Undo2 className="w-4 h-4 mr-2" />
-                {actionLoading ? 'Processing...' : 'Undo Dispense'}
+                {actionLoading ? "Processing..." : "Undo Dispense"}
               </Button>
             )}
           </div>
@@ -287,22 +304,29 @@ export default function PrescriptionDetailPage() {
                 <div>
                   <p className="text-sm text-slate-500">Name</p>
                   <p className="text-lg font-semibold text-slate-900">
-                    {prescription.patient.firstName} {prescription.patient.lastName}
+                    {prescription.patient.firstName}{" "}
+                    {prescription.patient.lastName}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Date of Birth</p>
                   <p className="text-lg font-semibold text-slate-900">
-                    {new Date(prescription.patient.dateOfBirth).toLocaleDateString()}
+                    {new Date(
+                      prescription.patient.dateOfBirth,
+                    ).toLocaleDateString()}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Phone</p>
-                  <p className="text-lg font-semibold text-slate-900">{prescription.patient.phone}</p>
+                  <p className="text-lg font-semibold text-slate-900">
+                    {prescription.patient.phone}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Email</p>
-                  <p className="text-lg font-semibold text-slate-900">{prescription.patient.email}</p>
+                  <p className="text-lg font-semibold text-slate-900">
+                    {prescription.patient.email}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -326,15 +350,21 @@ export default function PrescriptionDetailPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-slate-500">Name</p>
-                  <p className="text-lg font-semibold text-slate-900">{prescription.doctor.user.name}</p>
+                  <p className="text-lg font-semibold text-slate-900">
+                    {prescription.doctor.user.name}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Specialization</p>
-                  <p className="text-lg font-semibold text-slate-900">{prescription.doctor.specialization}</p>
+                  <p className="text-lg font-semibold text-slate-900">
+                    {prescription.doctor.specialization}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Email</p>
-                  <p className="text-lg font-semibold text-slate-900">{prescription.doctor.user.email}</p>
+                  <p className="text-lg font-semibold text-slate-900">
+                    {prescription.doctor.user.email}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -358,24 +388,35 @@ export default function PrescriptionDetailPage() {
               {medications.length > 0 ? (
                 <div className="space-y-4">
                   {medications.map((med: any, index: number) => (
-                    <div key={index} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div
+                      key={index}
+                      className="p-4 bg-blue-50 rounded-lg border border-blue-200"
+                    >
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                           <p className="text-sm text-slate-500">Name</p>
-                          <p className="text-lg font-semibold text-slate-900">{med.name || med.medication || 'N/A'}</p>
+                          <p className="text-lg font-semibold text-slate-900">
+                            {med.name || med.medication || "N/A"}
+                          </p>
                         </div>
                         <div>
                           <p className="text-sm text-slate-500">Dosage</p>
-                          <p className="text-lg font-semibold text-slate-900">{med.dosage || 'N/A'}</p>
+                          <p className="text-lg font-semibold text-slate-900">
+                            {med.dosage || "N/A"}
+                          </p>
                         </div>
                         <div>
                           <p className="text-sm text-slate-500">Frequency</p>
-                          <p className="text-lg font-semibold text-slate-900">{med.frequency || 'N/A'}</p>
+                          <p className="text-lg font-semibold text-slate-900">
+                            {med.frequency || "N/A"}
+                          </p>
                         </div>
                         {med.duration && (
                           <div>
                             <p className="text-sm text-slate-500">Duration</p>
-                            <p className="text-lg font-semibold text-slate-900">{med.duration}</p>
+                            <p className="text-lg font-semibold text-slate-900">
+                              {med.duration}
+                            </p>
                           </div>
                         )}
                       </div>
@@ -385,7 +426,9 @@ export default function PrescriptionDetailPage() {
               ) : (
                 <div className="text-center py-8">
                   <Pill className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                  <p className="text-slate-500">No medication details available</p>
+                  <p className="text-slate-500">
+                    No medication details available
+                  </p>
                   <pre className="mt-4 p-4 bg-slate-100 rounded text-left text-sm overflow-auto">
                     {JSON.stringify(prescription.medications, null, 2)}
                   </pre>
@@ -410,7 +453,9 @@ export default function PrescriptionDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-slate-700 leading-relaxed">{prescription.instructions}</p>
+                <p className="text-slate-700 leading-relaxed">
+                  {prescription.instructions}
+                </p>
               </CardContent>
             </Card>
           </motion.div>
@@ -433,7 +478,9 @@ export default function PrescriptionDetailPage() {
               <CardContent>
                 <div className="flex items-center gap-2 text-green-700">
                   <Calendar className="w-4 h-4" />
-                  <span className="font-medium">Dispensed on: {formatDate(prescription.dispensedAt)}</span>
+                  <span className="font-medium">
+                    Dispensed on: {formatDate(prescription.dispensedAt)}
+                  </span>
                 </div>
               </CardContent>
             </Card>

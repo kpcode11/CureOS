@@ -1,23 +1,36 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
-import { 
+import { useEffect, useState } from "react";
+import { motion } from "motion/react";
+import {
   Package,
   Search,
   Plus,
   Edit,
   Minus,
   AlertTriangle,
-  TrendingDown
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+  TrendingDown,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 interface InventoryItem {
   id: string;
@@ -33,20 +46,22 @@ interface InventoryItem {
 export default function InventoryPage() {
   const { toast } = useToast();
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [filteredInventory, setFilteredInventory] = useState<InventoryItem[]>([]);
+  const [filteredInventory, setFilteredInventory] = useState<InventoryItem[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeductDialogOpen, setIsDeductDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   const [newItem, setNewItem] = useState({
-    itemName: '',
-    category: 'general',
+    itemName: "",
+    category: "general",
     quantity: 0,
     minStock: 10,
-    unit: 'ea',
+    unit: "ea",
   });
 
   const [deductAmount, setDeductAmount] = useState(1);
@@ -61,15 +76,15 @@ export default function InventoryPage() {
 
   const fetchInventory = async () => {
     try {
-      const response = await fetch('/api/pharmacist/inventory');
+      const response = await fetch("/api/pharmacist/inventory");
       const data = await response.json();
       setInventory(data);
     } catch (error) {
-      console.error('Failed to fetch inventory:', error);
+      console.error("Failed to fetch inventory:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to load inventory',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to load inventory",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -80,9 +95,10 @@ export default function InventoryPage() {
     let filtered = [...inventory];
 
     if (searchQuery) {
-      filtered = filtered.filter(item =>
-        item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (item) =>
+          item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.category.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
@@ -103,27 +119,33 @@ export default function InventoryPage() {
     setActionLoading(true);
 
     try {
-      const response = await fetch('/api/pharmacist/inventory', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/pharmacist/inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newItem),
       });
 
-      if (!response.ok) throw new Error('Failed to add item');
+      if (!response.ok) throw new Error("Failed to add item");
 
       toast({
-        title: 'Success',
-        description: 'Item added to inventory',
+        title: "Success",
+        description: "Item added to inventory",
       });
 
       setIsAddDialogOpen(false);
-      setNewItem({ itemName: '', category: 'general', quantity: 0, minStock: 10, unit: 'ea' });
+      setNewItem({
+        itemName: "",
+        category: "general",
+        quantity: 0,
+        minStock: 10,
+        unit: "ea",
+      });
       await fetchInventory();
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to add item',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to add item",
+        variant: "destructive",
       });
     } finally {
       setActionLoading(false);
@@ -135,16 +157,19 @@ export default function InventoryPage() {
 
     setActionLoading(true);
     try {
-      const response = await fetch(`/api/pharmacist/inventory/${selectedItem.id}/deduct`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: deductAmount }),
-      });
+      const response = await fetch(
+        `/api/pharmacist/inventory/${selectedItem.id}/deduct`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: deductAmount }),
+        },
+      );
 
-      if (!response.ok) throw new Error('Failed to deduct stock');
+      if (!response.ok) throw new Error("Failed to deduct stock");
 
       toast({
-        title: 'Success',
+        title: "Success",
         description: `Deducted ${deductAmount} ${selectedItem.unit} from ${selectedItem.itemName}`,
       });
 
@@ -154,9 +179,9 @@ export default function InventoryPage() {
       await fetchInventory();
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to deduct stock',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to deduct stock",
+        variant: "destructive",
       });
     } finally {
       setActionLoading(false);
@@ -165,12 +190,24 @@ export default function InventoryPage() {
 
   const getStockStatus = (item: InventoryItem) => {
     if (item.quantity === 0) {
-      return { label: 'Out of Stock', color: 'bg-red-100 text-red-800', icon: AlertTriangle };
+      return {
+        label: "Out of Stock",
+        color: "bg-red-100 text-red-800",
+        icon: AlertTriangle,
+      };
     }
     if (item.quantity <= item.minStock) {
-      return { label: 'Low Stock', color: 'bg-amber-100 text-amber-800', icon: TrendingDown };
+      return {
+        label: "Low Stock",
+        color: "bg-amber-100 text-amber-800",
+        icon: TrendingDown,
+      };
     }
-    return { label: 'In Stock', color: 'bg-green-100 text-green-800', icon: Package };
+    return {
+      label: "In Stock",
+      color: "bg-green-100 text-green-800",
+      icon: Package,
+    };
   };
 
   return (
@@ -190,7 +227,7 @@ export default function InventoryPage() {
               Track and manage medication stock levels
             </p>
           </div>
-          
+
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-blue-600 hover:bg-blue-700">
@@ -201,7 +238,9 @@ export default function InventoryPage() {
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Add New Item</DialogTitle>
-                <DialogDescription>Add a new medication to inventory</DialogDescription>
+                <DialogDescription>
+                  Add a new medication to inventory
+                </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAddItem} className="space-y-4">
                 <div>
@@ -209,7 +248,9 @@ export default function InventoryPage() {
                   <Input
                     id="itemName"
                     value={newItem.itemName}
-                    onChange={(e) => setNewItem({ ...newItem, itemName: e.target.value })}
+                    onChange={(e) =>
+                      setNewItem({ ...newItem, itemName: e.target.value })
+                    }
                     placeholder="e.g., Paracetamol 500mg"
                     required
                   />
@@ -219,7 +260,9 @@ export default function InventoryPage() {
                   <Input
                     id="category"
                     value={newItem.category}
-                    onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                    onChange={(e) =>
+                      setNewItem({ ...newItem, category: e.target.value })
+                    }
                     placeholder="e.g., Analgesic"
                   />
                 </div>
@@ -230,7 +273,12 @@ export default function InventoryPage() {
                       id="quantity"
                       type="number"
                       value={newItem.quantity}
-                      onChange={(e) => setNewItem({ ...newItem, quantity: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setNewItem({
+                          ...newItem,
+                          quantity: Number(e.target.value),
+                        })
+                      }
                       min="0"
                     />
                   </div>
@@ -240,7 +288,12 @@ export default function InventoryPage() {
                       id="minStock"
                       type="number"
                       value={newItem.minStock}
-                      onChange={(e) => setNewItem({ ...newItem, minStock: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setNewItem({
+                          ...newItem,
+                          minStock: Number(e.target.value),
+                        })
+                      }
                       min="0"
                     />
                   </div>
@@ -250,12 +303,18 @@ export default function InventoryPage() {
                   <Input
                     id="unit"
                     value={newItem.unit}
-                    onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
+                    onChange={(e) =>
+                      setNewItem({ ...newItem, unit: e.target.value })
+                    }
                     placeholder="e.g., tablets, bottles, boxes"
                   />
                 </div>
-                <Button type="submit" disabled={actionLoading} className="w-full">
-                  {actionLoading ? 'Adding...' : 'Add Item'}
+                <Button
+                  type="submit"
+                  disabled={actionLoading}
+                  className="w-full"
+                >
+                  {actionLoading ? "Adding..." : "Add Item"}
                 </Button>
               </form>
             </DialogContent>
@@ -314,7 +373,7 @@ export default function InventoryPage() {
               {filteredInventory.map((item, index) => {
                 const status = getStockStatus(item);
                 const StatusIcon = status.icon;
-                
+
                 return (
                   <motion.div
                     key={item.id}
@@ -322,12 +381,18 @@ export default function InventoryPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <Card className={`border-slate-200 hover:shadow-lg transition-all duration-300 ${item.quantity <= item.minStock ? 'border-l-4 border-l-amber-500' : ''}`}>
+                    <Card
+                      className={`border-slate-200 hover:shadow-lg transition-all duration-300 ${item.quantity <= item.minStock ? "border-l-4 border-l-amber-500" : ""}`}
+                    >
                       <CardHeader className="pb-3">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <CardTitle className="text-lg text-slate-900">{item.itemName}</CardTitle>
-                            <CardDescription className="text-sm mt-1">{item.category}</CardDescription>
+                            <CardTitle className="text-lg text-slate-900">
+                              {item.itemName}
+                            </CardTitle>
+                            <CardDescription className="text-sm mt-1">
+                              {item.category}
+                            </CardDescription>
                           </div>
                           <Badge className={status.color}>
                             <StatusIcon className="w-3 h-3 mr-1" />
@@ -341,26 +406,42 @@ export default function InventoryPage() {
                             <p className="text-slate-500">Current Stock</p>
                             <p className="text-2xl font-bold text-slate-900">
                               {item.quantity}
-                              <span className="text-sm text-slate-500 ml-1">{item.unit}</span>
+                              <span className="text-sm text-slate-500 ml-1">
+                                {item.unit}
+                              </span>
                             </p>
                           </div>
                           <div>
                             <p className="text-slate-500">Min Level</p>
                             <p className="text-2xl font-bold text-slate-900">
                               {item.minStock}
-                              <span className="text-sm text-slate-500 ml-1">{item.unit}</span>
+                              <span className="text-sm text-slate-500 ml-1">
+                                {item.unit}
+                              </span>
                             </p>
                           </div>
                         </div>
 
                         <div className="flex gap-2 pt-2 border-t">
-                          <Dialog open={isDeductDialogOpen && selectedItem?.id === item.id} onOpenChange={(open) => {
-                            setIsDeductDialogOpen(open);
-                            if (open) setSelectedItem(item);
-                            else { setSelectedItem(null); setDeductAmount(1); }
-                          }}>
+                          <Dialog
+                            open={
+                              isDeductDialogOpen && selectedItem?.id === item.id
+                            }
+                            onOpenChange={(open) => {
+                              setIsDeductDialogOpen(open);
+                              if (open) setSelectedItem(item);
+                              else {
+                                setSelectedItem(null);
+                                setDeductAmount(1);
+                              }
+                            }}
+                          >
                             <DialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="flex-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                              >
                                 <Minus className="w-4 h-4 mr-1" />
                                 Deduct
                               </Button>
@@ -374,12 +455,16 @@ export default function InventoryPage() {
                               </DialogHeader>
                               <div className="space-y-4">
                                 <div>
-                                  <Label htmlFor="deductAmount">Amount to Deduct</Label>
+                                  <Label htmlFor="deductAmount">
+                                    Amount to Deduct
+                                  </Label>
                                   <Input
                                     id="deductAmount"
                                     type="number"
                                     value={deductAmount}
-                                    onChange={(e) => setDeductAmount(Number(e.target.value))}
+                                    onChange={(e) =>
+                                      setDeductAmount(Number(e.target.value))
+                                    }
                                     min="1"
                                     max={item.quantity}
                                   />
@@ -389,11 +474,16 @@ export default function InventoryPage() {
                                 </div>
                                 <Button
                                   onClick={handleDeduct}
-                                  disabled={actionLoading || deductAmount > item.quantity}
+                                  disabled={
+                                    actionLoading ||
+                                    deductAmount > item.quantity
+                                  }
                                   className="w-full"
                                   variant="destructive"
                                 >
-                                  {actionLoading ? 'Processing...' : `Deduct ${deductAmount} ${item.unit}`}
+                                  {actionLoading
+                                    ? "Processing..."
+                                    : `Deduct ${deductAmount} ${item.unit}`}
                                 </Button>
                               </div>
                             </DialogContent>
