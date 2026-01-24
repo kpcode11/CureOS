@@ -1,13 +1,13 @@
-import { NextResponse } from 'next/server';
-import { requirePermission } from '@/lib/authorization';
-import { prisma } from '@/lib/prisma';
-import { createAudit } from '@/services/audit.service';
+import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/authorization";
+import { prisma } from "@/lib/prisma";
+import { createAudit } from "@/services/audit.service";
 
 /**
  * GET /api/doctor/patients/:id
  * Get detailed patient information including EMR and prescription history
- * 
- * RBAC: doctor.read
+ *
+ * RBAC: patient.read
  * Edge cases handled:
  * - Patient doesn't exist
  * - Doctor accessing patient they don't have records for
@@ -15,37 +15,46 @@ import { createAudit } from '@/services/audit.service';
  */
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   let sessionRes;
   try {
-    sessionRes = await requirePermission(req, 'doctor.read');
+    sessionRes = await requirePermission(req, "patient.read");
   } catch (err) {
-    console.error('[Doctor GET /patients/:id] Permission denied:', err);
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    console.error("[Doctor GET /patients/:id] Permission denied:", err);
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
     const { id: patientId } = await params;
 
     // Validate patient ID
-    if (!patientId || patientId.trim() === '') {
-      return NextResponse.json({ error: 'Invalid patient ID' }, { status: 400 });
+    if (!patientId || patientId.trim() === "") {
+      return NextResponse.json(
+        { error: "Invalid patient ID" },
+        { status: 400 },
+      );
     }
 
     const doctorUserId = sessionRes.session?.user?.id;
     if (!doctorUserId) {
-      return NextResponse.json({ error: 'Doctor ID not found in session' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Doctor ID not found in session" },
+        { status: 400 },
+      );
     }
 
     // Get doctor profile
     const doctor = await prisma.doctor.findUnique({
       where: { userId: doctorUserId },
-      select: { id: true }
+      select: { id: true },
     });
 
     if (!doctor) {
-      return NextResponse.json({ error: 'Doctor profile not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "Doctor profile not found" },
+        { status: 404 },
+      );
     }
 
     // Get patient with all related data
@@ -60,10 +69,10 @@ export async function GET(
             reason: true,
             status: true,
             notes: true,
-            createdAt: true
+            createdAt: true,
           },
-          orderBy: { dateTime: 'desc' },
-          take: 50
+          orderBy: { dateTime: "desc" },
+          take: 50,
         },
         prescriptions: {
           where: { doctorId: doctor.id },
@@ -73,10 +82,10 @@ export async function GET(
             instructions: true,
             dispensed: true,
             dispensedAt: true,
-            createdAt: true
+            createdAt: true,
           },
-          orderBy: { createdAt: 'desc' },
-          take: 50
+          orderBy: { createdAt: "desc" },
+          take: 50,
         },
         emrRecords: {
           select: {
@@ -85,10 +94,10 @@ export async function GET(
             symptoms: true,
             vitals: true,
             notes: true,
-            createdAt: true
+            createdAt: true,
           },
-          orderBy: { createdAt: 'desc' },
-          take: 50
+          orderBy: { createdAt: "desc" },
+          take: 50,
         },
         labTests: {
           select: {
@@ -96,10 +105,10 @@ export async function GET(
             testType: true,
             status: true,
             results: true,
-            createdAt: true
+            createdAt: true,
           },
-          orderBy: { createdAt: 'desc' },
-          take: 50
+          orderBy: { createdAt: "desc" },
+          take: 50,
         },
         bedAssignments: {
           select: {
@@ -107,30 +116,33 @@ export async function GET(
             bedId: true,
             assignedAt: true,
             dischargedAt: true,
-            createdAt: true
+            createdAt: true,
           },
-          orderBy: { assignedAt: 'desc' },
-          take: 10
-        }
-      }
+          orderBy: { assignedAt: "desc" },
+          take: 10,
+        },
+      },
     });
 
     if (!patient) {
-      return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
+      return NextResponse.json({ error: "Patient not found" }, { status: 404 });
     }
 
     // Audit log for patient access
     await createAudit({
       actorId: doctorUserId,
-      action: 'doctor.patient.view',
-      resource: 'Patient',
+      action: "doctor.patient.view",
+      resource: "Patient",
       resourceId: patientId,
-      meta: { patientName: `${patient.firstName} ${patient.lastName}` }
+      meta: { patientName: `${patient.firstName} ${patient.lastName}` },
     });
 
     return NextResponse.json(patient);
   } catch (err) {
-    console.error('[Doctor GET /patients/:id] Error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("[Doctor GET /patients/:id] Error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
