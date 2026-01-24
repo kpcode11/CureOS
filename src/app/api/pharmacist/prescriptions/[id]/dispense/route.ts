@@ -1,29 +1,62 @@
-import { NextResponse } from 'next/server';
-import { requirePermission } from '@/lib/authorization';
-import { prisma } from '@/lib/prisma';
-import { createAudit } from '@/services/audit.service';
+import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/authorization";
+import { prisma } from "@/lib/prisma";
+import { createAudit } from "@/services/audit.service";
 
 // PATCH /api/pharmacist/prescriptions/:id/dispense
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const { id } = await params;
   let sessionRes;
   try {
-    sessionRes = await requirePermission(req, 'pharmacy.dispense');
+    sessionRes = await requirePermission(req, "pharmacy.dispense");
   } catch (err) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const actorId = sessionRes.session?.user?.id ?? null;
 
+  // Resolve pharmacist profile id from the authenticated user
+  let pharmacistProfile = null;
+  if (actorId) {
+    pharmacistProfile = await prisma.pharmacist.findUnique({
+      where: { userId: actorId },
+    });
+  }
+  if (!pharmacistProfile) {
+    return NextResponse.json(
+      { error: "Pharmacist profile not found for user" },
+      { status: 403 },
+    );
+  }
+
   const existing = await prisma.prescription.findUnique({ where: { id } });
-  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  if (existing.dispensed) return NextResponse.json({ error: 'Already dispensed' }, { status: 400 });
+  if (!existing)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (existing.dispensed)
+    return NextResponse.json({ error: "Already dispensed" }, { status: 400 });
 
   // perform dispense in a transaction (mark prescription, optionally deduct inventory handled separately)
   const now = new Date();
   const updated = await prisma.$transaction(async (tx) => {
-    const p = await tx.prescription.update({ where: { id }, data: { dispensed: true, dispensedAt: now, pharmacistId: actorId } });
-    await createAudit({ actorId, action: 'prescription.dispense', resource: 'Prescription', resourceId: id, before: existing, after: p });
+    const p = await tx.prescription.update({
+      where: { id },
+      data: {
+        dispensed: true,
+        dispensedAt: now,
+        pharmacistId: pharmacistProfile.id,
+      },
+    });
+    await createAudit({
+      actorId,
+      action: "prescription.dispense",
+      resource: "Prescription",
+      resourceId: id,
+      before: existing,
+      after: p,
+    });
     return p;
   });
 
