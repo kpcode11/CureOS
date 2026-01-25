@@ -41,9 +41,46 @@ export default function AdminPage() {
           fetch('/api/admin/permissions'),
         ]);
 
-        const users = await usersRes.json();
-        const roles = await rolesRes.json();
-        const perms = await permsRes.json();
+        // Check if responses are successful and have content
+        let users = [];
+        let roles = [];
+        let perms = [];
+
+        if (usersRes.ok) {
+          const text = await usersRes.text();
+          if (text) {
+            try {
+              users = JSON.parse(text);
+            } catch (e) {
+              console.warn('Failed to parse users response:', e);
+              users = [];
+            }
+          }
+        }
+
+        if (rolesRes.ok) {
+          const text = await rolesRes.text();
+          if (text) {
+            try {
+              roles = JSON.parse(text);
+            } catch (e) {
+              console.warn('Failed to parse roles response:', e);
+              roles = [];
+            }
+          }
+        }
+
+        if (permsRes.ok) {
+          const text = await permsRes.text();
+          if (text) {
+            try {
+              perms = JSON.parse(text);
+            } catch (e) {
+              console.warn('Failed to parse permissions response:', e);
+              perms = [];
+            }
+          }
+        }
 
         const statsData: StatCard[] = [
           {
