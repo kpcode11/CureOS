@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import {
   Plus,
   FileText,
@@ -82,7 +81,7 @@ export default function ClaimsPage() {
   const [claims, setClaims] = useState<InsuranceClaim[]>([]);
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [open, setOpen] = useState(false);
   const [processOpen, setProcessOpen] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState<InsuranceClaim | null>(
@@ -108,7 +107,7 @@ export default function ClaimsPage() {
 
   const fetchClaims = async () => {
     try {
-      const url = statusFilter
+      const url = statusFilter && statusFilter !== 'all'
         ? `/api/insurance/claims?status=${statusFilter}`
         : "/api/insurance/claims";
       const res = await fetch(url);
@@ -253,22 +252,23 @@ export default function ClaimsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="flex-1 bg-white">
+      <div className="p-8">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold text-gray-900">
             Insurance Claims
-          </h2>
-          <p className="text-muted-foreground">
+          </h1>
+          <p className="text-gray-600 mt-1">
             Process and manage insurance claims
           </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
+            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+              <Plus className="w-4 h-4" />
               New Claim
-            </Button>
+            </button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <form onSubmit={handleSubmit}>
@@ -354,13 +354,8 @@ export default function ClaimsPage() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card>
+      <div className="grid gap-4 md:grid-cols-6 mb-6">
+          <Card className="bg-blue-50 dark:bg-blue-900/20 border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Claims
@@ -371,14 +366,8 @@ export default function ClaimsPage() {
               <div className="text-2xl font-bold">{stats.total}</div>
             </CardContent>
           </Card>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
-          <Card>
+          <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pending</CardTitle>
               <Clock className="h-4 w-4 text-yellow-500" />
@@ -387,14 +376,8 @@ export default function ClaimsPage() {
               <div className="text-2xl font-bold">{stats.pending}</div>
             </CardContent>
           </Card>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-        >
-          <Card>
+          <Card className="bg-green-50 dark:bg-green-900/20 border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Approved</CardTitle>
               <CheckCircle className="h-4 w-4 text-green-500" />
@@ -403,14 +386,8 @@ export default function ClaimsPage() {
               <div className="text-2xl font-bold">{stats.approved}</div>
             </CardContent>
           </Card>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.3 }}
-        >
-          <Card>
+          <Card className="bg-red-50 dark:bg-red-900/20 border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Rejected</CardTitle>
               <XCircle className="h-4 w-4 text-red-500" />
@@ -419,14 +396,8 @@ export default function ClaimsPage() {
               <div className="text-2xl font-bold">{stats.rejected}</div>
             </CardContent>
           </Card>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.4 }}
-        >
-          <Card>
+          <Card className="bg-purple-50 dark:bg-purple-900/20 border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Claimed
@@ -439,14 +410,8 @@ export default function ClaimsPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.5 }}
-        >
-          <Card>
+          <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Approved
@@ -459,11 +424,10 @@ export default function ClaimsPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
-      </div>
+        </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="bg-white border-gray-200 mb-6">
         <CardHeader>
           <CardTitle>Filters</CardTitle>
         </CardHeader>
@@ -474,7 +438,7 @@ export default function ClaimsPage() {
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="PENDING">Pending</SelectItem>
                 <SelectItem value="PROCESSING">Processing</SelectItem>
                 <SelectItem value="APPROVED">Approved</SelectItem>
@@ -487,10 +451,10 @@ export default function ClaimsPage() {
       </Card>
 
       {/* Claims Table */}
-      <Card>
+      <Card className="bg-white border-gray-200 mb-6">
         <CardHeader>
-          <CardTitle>Insurance Claims</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-gray-900">Insurance Claims</CardTitle>
+          <CardDescription className="text-gray-600">
             {loading ? "Loading..." : `${claims.length} claims found`}
           </CardDescription>
         </CardHeader>
@@ -545,13 +509,12 @@ export default function ClaimsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    <button
+                      className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition"
                       onClick={() => openProcessDialog(claim)}
                     >
                       Process
-                    </Button>
+                    </button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -625,6 +588,7 @@ export default function ClaimsPage() {
           </form>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }

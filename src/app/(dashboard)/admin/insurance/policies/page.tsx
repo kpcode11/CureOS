@@ -70,7 +70,7 @@ export default function PoliciesPage() {
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     patientId: "",
@@ -89,7 +89,7 @@ export default function PoliciesPage() {
 
   const fetchPolicies = async () => {
     try {
-      const url = statusFilter
+      const url = statusFilter && statusFilter !== 'all'
         ? `/api/insurance/policies?status=${statusFilter}`
         : "/api/insurance/policies";
       const res = await fetch(url);
@@ -185,22 +185,23 @@ export default function PoliciesPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="flex-1 bg-white">
+      <div className="p-8">
+      <div className="flex justify-between items-center mb-8 mb-8">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold text-gray-900">
             Insurance Policies
-          </h2>
-          <p className="text-muted-foreground">
+          </h1>
+          <p className="text-gray-600 mt-1">
             Manage patient insurance policies
           </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
+            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+              <Plus className="w-4 h-4" />
               Add Policy
-            </Button>
+            </button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <form onSubmit={handleSubmit}>
@@ -326,14 +327,9 @@ export default function PoliciesPage() {
         </Dialog>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card>
+        {/* Statistics Cards */}
+        <div className="grid gap-4 md:grid-cols-4 mb-6">
+          <Card className="bg-blue-50 dark:bg-blue-900/20 border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Policies
@@ -344,14 +340,8 @@ export default function PoliciesPage() {
               <div className="text-2xl font-bold">{stats.total}</div>
             </CardContent>
           </Card>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
-          <Card>
+          <Card className="bg-green-50 dark:bg-green-900/20 border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Active Policies
@@ -362,14 +352,8 @@ export default function PoliciesPage() {
               <div className="text-2xl font-bold">{stats.active}</div>
             </CardContent>
           </Card>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-        >
-          <Card>
+          <Card className="bg-gray-50 dark:bg-gray-900/20 border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Expired Policies
@@ -380,14 +364,8 @@ export default function PoliciesPage() {
               <div className="text-2xl font-bold">{stats.expired}</div>
             </CardContent>
           </Card>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.3 }}
-        >
-          <Card>
+          <Card className="bg-purple-50 dark:bg-purple-900/20 border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Coverage
@@ -400,22 +378,21 @@ export default function PoliciesPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
-      </div>
+        </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
+        {/* Filters */}
+        <Card className="bg-white border-gray-200 mb-6">
+          <CardHeader>
+            <CardTitle className="text-gray-900">Filters</CardTitle>
+          </CardHeader>
+          <CardContent>
           <div className="flex gap-4">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="ACTIVE">Active</SelectItem>
                 <SelectItem value="EXPIRED">Expired</SelectItem>
                 <SelectItem value="CANCELLED">Cancelled</SelectItem>
@@ -426,15 +403,15 @@ export default function PoliciesPage() {
         </CardContent>
       </Card>
 
-      {/* Policies Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Insurance Policies</CardTitle>
-          <CardDescription>
-            {loading ? "Loading..." : `${policies.length} policies found`}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+        {/* Policies Table */}
+        <Card className="bg-white border-gray-200">
+          <CardHeader>
+            <CardTitle className="text-gray-900">Insurance Policies</CardTitle>
+            <CardDescription className="text-gray-600">
+              {loading ? 'Loading...' : `${policies.length} policies found`}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
@@ -487,6 +464,7 @@ export default function PoliciesPage() {
           </Table>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
