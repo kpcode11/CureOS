@@ -667,6 +667,19 @@ export default function UsersManagement() {
                         </p>
                       </div>
                     )}
+
+                  {/* BILLING_OFFICER: No profile fields needed */}
+                  {formData.roleEntityId &&
+                    roles
+                      .find((r) => r.id === formData.roleEntityId)
+                      ?.name?.toUpperCase() === "BILLING_OFFICER" && (
+                      <div className="p-3 bg-green-50 border border-green-200 text-green-700 rounded text-sm">
+                        <p>
+                          No additional profile information required for Billing
+                          Officer role.
+                        </p>
+                      </div>
+                    )}
                 </>
               )}
 

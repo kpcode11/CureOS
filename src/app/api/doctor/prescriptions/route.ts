@@ -226,6 +226,22 @@ export async function POST(req: Request) {
         },
       });
 
+      // Calculate prescription cost (₹200 per medication)
+      const medicationCost = medications.length * 200;
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 7); // Due in 7 days
+
+      // Create billing record for prescription
+      await tx.billing.create({
+        data: {
+          patientId,
+          amount: medicationCost,
+          description: `Prescription - ${medications.map((m: any) => m.name).join(", ")}`,
+          status: "PENDING",
+          dueDate: dueDate,
+        },
+      });
+
       await createAudit({
         actorId: doctorUserId,
         action: "prescription.create",
@@ -235,6 +251,7 @@ export async function POST(req: Request) {
           patientId,
           patientName: `${patient.firstName} ${patient.lastName}`,
           medicationCount: medications.length,
+          medicationCost,
         },
       });
 

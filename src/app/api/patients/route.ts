@@ -19,8 +19,11 @@ export async function POST(req: Request) {
     const res = await requirePermission(req, "patient.create");
     actorId = res.session?.user?.id ?? null;
   } catch (err) {
-    console.error('Permission denied for patient.create:', err);
-    return NextResponse.json({ error: "Forbidden - insufficient permissions" }, { status: 403 });
+    console.error("Permission denied for patient.create:", err);
+    return NextResponse.json(
+      { error: "Forbidden - insufficient permissions" },
+      { status: 403 },
+    );
   }
   const body = await req.json();
 
@@ -91,10 +94,7 @@ export async function POST(req: Request) {
 
   let age = today.getFullYear() - dob.getFullYear();
   const monthDiff = today.getMonth() - dob.getMonth();
-  if (
-    monthDiff < 0 ||
-    (monthDiff === 0 && today.getDate() < dob.getDate())
-  ) {
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
     age--;
   }
 
@@ -118,7 +118,24 @@ export async function POST(req: Request) {
         gender: body.gender.toUpperCase(),
         address: body.address ? body.address.trim() : null,
         bloodType: body.bloodType || null,
-        emergencyContact: body.emergencyContact ? body.emergencyContact.trim() : null,
+        emergencyContact: body.emergencyContact
+          ? body.emergencyContact.trim()
+          : null,
+      },
+    });
+
+    // Create registration fee billing record
+    const registrationFee = 500; // ₹500 registration fee
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 7); // Due in 7 days
+
+    await prisma.billing.create({
+      data: {
+        patientId: rec.id,
+        amount: registrationFee,
+        description: "Patient Registration Fee",
+        status: "PENDING",
+        dueDate: dueDate,
       },
     });
 
@@ -127,7 +144,11 @@ export async function POST(req: Request) {
       action: "patient.create",
       resource: "Patient",
       resourceId: rec.id,
-      meta: { firstName: rec.firstName, lastName: rec.lastName },
+      meta: {
+        firstName: rec.firstName,
+        lastName: rec.lastName,
+        registrationFee,
+      },
     });
 
     return NextResponse.json(rec);

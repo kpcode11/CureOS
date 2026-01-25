@@ -7,7 +7,7 @@ export async function GET(req: Request) {
   try {
     await requirePermission(req, "appointment.read");
   } catch (err) {
-    console.error('[Appointment GET] Permission denied:', err);
+    console.error("[Appointment GET] Permission denied:", err);
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       receptionistId = receptionist?.id ?? null;
     }
   } catch (err) {
-    console.error('[Appointment POST] Permission denied:', err);
+    console.error("[Appointment POST] Permission denied:", err);
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -58,7 +58,12 @@ export async function POST(req: Request) {
 
   // Validate required fields
   if (!body.patientId || !body.doctorId || !body.dateTime || !body.reason) {
-    console.error('[Appointment POST] Missing fields:', { patientId: body.patientId, doctorId: body.doctorId, dateTime: body.dateTime, reason: body.reason });
+    console.error("[Appointment POST] Missing fields:", {
+      patientId: body.patientId,
+      doctorId: body.doctorId,
+      dateTime: body.dateTime,
+      reason: body.reason,
+    });
     return NextResponse.json(
       {
         error: "Missing required fields: patientId, doctorId, dateTime, reason",
@@ -88,6 +93,21 @@ export async function POST(req: Request) {
       },
     });
 
+    // Create consultation fee billing record
+    const consultationFee = 1000; // ₹1000 consultation fee
+    const dueDate = new Date(appointment.dateTime);
+    dueDate.setDate(dueDate.getDate() + 7); // Due 7 days after appointment
+
+    await prisma.billing.create({
+      data: {
+        patientId: body.patientId,
+        amount: consultationFee,
+        description: `Consultation with Dr. ${appointment.doctor.user.name} - ${body.reason}`,
+        status: "PENDING",
+        dueDate: dueDate,
+      },
+    });
+
     await createAudit({
       actorId,
       action: "appointment.create",
@@ -97,13 +117,14 @@ export async function POST(req: Request) {
         patientId: appointment.patientId,
         doctorId: appointment.doctorId,
         dateTime: appointment.dateTime,
+        consultationFee,
       },
     });
 
-    console.log('[Appointment POST] Successfully created:', appointment.id);
+    console.log("[Appointment POST] Successfully created:", appointment.id);
     return NextResponse.json(appointment);
   } catch (error) {
-    console.error('[Appointment POST] Creation failed:', error);
+    console.error("[Appointment POST] Creation failed:", error);
     return NextResponse.json(
       { error: "Failed to create appointment", details: String(error) },
       { status: 500 },
