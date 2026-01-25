@@ -122,12 +122,27 @@ export async function POST(req: Request) {
       },
     });
 
+    // Create registration fee billing record
+    const registrationFee = 500; // ₹500 registration fee
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 7); // Due in 7 days
+
+    await prisma.billing.create({
+      data: {
+        patientId: rec.id,
+        amount: registrationFee,
+        description: 'Patient Registration Fee',
+        status: 'PENDING',
+        dueDate: dueDate,
+      },
+    });
+
     await createAudit({
       actorId,
       action: "patient.create",
       resource: "Patient",
       resourceId: rec.id,
-      meta: { firstName: rec.firstName, lastName: rec.lastName },
+      meta: { firstName: rec.firstName, lastName: rec.lastName, registrationFee },
     });
 
     return NextResponse.json(rec);

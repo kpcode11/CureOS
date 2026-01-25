@@ -36,14 +36,14 @@ export async function POST(req: Request) {
   const hashed = await bcrypt.hash(password, 10);
 
   // Helper: normalize/match incoming role names to the Prisma `Role` enum
-  const ROLE_ENUM = ['DOCTOR','NURSE','PHARMACIST','LAB_TECH','RECEPTIONIST','ADMIN','EMERGENCY'] as const;
+  const ROLE_ENUM = ['DOCTOR','NURSE','PHARMACIST','LAB_TECH','RECEPTIONIST','ADMIN','BILLING_OFFICER','EMERGENCY'] as const;
   function mapToEnumRole(input?: unknown): (typeof ROLE_ENUM)[number] | null {
     if (!input || typeof input !== 'string') return null;
     const s = input.trim().toUpperCase().replace(/[\-\s]+/g, '_').replace(/[^A-Z0-9_]/g, '');
     // common synonyms
     if (s === 'ADMINISTRATOR' || s === 'ADMIN') return 'ADMIN';
     if (s === 'LABTECH' || s === 'LAB_TECH') return 'LAB_TECH';
-    if (s === 'BILLING' || s === 'BILLING_OFFICER') return null; // no matching enum
+    if (s === 'BILLING' || s === 'BILLING_OFFICER') return 'BILLING_OFFICER';
     if (s === 'RECEPTION' || s === 'RECEPTIONIST') return 'RECEPTIONIST';
     if (ROLE_ENUM.includes(s as any)) return s as any;
     return null;

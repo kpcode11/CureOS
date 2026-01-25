@@ -11,8 +11,32 @@ export async function GET(req: Request) {
 
   try {
     const now = new Date();
-    const rows = await prisma.billing.findMany({ where: { status: 'PENDING', dueDate: { lt: now } }, orderBy: { dueDate: 'asc' } });
-    return NextResponse.json(rows);
+    const rows = await prisma.billing.findMany({ 
+      where: { status: 'PENDING', dueDate: { lt: now } }, 
+      orderBy: { dueDate: 'asc' },
+      include: {
+        patient: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true
+          }
+        }
+      }
+    });
+    
+    // Format patient data to match frontend expectations
+    const formattedRows = rows.map(row => ({
+      ...row,
+      patient: row.patient ? {
+        name: `${row.patient.firstName} ${row.patient.lastName}`,
+        mrn: row.patient.id
+      } : undefined
+    }));
+    
+    return NextResponse.json(formattedRows);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('billing.overdue error:', err);

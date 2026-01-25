@@ -18,6 +18,7 @@ model User {
   updatedAt                   DateTime            @updatedAt
   admin                       Admin?
   auditLogs                   AuditLog[]          @relation("AuditLog_actor")
+  billingOfficer              BillingOfficer?
   doctor                      Doctor?
   emergencyOverridesRequested EmergencyOverride[] @relation("EmergencyOverride_actor")
   emergencyOverridesTargeted  EmergencyOverride[] @relation("EmergencyOverride_targetUser")
@@ -114,6 +115,14 @@ model Admin {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model BillingOfficer {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model Appointment {
   id                                           String            @id @default(cuid())
   patientId                                    String
@@ -158,6 +167,7 @@ model Prescription {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   pharmacistNotes String?
+  transcription   String?
   doctor          Doctor      @relation(fields: [doctorId], references: [id])
   patient         Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
   pharmacist      Pharmacist? @relation(fields: [pharmacistId], references: [id])
@@ -379,6 +389,7 @@ enum Role {
   LAB_TECH
   RECEPTIONIST
   ADMIN
+  BILLING_OFFICER
   EMERGENCY
 }
 

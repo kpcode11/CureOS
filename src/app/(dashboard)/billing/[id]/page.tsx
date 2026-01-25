@@ -39,6 +39,12 @@ interface BillingRecord {
   paidAt: string | null;
   createdAt: string;
   updatedAt: string;
+  patient?: {
+    name: string;
+    mrn: string;
+    email?: string;
+    phone?: string;
+  };
 }
 
 const statusConfig = {
@@ -189,10 +195,13 @@ export default function BillingDetailPage() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-slate-600">
                         <User className="w-4 h-4" />
-                        <span className="text-sm font-medium">Patient ID</span>
+                        <span className="text-sm font-medium">Patient</span>
                       </div>
                       <p className="text-lg font-semibold text-slate-900">
-                        {bill.patientId}
+                        {bill.patient?.name || 'Unknown Patient'}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        MRN: {bill.patient?.mrn || bill.patientId}
                       </p>
                     </div>
 

@@ -88,6 +88,21 @@ export async function POST(req: Request) {
       },
     });
 
+    // Create consultation fee billing record
+    const consultationFee = 1000; // ₹1000 consultation fee
+    const dueDate = new Date(appointment.dateTime);
+    dueDate.setDate(dueDate.getDate() + 7); // Due 7 days after appointment
+
+    await prisma.billing.create({
+      data: {
+        patientId: body.patientId,
+        amount: consultationFee,
+        description: `Consultation with Dr. ${appointment.doctor.user.name} - ${body.reason}`,
+        status: 'PENDING',
+        dueDate: dueDate,
+      },
+    });
+
     await createAudit({
       actorId,
       action: "appointment.create",
@@ -97,6 +112,7 @@ export async function POST(req: Request) {
         patientId: appointment.patientId,
         doctorId: appointment.doctorId,
         dateTime: appointment.dateTime,
+        consultationFee,
       },
     });
 

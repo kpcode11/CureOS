@@ -20,8 +20,33 @@ export async function GET(req: Request) {
     if (patientId) where.patientId = patientId;
     if (status) where.status = status;
 
-    const rows = await prisma.billing.findMany({ where, take: 200, orderBy: { createdAt: 'desc' } });
-    return NextResponse.json(rows);
+    const rows = await prisma.billing.findMany({ 
+      where, 
+      take: 200, 
+      orderBy: { createdAt: 'desc' },
+      include: {
+        patient: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true
+          }
+        }
+      }
+    });
+    
+    // Format patient data to match frontend expectations
+    const formattedRows = rows.map(row => ({
+      ...row,
+      patient: row.patient ? {
+        name: `${row.patient.firstName} ${row.patient.lastName}`,
+        mrn: row.patient.id
+      } : undefined
+    }));
+    
+    return NextResponse.json(formattedRows);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('billing.GET error:', err);

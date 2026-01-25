@@ -17,10 +17,10 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     if (existing.status === 'PAID') return NextResponse.json({ error: 'Already paid' }, { status: 409 });
 
-    const updated = await prisma.billing.update({ where: { id: params.id }, data: { status: 'PAID', paidAt: new Date() } });
+    const updated = await prisma.billing.update({ where: { id }, data: { status: 'PAID', paidAt: new Date() } });
 
     try {
-      await createAudit({ actorId, action: 'billing.pay', resource: 'Billing', resourceId: params.id, before: existing, after: updated });
+      await createAudit({ actorId, action: 'billing.pay', resource: 'Billing', resourceId: id, before: existing, after: updated });
     } catch (auditErr) {
       // eslint-disable-next-line no-console
       console.warn('billing.pay audit failed:', auditErr);

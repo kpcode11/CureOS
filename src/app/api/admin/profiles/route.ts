@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     }
 
     // Validate role
-    const validRoles = ['DOCTOR', 'NURSE', 'PHARMACIST', 'LAB_TECH', 'RECEPTIONIST'];
+    const validRoles = ['DOCTOR', 'NURSE', 'PHARMACIST', 'LAB_TECH', 'RECEPTIONIST', 'BILLING_OFFICER'];
     if (!validRoles.includes(role)) {
       return NextResponse.json({ error: `Invalid role: ${role}` }, { status: 400 });
     }
@@ -206,6 +206,24 @@ export async function POST(req: Request) {
         }
 
         profile = await prisma.receptionist.create({
+          data: {
+            userId
+          }
+        });
+        break;
+      }
+
+      case 'BILLING_OFFICER': {
+        // Check if billing officer profile already exists
+        const existingProfile = await prisma.billingOfficer.findUnique({
+          where: { userId }
+        });
+
+        if (existingProfile) {
+          return NextResponse.json({ error: 'Billing Officer profile already exists for this user' }, { status: 409 });
+        }
+
+        profile = await prisma.billingOfficer.create({
           data: {
             userId
           }
