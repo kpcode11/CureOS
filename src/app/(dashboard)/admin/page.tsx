@@ -1,31 +1,36 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown, Plus, Download, FileText, Users, Lock, Shield, TrendingUp, Search, Command, UserPlus, Settings, Database, Activity, CheckCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
-import { Users, Lock, Shield, ArrowRight } from 'lucide-react';
-import Stats10 from '@/components/stats-10';
-import GooeyDepartmentDashboard from '@/components/gooey-department-dashboard';
+import { WelcomeSection } from '@/components/dashboard-2/welcome-section';
+import { LeadSourcesChart } from '@/components/dashboard-2/lead-sources-chart';
+import { RevenueFlowChart } from '@/components/dashboard-2/revenue-flow-chart';
+import { DealsTable } from '@/components/dashboard-2/deals-table';
 
-interface AnalyticsData {
-  date: string;
-  [key: string]: string | number;
-}
-
-interface AnalyticsSummary {
-  name: string;
-  tickerSymbol: string;
-  value: string | number;
-  change: string | number;
-  percentageChange: string;
-  changeType: "positive" | "negative";
+interface StatCard {
+  title: string;
+  value: number | string;
+  change: string;
+  icon: React.ReactNode;
+  color: string;
+  link?: string;
 }
 
 export default function AdminPage() {
-  const [stats, setStats] = useState({ users: 0, roles: 0, permissions: 0 });
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
-  const [analyticsSummary, setAnalyticsSummary] = useState<AnalyticsSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const { data: session } = useSession();
+  const [stats, setStats] = useState<StatCard[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -40,202 +45,223 @@ export default function AdminPage() {
         const roles = await rolesRes.json();
         const perms = await permsRes.json();
 
-        setStats({
-          users: Array.isArray(users) ? users.length : 0,
-          roles: Array.isArray(roles) ? roles.length : 0,
-          permissions: Array.isArray(perms) ? perms.length : 0,
-        });
+        const statsData: StatCard[] = [
+          {
+            title: 'Total Users',
+            value: Array.isArray(users) ? users.length : 0,
+            change: '+12%',
+            icon: <Users className="w-5 h-5" />,
+            color: 'bg-blue-50 dark:bg-blue-900/20',
+            link: '/admin/rbac?tab=users',
+          },
+          {
+            title: 'Roles',
+            value: Array.isArray(roles) ? roles.length : 0,
+            change: '+4%',
+            icon: <Shield className="w-5 h-5" />,
+            color: 'bg-purple-50 dark:bg-purple-900/20',
+            link: '/admin/rbac?tab=roles',
+          },
+          {
+            title: 'Permissions',
+            value: Array.isArray(perms) ? perms.length : 0,
+            change: '+8%',
+            icon: <Lock className="w-5 h-5" />,
+            color: 'bg-green-50 dark:bg-green-900/20',
+            link: '/admin/rbac?tab=permissions',
+          },
+          {
+            title: 'System Health',
+            value: '98%',
+            change: '+2%',
+            icon: <TrendingUp className="w-5 h-5" />,
+            color: 'bg-emerald-50 dark:bg-emerald-900/20',
+          },
+        ];
+
+        setStats(statsData);
       } catch (error) {
         console.error('Failed to fetch stats:', error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchStats();
   }, []);
 
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        const [patientsRes, bedsRes, prescriptionsRes] = await Promise.all([
-          fetch('/api/patients').catch(() => null),
-          fetch('/api/beds').catch(() => null),
-          fetch('/api/prescriptions').catch(() => null),
-        ]);
-
-        const patients = patientsRes ? await patientsRes.json().catch(() => []) : [];
-        const beds = bedsRes ? await bedsRes.json().catch(() => []) : [];
-        const prescriptions = prescriptionsRes ? await prescriptionsRes.json().catch(() => []) : [];
-
-        // Calculate real metrics from database
-        const activeBeds = Array.isArray(beds) 
-          ? beds.filter((b: any) => b.status === 'AVAILABLE').length 
-          : 0;
-        
-        const activePatients = Array.isArray(patients) 
-          ? patients.length 
-          : 0;
-        
-        const pendingOrders = Array.isArray(prescriptions) 
-          ? prescriptions.filter((p: any) => !p.dispensed).length 
-          : 0;
-
-        // Generate 7-day trend data with real current values
-        const days = ['Jan 18', 'Jan 19', 'Jan 20', 'Jan 21', 'Jan 22', 'Jan 23', 'Jan 24', 'Jan 25'];
-        const trendData = days.map((date) => ({
-          date,
-          'Active Patients (IPD)': Math.max(100, activePatients - Math.floor(Math.random() * 20)),
-          'Pending Clinical Orders': Math.max(20, pendingOrders - Math.floor(Math.random() * 10)),
-          'Available Beds': Math.max(10, activeBeds - Math.floor(Math.random() * 8)),
-        }));
-
-        setAnalyticsData(trendData);
-
-        // Calculate summary with real data
-        const summary: AnalyticsSummary[] = [
-          {
-            name: 'Active Patients (IPD)',
-            tickerSymbol: 'ADMITTED',
-            value: activePatients || 156,
-            change: '+8',
-            percentageChange: '+5.4%',
-            changeType: 'positive',
-          },
-          {
-            name: 'Pending Clinical Orders',
-            tickerSymbol: 'ORDERS',
-            value: pendingOrders || 47,
-            change: '-12',
-            percentageChange: '-20.3%',
-            changeType: 'positive',
-          },
-          {
-            name: 'Available Beds',
-            tickerSymbol: 'BEDS',
-            value: activeBeds || 34,
-            change: '-5',
-            percentageChange: '-12.8%',
-            changeType: 'negative',
-          },
-        ];
-
-        setAnalyticsSummary(summary);
-      } catch (error) {
-        console.error('Failed to fetch analytics:', error);
-        // Fallback to static data on error
-        setAnalyticsData([
-          { date: 'Jan 18', 'Active Patients (IPD)': 142, 'Pending Clinical Orders': 68, 'Available Beds': 42 },
-          { date: 'Jan 19', 'Active Patients (IPD)': 148, 'Pending Clinical Orders': 72, 'Available Beds': 36 },
-          { date: 'Jan 20', 'Active Patients (IPD)': 151, 'Pending Clinical Orders': 59, 'Available Beds': 33 },
-          { date: 'Jan 21', 'Active Patients (IPD)': 154, 'Pending Clinical Orders': 65, 'Available Beds': 30 },
-          { date: 'Jan 22', 'Active Patients (IPD)': 158, 'Pending Clinical Orders': 58, 'Available Beds': 26 },
-          { date: 'Jan 23', 'Active Patients (IPD)': 160, 'Pending Clinical Orders': 63, 'Available Beds': 24 },
-          { date: 'Jan 24', 'Active Patients (IPD)': 159, 'Pending Clinical Orders': 52, 'Available Beds': 35 },
-          { date: 'Jan 25', 'Active Patients (IPD)': 156, 'Pending Clinical Orders': 47, 'Available Beds': 34 },
-        ]);
-        setAnalyticsSummary([
-          { name: 'Active Patients (IPD)', tickerSymbol: 'ADMITTED', value: 156, change: '+8', percentageChange: '+5.4%', changeType: 'positive' },
-          { name: 'Pending Clinical Orders', tickerSymbol: 'ORDERS', value: 47, change: '-12', percentageChange: '-20.3%', changeType: 'positive' },
-          { name: 'Available Beds', tickerSymbol: 'BEDS', value: 34, change: '-5', percentageChange: '-12.8%', changeType: 'negative' },
-        ]);
-      } finally {
-        setAnalyticsLoading(false);
-      }
-    };
-
-    fetchAnalytics();
-  }, []);
-
-  const StatCard = ({ title, value, icon: Icon }: { title: string; value: number; icon: any }) => (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">{loading ? '-' : value}</p>
-        </div>
-        <Icon className="w-8 h-8 text-gray-400" />
-      </div>
-    </div>
-  );
-
-  const ActionCard = ({
-    title,
-    description,
-    icon: Icon,
-    href,
-  }: {
-    title: string;
-    description: string;
-    icon: any;
-    href: string;
-  }) => (
-    <Link href={href}>
-      <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer">
-        <Icon className="w-8 h-8 text-blue-600 mb-3" />
-        <h3 className="font-semibold text-gray-900">{title}</h3>
-        <p className="text-sm text-gray-600 mt-1">{description}</p>
-        <div className="flex items-center text-blue-600 text-sm font-medium mt-4">
-          Manage <ArrowRight className="w-4 h-4 ml-2" />
-        </div>
-      </div>
-    </Link>
-  );
-
   return (
-    <div className="flex-1 p-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Welcome back</h1>
-        <p className="text-gray-600 mt-2">Manage your access control and track system activities</p>
-      </div>
+    <div className="h-svh overflow-hidden lg:p-2 w-full">
+      <div className="lg:border lg:rounded-md overflow-hidden flex flex-col items-center justify-start bg-container h-full w-full bg-background">
+        {/* Header */}
+        <header className="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 border-b bg-card sticky top-0 z-10 w-full">
+          <h1 className="text-base sm:text-lg font-medium flex-1 truncate">Admin Dashboard</h1>
 
-      {/* System Analytics - MOVED TO TOP */}
-      {/* <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">System Analytics</h2>
-        <Stats10 data={analyticsData} summary={analyticsSummary} isLoading={analyticsLoading} />
-      </div> */}
+          <div className="hidden md:block relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
+            <Input
+              placeholder="Search Anything..."
+              className="pl-10 pr-14 w-[180px] lg:w-[220px] h-9 bg-card border"
+            />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 bg-muted px-1 py-0.5 rounded text-xs text-muted-foreground">
+              <Command className="size-3" />
+              <span>K</span>
+            </div>
+          </div>
 
-      {/* Department Analytics Dashboard */}
-      <div className="mb-12">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Department Analytics</h2>
-        <GooeyDepartmentDashboard />
-      </div>
+          <ThemeToggle />
 
-      {/* Stats Cards */}
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Admin Summary</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatCard title="Total Users" value={stats.users} icon={Users} />
-          <StatCard title="Total Roles" value={stats.roles} icon={Shield} />
-          <StatCard title="Total Permissions" value={stats.permissions} icon={Lock} />
-        </div>
-      </div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 sm:gap-3 h-8 sm:h-9 text-xs sm:text-sm"
+                >
+                  <span className="hidden xs:inline">Export</span>
+                  <Download className="w-4 h-4" />
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Export Report
+                </DropdownMenuItem>
+                <DropdownMenuItem>Export Users</DropdownMenuItem>
+                <DropdownMenuItem>Export Audit Log</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button size="sm" className="gap-2 h-8 sm:h-9 text-xs sm:text-sm">
+              <Plus className="w-4 h-4" />
+              <span className="hidden xs:inline">Add User</span>
+            </Button>
+          </div>
+        </header>
 
-      {/* Quick Actions */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-        <p className="text-gray-600 mb-6">Manage your system resources</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <ActionCard
-            title="Manage Users"
-            description="View & edit users"
-            icon={Users}
-            href="/admin/rbac?tab=users"
-          />
-          <ActionCard
-            title="Manage Roles"
-            description="Configure roles"
-            icon={Shield}
-            href="/admin/rbac?tab=roles"
-          />
-          <ActionCard
-            title="Permissions"
-            description="Control access"
-            icon={Lock}
-            href="/admin/rbac?tab=permissions"
-          />
-        </div>
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 bg-background w-full">
+          {/* Welcome Section */}
+          <WelcomeSection />
+
+          {/* Stats Cards Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 p-3 sm:p-4 lg:p-6 rounded-xl border bg-card">
+            {stats.map((stat, index) => (
+              <Link
+                key={stat.title}
+                href={stat.link || '#'}
+                className={`group flex flex-col justify-between p-4 rounded-lg transition-all ${stat.color} hover:shadow-md cursor-pointer`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    {stat.icon}
+                    <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
+                      {stat.title}
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
+                    {isLoading ? '-' : stat.value}
+                  </p>
+                  <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                    <TrendingUp className="w-3 h-3" />
+                    {stat.change}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Charts */}
+          <div className="flex flex-col xl:flex-row gap-4 sm:gap-6">
+            <LeadSourcesChart />
+            <RevenueFlowChart />
+          </div>
+
+          {/* Deals Table */}
+          <DealsTable />
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+            <Link
+              href="/admin/rbac?tab=users"
+              className="group relative overflow-hidden rounded-lg border bg-card p-4 transition-all hover:bg-accent hover:border-primary/20"
+            >
+              <div className="flex items-start gap-3">
+                <div className="rounded-md bg-blue-100 dark:bg-blue-900/30 p-2 text-blue-600 dark:text-blue-400">
+                  <UserPlus className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium text-sm">Manage Users</h4>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    Add & manage users
+                  </p>
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              href="/admin/rbac?tab=roles"
+              className="group relative overflow-hidden rounded-lg border bg-card p-4 transition-all hover:bg-accent hover:border-primary/20"
+            >
+              <div className="flex items-start gap-3">
+                <div className="rounded-md bg-purple-100 dark:bg-purple-900/30 p-2 text-purple-600 dark:text-purple-400">
+                  <Shield className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium text-sm">Manage Roles</h4>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    Configure roles
+                  </p>
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              href="/admin/rbac?tab=permissions"
+              className="group relative overflow-hidden rounded-lg border bg-card p-4 transition-all hover:bg-accent hover:border-primary/20"
+            >
+              <div className="flex items-start gap-3">
+                <div className="rounded-md bg-green-100 dark:bg-green-900/30 p-2 text-green-600 dark:text-green-400">
+                  <Lock className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium text-sm">Permissions</h4>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    Define permissions
+                  </p>
+                </div>
+              </div>
+            </Link>
+
+            <div className="group relative overflow-hidden rounded-lg border bg-card p-4">
+              <div className="flex items-start gap-3">
+                <div className="rounded-md bg-emerald-100 dark:bg-emerald-900/30 p-2 text-emerald-600 dark:text-emerald-400">
+                  <Activity className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium text-sm">System Status</h4>
+                  <div className="mt-2 space-y-1.5">
+                    <div className="flex items-center gap-2 text-xs">
+                      <CheckCircle className="h-3 w-3 text-emerald-500" />
+                      <span className="text-muted-foreground">Database</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <CheckCircle className="h-3 w-3 text-emerald-500" />
+                      <span className="text-muted-foreground">Auth Active</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <CheckCircle className="h-3 w-3 text-emerald-500" />
+                      <span className="text-muted-foreground">Sync Ready</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );
