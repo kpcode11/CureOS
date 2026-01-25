@@ -29,6 +29,9 @@ import {
   UserPlus,
   Bell,
   LogOut,
+  Search,
+  AlertTriangle,
+  ArrowRightLeft,
 } from "lucide-react";
 import { Logo } from "@/components/sidebar-02/logo";
 import type { Route } from "./nav-main";
@@ -36,6 +39,8 @@ import DashboardNavigation from "@/components/sidebar-02/nav-main";
 import { NotificationsPopover } from "@/components/sidebar-02/nav-notifications";
 import { TeamSwitcher } from "@/components/sidebar-02/team-switcher";
 import { useSession, signOut } from "next-auth/react";
+import { useState } from "react";
+import { LogoutModal } from "@/components/ui/logout-modal";
 
 const sampleNotifications = [
   {
@@ -63,92 +68,123 @@ const sampleNotifications = [
 
 // Hospital-specific routes based on user role
 const getHospitalRoutes = (userRole?: string): Route[] => {
-  const commonRoutes: Route[] = [
-    {
-      id: "dashboard",
-      title: "Dashboard",
-      icon: <Home className="size-4" />,
-      link: "/admin",
-    },
-  ];
+  // Role-specific dashboard route
+  const getDashboardRoute = (role?: string): Route => {
+    switch (role) {
+      case "ADMIN":
+        return {
+          id: "dashboard",
+          title: "Dashboard",
+          icon: <Home className="size-4" />,
+          link: "/admin",
+        };
+      case "DOCTOR":
+        return {
+          id: "dashboard",
+          title: "Dashboard",
+          icon: <Home className="size-4" />,
+          link: "/doctor",
+        };
+      case "NURSE":
+        return {
+          id: "dashboard",
+          title: "Dashboard",
+          icon: <Home className="size-4" />,
+          link: "/nurse",
+        };
+      case "RECEPTIONIST":
+        return {
+          id: "dashboard",
+          title: "Dashboard",
+          icon: <Home className="size-4" />,
+          link: "/receptionist",
+        };
+      case "LAB_TECHNICIAN":
+        return {
+          id: "dashboard",
+          title: "Dashboard",
+          icon: <Home className="size-4" />,
+          link: "/lab-tech",
+        };
+      case "PHARMACIST":
+        return {
+          id: "dashboard",
+          title: "Dashboard",
+          icon: <Home className="size-4" />,
+          link: "/pharmacist",
+        };
+      default:
+        return {
+          id: "dashboard",
+          title: "Dashboard",
+          icon: <Home className="size-4" />,
+          link: "/admin",
+        };
+    }
+  };
 
   switch (userRole) {
     case "ADMIN":
       return [
-        ...commonRoutes,
+        getDashboardRoute(userRole),
         {
-          id: "admin",
-          title: "Administration",
-          icon: <Shield className="size-4" />,
-          link: "/admin",
-          subs: [
-            {
-              title: "Users",
-              link: "/admin/rbac?tab=users",
-              icon: <Users className="size-4" />,
-            },
-            {
-              title: "Roles",
-              link: "/admin/rbac?tab=roles",
-              icon: <Lock className="size-4" />,
-            },
-            {
-              title: "Permissions",
-              link: "/admin/rbac?tab=permissions",
-              icon: <Lock className="size-4" />,
-            },
-          ],
+          id: "users",
+          title: "Users",
+          icon: <Users className="size-4" />,
+          link: "/admin/rbac?tab=users",
         },
         {
-          id: "analytics",
-          title: "Analytics",
-          icon: <BarChart3 className="size-4" />,
-          link: "#",
-          subs: [
-            {
-              title: "Reports",
-              link: "/admin/reports",
-              icon: <FileText className="size-4" />,
-            },
-            {
-              title: "Billing",
-              link: "/admin/billing",
-              icon: <DollarSign className="size-4" />,
-            },
-          ],
+          id: "roles",
+          title: "Roles",
+          icon: <Lock className="size-4" />,
+          link: "/admin/rbac?tab=roles",
+        },
+        {
+          id: "permissions",
+          title: "Permissions",
+          icon: <Lock className="size-4" />,
+          link: "/admin/rbac?tab=permissions",
+        },
+        {
+          id: "reports",
+          title: "Reports",
+          icon: <FileText className="size-4" />,
+          link: "/admin/reports",
+        },
+        {
+          id: "billing",
+          title: "Billing",
+          icon: <DollarSign className="size-4" />,
+          link: "/admin/billing",
         },
       ];
 
     case "DOCTOR":
       return [
-        ...commonRoutes,
+        getDashboardRoute(userRole),
         {
-          id: "clinical",
-          title: "Clinical",
-          icon: <Stethoscope className="size-4" />,
-          link: "/doctor",
-          subs: [
-            {
-              title: "Patients",
-              link: "/doctor/patients",
-              icon: <Users className="size-4" />,
-            },
-            {
-              title: "EMR",
-              link: "/doctor/emr",
-              icon: <FileText className="size-4" />,
-            },
-            {
-              title: "Prescriptions",
-              link: "/doctor/prescriptions",
-              icon: <Pill className="size-4" />,
-            },
-            {
-              title: "Orders",
-              link: "/doctor/orders",
-              icon: <Package2 className="size-4" />,
-            },
-          ],
+          id: "patients",
+          title: "Patients",
+          icon: <Users className="size-4" />,
+          link: "/doctor/patients",
+        },
+        {
+          id: "emr",
+          title: "EMR",
+          icon: <FileText className="size-4" />,
+          link: "/doctor/emr",
+        },
+        {
+          id: "prescriptions",
+          title: "Prescriptions",
+          icon: <Pill className="size-4" />,
+          link: "/doctor/prescriptions",
+        },
+        {
+          id: "orders",
+          title: "Orders",
+          icon: <Package2 className="size-4" />,
+          link: "/doctor/orders",
         },
         {
           id: "surgery",
@@ -160,103 +196,104 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
 
     case "NURSE":
       return [
-        ...commonRoutes,
+        getDashboardRoute(userRole),
         {
-          id: "patient-care",
-          title: "Patient Care",
+          id: "bed-assignments",
+          title: "Bed Assignments",
+          icon: <Bed className="size-4" />,
+          link: "/nurse/beds",
+        },
+        {
+          id: "vitals",
+          title: "Vitals",
           icon: <Activity className="size-4" />,
-          link: "/nurse",
-          subs: [
-            {
-              title: "Bed Assignments",
-              link: "/nurse/beds",
-              icon: <Bed className="size-4" />,
-            },
-            {
-              title: "Vitals",
-              link: "/nurse/vitals",
-              icon: <Activity className="size-4" />,
-            },
-            {
-              title: "MAR",
-              link: "/nurse/mar",
-              icon: <Pill className="size-4" />,
-            },
-          ],
+          link: "/nurse/vitals",
+        },
+        {
+          id: "mar",
+          title: "MAR",
+          icon: <Pill className="size-4" />,
+          link: "/nurse/mar",
         },
       ];
 
     case "PHARMACIST":
       return [
-        ...commonRoutes,
+        getDashboardRoute(userRole),
         {
-          id: "pharmacy",
-          title: "Pharmacy",
+          id: "prescriptions",
+          title: "Prescriptions",
           icon: <Pill className="size-4" />,
-          link: "/pharmacist",
-          subs: [
-            {
-              title: "Prescriptions",
-              link: "/pharmacist/prescriptions",
-              icon: <Pill className="size-4" />,
-            },
-            {
-              title: "Inventory",
-              link: "/pharmacist/inventory",
-              icon: <Package2 className="size-4" />,
-            },
-          ],
+          link: "/pharmacist/prescriptions",
+        },
+        {
+          id: "inventory",
+          title: "Inventory",
+          icon: <Package2 className="size-4" />,
+          link: "/pharmacist/inventory",
         },
       ];
 
     case "LAB_TECH":
       return [
-        ...commonRoutes,
+        getDashboardRoute("LAB_TECHNICIAN"),
         {
-          id: "lab",
-          title: "Laboratory",
+          id: "tests",
+          title: "Tests",
           icon: <TestTube className="size-4" />,
-          link: "/lab-tech",
-          subs: [
-            {
-              title: "Tests",
-              link: "/lab-tech/tests",
-              icon: <TestTube className="size-4" />,
-            },
-            {
-              title: "Results",
-              link: "/lab-tech/results",
-              icon: <FileText className="size-4" />,
-            },
-          ],
+          link: "/lab-tech/tests",
+        },
+        {
+          id: "results",
+          title: "Results",
+          icon: <FileText className="size-4" />,
+          link: "/lab-tech/results",
         },
       ];
 
     case "RECEPTIONIST":
       return [
-        ...commonRoutes,
+        getDashboardRoute(userRole),
         {
-          id: "registration",
-          title: "Registration",
+          id: "new-patient",
+          title: "New Patient",
+          icon: <UserPlus className="size-4" />,
+          link: "/receptionist/registration",
+        },
+        {
+          id: "appointments",
+          title: "Appointments",
+          icon: <Package2 className="size-4" />,
+          link: "/receptionist/appointments",
+        },
+        {
+          id: "patients",
+          title: "Patient Records",
           icon: <Users className="size-4" />,
-          link: "/receptionist",
-          subs: [
-            {
-              title: "New Patient",
-              link: "/receptionist/registration",
-              icon: <UserPlus className="size-4" />,
-            },
-            {
-              title: "Appointments",
-              link: "/receptionist/appointments",
-              icon: <Package2 className="size-4" />,
-            },
-          ],
+          link: "/receptionist/patients",
+        },
+        {
+          id: "search",
+          title: "Search Patients",
+          icon: <Search className="size-4" />,
+          link: "/receptionist/search",
+        },
+        {
+          id: "emergency",
+          title: "Emergency",
+          icon: <AlertTriangle className="size-4" />,
+          link: "/receptionist/emergency",
+        },
+        {
+          id: "referrals",
+          title: "Referrals",
+          icon: <ArrowRightLeft className="size-4" />,
+          link: "/receptionist/referrals",
         },
       ];
 
     default:
-      return commonRoutes;
+      return [getDashboardRoute(userRole)];
   }
 };
 
@@ -269,6 +306,7 @@ const teams = [
 export function DashboardSidebar() {
   const { state } = useSidebar();
   const { data: session } = useSession();
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const userRole = session?.user?.role;
   const isCollapsed = state === "collapsed";
   const routes = getHospitalRoutes(userRole);
@@ -312,13 +350,18 @@ export function DashboardSidebar() {
       <SidebarFooter className="px-2 space-y-2">
         <TeamSwitcher teams={teams} />
         <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
+          onClick={() => setLogoutModalOpen(true)}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors text-sm font-medium border border-gray-200 hover:border-red-200"
         >
           <LogOut className="w-4 h-4" />
           <span>Logout</span>
         </button>
       </SidebarFooter>
+      
+      <LogoutModal 
+        open={logoutModalOpen} 
+        onOpenChange={setLogoutModalOpen} 
+      />
     </Sidebar>
   );
 }

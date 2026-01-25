@@ -3,7 +3,7 @@
 import React from "react";
 import { SessionProvider } from "next-auth/react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { DashboardSidebar } from "@/components/dashboard-2/sidebar";
+import { DashboardSidebar } from "@/components/sidebar-02/app-sidebar";
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   return (

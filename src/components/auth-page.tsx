@@ -12,6 +12,9 @@ import type React from "react";
 import { FloatingPaths } from "@/components/floating-paths";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
 export function AuthPage() {
 	const [email, setEmail] = useState("");
@@ -59,13 +62,30 @@ export function AuthPage() {
 				<Logo className="mr-auto h-5" />
 
 				<div className="z-10 mt-auto">
-					<blockquote className="space-y-2">
-						<p className="text-xl">
-							&ldquo;A Unified Hospital Information System (HIS) that creates a "Zero-Friction" patient journey by integrating all departments into a single, intelligent event-loop.&rdquo;
+					<blockquote className="space-y-4 bg-background/20 backdrop-blur-sm p-6 rounded-xl border">
+						<h2 className="text-2xl font-bold">
+							Connecting Healthcare Professionals with Excellence
+						</h2>
+						<p className="text-lg text-muted-foreground">
+							CureOS is the home of healthcare innovation, delivering amazing patient care, and empowering medical teams. Experience seamless healthcare management with us.
 						</p>
-						<footer className="font-mono font-semibold text-sm">
-							~ Team CureOS
-						</footer>
+						<div className="flex items-center gap-3">
+							<div className="flex -space-x-2">
+								<div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-semibold">D</div>
+								<div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-semibold">N</div>
+								<div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-semibold">A</div>
+								<div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-semibold">P</div>
+							</div>
+							<div className="flex items-center gap-1">
+								<div className="flex text-yellow-400">
+									{"★".repeat(5)}
+								</div>
+								<span className="text-lg font-semibold ml-2">4.9</span>
+							</div>
+						</div>
+						<p className="text-sm text-muted-foreground">
+							from over 50,000+ healthcare professionals
+						</p>
 					</blockquote>
 				</div>
 				<div className="absolute inset-0">
@@ -73,7 +93,7 @@ export function AuthPage() {
 					<FloatingPaths position={-1} />
 				</div>
 			</div>
-			<div className="relative flex min-h-screen flex-col justify-center p-4">
+			<div className="relative flex min-h-screen flex-col justify-center p-4 bg-transparent">
 				<div
 					aria-hidden
 					className="-z-10 absolute inset-0 isolate opacity-60 contain-strict"
@@ -88,75 +108,84 @@ export function AuthPage() {
 						Home
 					</a>
 				</Button>
-				<div className="mx-auto space-y-4 sm:w-sm">
-					<Logo className="h-5 lg:hidden" />
-					<div className="flex flex-col space-y-1">
-						<h1 className="font-bold text-2xl tracking-wide">
-							Login (Dev)
-						</h1>
-						<p className="text-base text-muted-foreground">
-							Enter credentials to access CureOS
-						</p>
-					</div>
+				
+				{/* New Login-06 Design */}
+				<div className="flex items-center justify-center">
+					<Card className="w-full max-w-sm rounded-[3rem] px-6 py-10 pt-14">
+						<CardContent className="">
+							<div className="flex flex-col items-center space-y-8">
+								<Logo className="h-12" />
 
-					{error && (
-						<div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded text-sm">
-							{error}
-						</div>
-					)}
+								<div className="space-y-2 text-center">
+									<h1 className="text-3xl font-semibold text-foreground">
+										Welcome back!
+									</h1>
+									<p className="text-muted-foreground text-sm">
+										Access your CureOS account
+									</p>
+								</div>
 
-					<form onSubmit={handleCredentialsLogin} className="space-y-3">
-						<div>
-							<label className="text-xs text-muted-foreground block mb-1">Email</label>
-							<InputGroup>
-								<InputGroupInput
-									placeholder="admin@neon.example"
-									type="email"
-									value={email}
-									onChange={(e) => setEmail(e.target.value)}
-									disabled={isLoading}
-									required
-								/>
-								<InputGroupAddon>
-									<AtSignIcon />
-								</InputGroupAddon>
-							</InputGroup>
-						</div>
+								{error && (
+									<div className="w-full p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+										{error}
+									</div>
+								)}
 
-						<div>
-							<label className="text-xs text-muted-foreground block mb-1">Password</label>
-							<InputGroup>
-								<InputGroupInput
-									placeholder="Password"
-									type={showPassword ? "text" : "password"}
-									value={password}
-									onChange={(p) => setPassword(p.target.value)}
-									disabled={isLoading}
-									required
-								/>
-								<InputGroupAddon
-									onClick={() => setShowPassword(!showPassword)}
-									className="cursor-pointer"
-								>
-									{showPassword ? "Hide" : "Show"}
-								</InputGroupAddon>
-							</InputGroup>
-						</div>
+								<div className="w-full space-y-4">
+									<form onSubmit={handleCredentialsLogin} className="w-full space-y-4">
+										<Input
+											type="email"
+											placeholder="Your email"
+											className="w-full rounded-3xl"
+											value={email}
+											onChange={(e) => setEmail(e.target.value)}
+											disabled={isLoading}
+											required
+										/>
+										<Input
+											type={showPassword ? "text" : "password"}
+											placeholder="Password"
+											className="w-full rounded-3xl"
+											value={password}
+											onChange={(e) => setPassword(e.target.value)}
+											disabled={isLoading}
+											required
+										/>
+										<div className="flex flex-col gap-2">
+											<Button 
+												type="submit"
+												className="w-full rounded-3xl" 
+												size="lg"
+												disabled={isLoading}
+											>
+												{isLoading ? "Logging in..." : "Login to CureOS"}
+											</Button>
+											<Button
+												type="button"
+												variant="link"
+												className="w-full text-sm text-muted-foreground"
+												onClick={() => setShowPassword(!showPassword)}
+											>
+												{showPassword ? "Hide password" : "Show password"}
+											</Button>
+										</div>
+									</form>
+								</div>
 
-						<Button 
-							className="w-full" 
-							type="submit"
-							disabled={isLoading}
-						>
-							{isLoading ? "Logging in..." : "Login as Admin"}
-						</Button>
-					</form>
-
-					<div className="p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-						<strong>Dev Credentials:</strong><br/>
-						Email: admin@neon.example<br/>
-						Password: Admin123!
-					</div>
+								<p className="text-center text-xs w-11/12 text-muted-foreground">
+									By continuing, you agree to CureOS{" "}
+									<a href="#" className="underline hover:text-foreground">
+										Terms of Service
+									</a>{" "}
+									and{" "}
+									<a href="#" className="underline hover:text-foreground">
+										Privacy Policy
+									</a>
+									.
+								</p>
+							</div>
+						</CardContent>
+					</Card>
 				</div>
 			</div>
 		</main>
