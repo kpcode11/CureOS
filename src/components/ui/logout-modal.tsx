@@ -24,9 +24,9 @@ export function LogoutModal({ open, onOpenChange }: LogoutModalProps) {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await signOut({ 
+      await signOut({
         callbackUrl: "/login",
-        redirect: true 
+        redirect: true,
       });
     } catch (error) {
       console.error("Logout error:", error);
@@ -47,21 +47,22 @@ export function LogoutModal({ open, onOpenChange }: LogoutModalProps) {
             Sign out of CureOS?
           </DialogTitle>
           <DialogDescription className="text-center text-gray-600">
-            Are you sure you want to sign out? You'll need to sign in again to access your account.
+            Are you sure you want to sign out? You'll need to sign in again to
+            access your account.
           </DialogDescription>
         </DialogHeader>
-        
+
         <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-0 mt-6">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => onOpenChange(false)}
             className="w-full sm:w-auto rounded-2xl"
             disabled={isLoggingOut}
           >
             Cancel
           </Button>
-          <Button 
-            variant="destructive" 
+          <Button
+            variant="destructive"
             onClick={handleLogout}
             className="w-full sm:w-auto rounded-2xl"
             disabled={isLoggingOut}
