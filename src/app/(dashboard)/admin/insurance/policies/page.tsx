@@ -70,7 +70,7 @@ export default function PoliciesPage() {
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     patientId: "",
@@ -89,9 +89,10 @@ export default function PoliciesPage() {
 
   const fetchPolicies = async () => {
     try {
-      const url = statusFilter && statusFilter !== 'all'
-        ? `/api/insurance/policies?status=${statusFilter}`
-        : "/api/insurance/policies";
+      const url =
+        statusFilter && statusFilter !== "all"
+          ? `/api/insurance/policies?status=${statusFilter}`
+          : "/api/insurance/policies";
       const res = await fetch(url);
       const data = await res.json();
       setPolicies(Array.isArray(data) ? data : []);
@@ -187,145 +188,153 @@ export default function PoliciesPage() {
   return (
     <div className="flex-1 bg-white">
       <div className="p-8">
-      <div className="flex justify-between items-center mb-8 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Insurance Policies
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Manage patient insurance policies
-          </p>
+        <div className="flex justify-between items-center mb-8 mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Insurance Policies
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Manage patient insurance policies
+            </p>
+          </div>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                <Plus className="w-4 h-4" />
+                Add Policy
+              </button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <form onSubmit={handleSubmit}>
+                <DialogHeader>
+                  <DialogTitle>Create Insurance Policy</DialogTitle>
+                  <DialogDescription>
+                    Add a new insurance policy for a patient
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="patientId">Patient</Label>
+                    <Select
+                      value={formData.patientId}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, patientId: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select patient" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {patients.map((patient) => (
+                          <SelectItem key={patient.id} value={patient.id}>
+                            {patient.firstName} {patient.lastName} -{" "}
+                            {patient.email}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="provider">Provider</Label>
+                      <Input
+                        id="provider"
+                        placeholder="e.g., Blue Cross Blue Shield"
+                        value={formData.provider}
+                        onChange={(e) =>
+                          setFormData({ ...formData, provider: e.target.value })
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="policyNumber">Policy Number</Label>
+                      <Input
+                        id="policyNumber"
+                        placeholder="e.g., POL-123456"
+                        value={formData.policyNumber}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            policyNumber: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="policyType">Policy Type</Label>
+                      <Input
+                        id="policyType"
+                        placeholder="e.g., Health, Life, Dental"
+                        value={formData.policyType}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            policyType: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="coverageAmount">
+                        Coverage Amount (₹)
+                      </Label>
+                      <Input
+                        id="coverageAmount"
+                        type="number"
+                        placeholder="e.g., 500000"
+                        value={formData.coverageAmount}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            coverageAmount: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="startDate">Start Date</Label>
+                      <Input
+                        id="startDate"
+                        type="date"
+                        value={formData.startDate}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            startDate: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="endDate">End Date</Label>
+                      <Input
+                        id="endDate"
+                        type="date"
+                        value={formData.endDate}
+                        onChange={(e) =>
+                          setFormData({ ...formData, endDate: e.target.value })
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="submit">Create Policy</Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-              <Plus className="w-4 h-4" />
-              Add Policy
-            </button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <form onSubmit={handleSubmit}>
-              <DialogHeader>
-                <DialogTitle>Create Insurance Policy</DialogTitle>
-                <DialogDescription>
-                  Add a new insurance policy for a patient
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="patientId">Patient</Label>
-                  <Select
-                    value={formData.patientId}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, patientId: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select patient" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {patients.map((patient) => (
-                        <SelectItem key={patient.id} value={patient.id}>
-                          {patient.firstName} {patient.lastName} -{" "}
-                          {patient.email}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="provider">Provider</Label>
-                    <Input
-                      id="provider"
-                      placeholder="e.g., Blue Cross Blue Shield"
-                      value={formData.provider}
-                      onChange={(e) =>
-                        setFormData({ ...formData, provider: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="policyNumber">Policy Number</Label>
-                    <Input
-                      id="policyNumber"
-                      placeholder="e.g., POL-123456"
-                      value={formData.policyNumber}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          policyNumber: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="policyType">Policy Type</Label>
-                    <Input
-                      id="policyType"
-                      placeholder="e.g., Health, Life, Dental"
-                      value={formData.policyType}
-                      onChange={(e) =>
-                        setFormData({ ...formData, policyType: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="coverageAmount">Coverage Amount (₹)</Label>
-                    <Input
-                      id="coverageAmount"
-                      type="number"
-                      placeholder="e.g., 500000"
-                      value={formData.coverageAmount}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          coverageAmount: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="startDate">Start Date</Label>
-                    <Input
-                      id="startDate"
-                      type="date"
-                      value={formData.startDate}
-                      onChange={(e) =>
-                        setFormData({ ...formData, startDate: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="endDate">End Date</Label>
-                    <Input
-                      id="endDate"
-                      type="date"
-                      value={formData.endDate}
-                      onChange={(e) =>
-                        setFormData({ ...formData, endDate: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit">Create Policy</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
 
         {/* Statistics Cards */}
         <div className="grid gap-4 md:grid-cols-4 mb-6">
@@ -386,84 +395,84 @@ export default function PoliciesPage() {
             <CardTitle className="text-gray-900">Filters</CardTitle>
           </CardHeader>
           <CardContent>
-          <div className="flex gap-4">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="EXPIRED">Expired</SelectItem>
-                <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                <SelectItem value="SUSPENDED">Suspended</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+            <div className="flex gap-4">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="ACTIVE">Active</SelectItem>
+                  <SelectItem value="EXPIRED">Expired</SelectItem>
+                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                  <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Policies Table */}
         <Card className="bg-white border-gray-200">
           <CardHeader>
             <CardTitle className="text-gray-900">Insurance Policies</CardTitle>
             <CardDescription className="text-gray-600">
-              {loading ? 'Loading...' : `${policies.length} policies found`}
+              {loading ? "Loading..." : `${policies.length} policies found`}
             </CardDescription>
           </CardHeader>
           <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Policy Number</TableHead>
-                <TableHead>Patient</TableHead>
-                <TableHead>Provider</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Coverage</TableHead>
-                <TableHead>Period</TableHead>
-                <TableHead>Claims</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {policies.map((policy) => (
-                <TableRow key={policy.id}>
-                  <TableCell className="font-medium">
-                    {policy.policyNumber}
-                  </TableCell>
-                  <TableCell>
-                    {policy.patient.firstName} {policy.patient.lastName}
-                  </TableCell>
-                  <TableCell>{policy.provider}</TableCell>
-                  <TableCell>{policy.policyType}</TableCell>
-                  <TableCell>
-                    ₹{policy.coverageAmount.toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      <div>
-                        {new Date(policy.startDate).toLocaleDateString()}
-                      </div>
-                      <div className="text-muted-foreground">
-                        to {new Date(policy.endDate).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{policy.claims.length}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(policy.status)}>
-                      <span className="flex items-center gap-1">
-                        {getStatusIcon(policy.status)}
-                        {policy.status}
-                      </span>
-                    </Badge>
-                  </TableCell>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Policy Number</TableHead>
+                  <TableHead>Patient</TableHead>
+                  <TableHead>Provider</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Coverage</TableHead>
+                  <TableHead>Period</TableHead>
+                  <TableHead>Claims</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {policies.map((policy) => (
+                  <TableRow key={policy.id}>
+                    <TableCell className="font-medium">
+                      {policy.policyNumber}
+                    </TableCell>
+                    <TableCell>
+                      {policy.patient.firstName} {policy.patient.lastName}
+                    </TableCell>
+                    <TableCell>{policy.provider}</TableCell>
+                    <TableCell>{policy.policyType}</TableCell>
+                    <TableCell>
+                      ₹{policy.coverageAmount.toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        <div>
+                          {new Date(policy.startDate).toLocaleDateString()}
+                        </div>
+                        <div className="text-muted-foreground">
+                          to {new Date(policy.endDate).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{policy.claims.length}</TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(policy.status)}>
+                        <span className="flex items-center gap-1">
+                          {getStatusIcon(policy.status)}
+                          {policy.status}
+                        </span>
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
