@@ -63,21 +63,21 @@ const SEVERITY_OPTIONS: { value: SeverityLevel; label: string; color: string; de
   { value: 'HIGH', label: 'High', color: 'bg-red-500', description: 'Urgent, needs senior doctor' },
 ];
 
-const PROBLEM_CATEGORIES: { value: ProblemCategory; label: string; icon: string; examples: string }[] = [
-  { value: 'HEART', label: 'Heart/Cardiac', icon: '❤️', examples: 'Chest pain, palpitations, BP issues' },
-  { value: 'BONE_JOINT', label: 'Bone & Joint', icon: '🦴', examples: 'Fractures, joint pain, arthritis' },
-  { value: 'EAR_NOSE_THROAT', label: 'ENT', icon: '👂', examples: 'Hearing, sinus, throat problems' },
-  { value: 'EYE', label: 'Eye/Vision', icon: '👁️', examples: 'Vision issues, eye pain, cataracts' },
-  { value: 'SKIN', label: 'Skin', icon: '🩹', examples: 'Rash, acne, skin infections' },
-  { value: 'DIGESTIVE', label: 'Digestive/GI', icon: '🫃', examples: 'Stomach pain, acid reflux, liver' },
-  { value: 'RESPIRATORY', label: 'Respiratory', icon: '🫁', examples: 'Breathing issues, asthma, cough' },
-  { value: 'NEUROLOGICAL', label: 'Neurological', icon: '🧠', examples: 'Headache, seizures, numbness' },
-  { value: 'DENTAL', label: 'Dental', icon: '🦷', examples: 'Toothache, gum problems' },
-  { value: 'GENERAL', label: 'General/Primary', icon: '🏥', examples: 'Fever, cold, annual checkup' },
-  { value: 'PEDIATRIC', label: 'Pediatric', icon: '👶', examples: 'Child health, vaccinations' },
-  { value: 'GYNECOLOGY', label: 'Gynecology/OB', icon: '🤰', examples: 'Women\'s health, pregnancy' },
-  { value: 'UROLOGY', label: 'Urology', icon: '🚿', examples: 'Kidney, urinary issues' },
-  { value: 'MENTAL_HEALTH', label: 'Mental Health', icon: '🧘', examples: 'Anxiety, depression, stress' },
+const PROBLEM_CATEGORIES: { value: ProblemCategory; label: string; examples: string }[] = [
+  { value: 'HEART', label: 'Cardiology', examples: 'Chest pain, palpitations, blood pressure' },
+  { value: 'BONE_JOINT', label: 'Orthopedics', examples: 'Fractures, joint pain, arthritis' },
+  { value: 'EAR_NOSE_THROAT', label: 'ENT', examples: 'Hearing, sinus, throat' },
+  { value: 'EYE', label: 'Ophthalmology', examples: 'Vision, eye pain, cataracts' },
+  { value: 'SKIN', label: 'Dermatology', examples: 'Rash, acne, skin infections' },
+  { value: 'DIGESTIVE', label: 'Gastroenterology', examples: 'Stomach pain, acid reflux' },
+  { value: 'RESPIRATORY', label: 'Pulmonology', examples: 'Breathing issues, asthma' },
+  { value: 'NEUROLOGICAL', label: 'Neurology', examples: 'Headache, seizures, numbness' },
+  { value: 'DENTAL', label: 'Dental', examples: 'Toothache, gum problems' },
+  { value: 'GENERAL', label: 'General Medicine', examples: 'Fever, cold, checkup' },
+  { value: 'PEDIATRIC', label: 'Pediatrics', examples: 'Child health, vaccinations' },
+  { value: 'GYNECOLOGY', label: 'OB/GYN', examples: 'Women\'s health, pregnancy' },
+  { value: 'UROLOGY', label: 'Urology', examples: 'Kidney, urinary issues' },
+  { value: 'MENTAL_HEALTH', label: 'Psychiatry', examples: 'Anxiety, depression' },
 ];
 
 interface Patient {
@@ -501,8 +501,8 @@ export default function AppointmentBooking() {
         : '';
       
       toast({
-        title: "✅ Appointment Booked Successfully!",
-        description: `Appointment scheduled for ${new Date(appointment.dateTime).toLocaleString()} with Dr. ${appointment.doctor.user.name}${assignmentInfo}`,
+        title: "Appointment Booked",
+        description: `Scheduled for ${new Date(appointment.dateTime).toLocaleString()} with Dr. ${appointment.doctor.user.name}`,
       });
 
       // Reset form
@@ -513,7 +513,7 @@ export default function AppointmentBooking() {
     } catch (error: any) {
       const errorMsg = error?.message || "Unknown error occurred";
       toast({
-        title: "❌ Booking Failed",
+        title: "Booking Failed",
         description: errorMsg,
         variant: "destructive",
       });
@@ -577,16 +577,15 @@ export default function AppointmentBooking() {
   };
 
   return (
-    <div className="p-6 bg-gradient-to-br from-blue-50 via-white to-blue-50 min-h-screen">
-      <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
+    <div className="p-6 bg-slate-50 min-h-screen">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900 flex items-center gap-3">
-              <CalendarDays className="h-10 w-10 text-blue-600" />
+            <h1 className="text-2xl font-semibold text-slate-900">
               Appointments
             </h1>
-            <p className="text-slate-600 mt-2">Manage patient appointments</p>
+            <p className="text-slate-500 text-sm mt-1">Schedule and manage patient appointments</p>
           </div>
           <Button
             variant="outline"
@@ -620,9 +619,9 @@ export default function AppointmentBooking() {
 
         {/* Appointments List Tab */}
         {activeTab === "list" && (
-          <Card className="shadow-xl border-2 border-slate-200">
-            <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
-              <CardTitle className="text-xl text-slate-900">
+          <Card>
+            <CardHeader className="border-b">
+              <CardTitle className="text-lg font-medium text-slate-900">
                 Scheduled Appointments
               </CardTitle>
               <CardDescription>
@@ -642,25 +641,25 @@ export default function AppointmentBooking() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-50 hover:bg-slate-50">
-                        <TableHead className="font-bold text-slate-700">
-                          Appointment ID
+                        <TableHead className="text-slate-600 font-medium">
+                          ID
                         </TableHead>
-                        <TableHead className="font-bold text-slate-700">
+                        <TableHead className="text-slate-600 font-medium">
                           Patient
                         </TableHead>
-                        <TableHead className="font-bold text-slate-700">
+                        <TableHead className="text-slate-600 font-medium">
                           Doctor
                         </TableHead>
-                        <TableHead className="font-bold text-slate-700">
+                        <TableHead className="text-slate-600 font-medium">
                           Date & Time
                         </TableHead>
-                        <TableHead className="font-bold text-slate-700">
+                        <TableHead className="text-slate-600 font-medium">
                           Reason
                         </TableHead>
-                        <TableHead className="font-bold text-slate-700">
+                        <TableHead className="text-slate-600 font-medium">
                           Status
                         </TableHead>
-                        <TableHead className="text-right font-bold text-slate-700">
+                        <TableHead className="text-right text-slate-600 font-medium">
                           Actions
                         </TableHead>
                       </TableRow>
@@ -675,9 +674,9 @@ export default function AppointmentBooking() {
                             {appointment.id.slice(0, 8).toUpperCase()}
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
-                                <User className="h-5 w-5 text-white" />
+                            <div className="flex items-center gap-2">
+                              <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center">
+                                <User className="h-4 w-4 text-slate-600" />
                               </div>
                               <div>
                                 <p className="font-semibold text-slate-900">
@@ -779,13 +778,13 @@ export default function AppointmentBooking() {
           <>
             {/* Success Card */}
             {bookedAppointment && (
-              <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg">
+              <Card className="border border-green-200 bg-green-50">
                 <CardContent className="p-8 text-center">
-                  <div className="inline-flex h-20 w-20 rounded-full bg-green-500 items-center justify-center mb-6 shadow-lg">
-                    <CheckCircle2 className="h-10 w-10 text-white" />
+                  <div className="inline-flex h-16 w-16 rounded-full bg-green-100 items-center justify-center mb-4">
+                    <CheckCircle2 className="h-8 w-8 text-green-600" />
                   </div>
-                  <h3 className="text-3xl font-bold text-green-900 mb-3">
-                    Appointment Booked!
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                    Appointment Booked
                   </h3>
                   <p className="text-slate-700 mb-6 text-lg">
                     The appointment has been successfully scheduled
@@ -857,26 +856,26 @@ export default function AppointmentBooking() {
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Main Form */}
-                  <Card className="lg:col-span-2 shadow-md hover:shadow-xl transition-shadow duration-300">
-                    <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
-                      <CardTitle className="text-2xl flex items-center gap-2">
-                        <Calendar className="h-6 w-6" />
+                  <Card className="lg:col-span-2 shadow-sm border">
+                    <CardHeader className="border-b bg-slate-50">
+                      <CardTitle className="text-lg font-medium flex items-center gap-2">
+                        <Calendar className="h-5 w-5 text-slate-600" />
                         Appointment Details
                       </CardTitle>
-                      <CardDescription className="text-blue-100">
+                      <CardDescription>
                         Fill in the appointment information
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6 pt-6">
                       {/* Smart Scheduling Toggle */}
-                      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-purple-500 flex items-center justify-center">
-                            <Sparkles className="h-5 w-5 text-white" />
+                          <div className="h-9 w-9 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <Sparkles className="h-4 w-4 text-blue-600" />
                           </div>
                           <div>
-                            <Label className="text-slate-900 font-semibold">Smart Doctor Assignment</Label>
-                            <p className="text-sm text-slate-600">Auto-assign best available doctor based on severity & specialty</p>
+                            <Label className="text-slate-900 font-medium">Smart Doctor Assignment</Label>
+                            <p className="text-sm text-slate-500">Auto-assign based on severity and specialty</p>
                           </div>
                         </div>
                         <Switch
@@ -974,12 +973,9 @@ export default function AppointmentBooking() {
                               <SelectContent>
                                 {PROBLEM_CATEGORIES.map((cat) => (
                                   <SelectItem key={cat.value} value={cat.value}>
-                                    <div className="flex items-center gap-3">
-                                      <span className="text-xl">{cat.icon}</span>
-                                      <div>
-                                        <span className="font-semibold">{cat.label}</span>
-                                        <span className="text-slate-500 text-xs ml-2">{cat.examples}</span>
-                                      </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium">{cat.label}</span>
+                                      <span className="text-slate-400 text-xs">({cat.examples})</span>
                                     </div>
                                   </SelectItem>
                                 ))}
@@ -1216,9 +1212,9 @@ export default function AppointmentBooking() {
                   {/* Summary Sidebar */}
                   <div className="space-y-6">
                     {/* Appointment Summary */}
-                    <Card className="shadow-md bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg text-slate-900">
+                    <Card className="shadow-sm border">
+                      <CardHeader className="pb-3 border-b">
+                        <CardTitle className="text-base font-medium text-slate-900">
                           Appointment Summary
                         </CardTitle>
                       </CardHeader>
@@ -1294,11 +1290,11 @@ export default function AppointmentBooking() {
                     </Card>
 
                     {/* Submit Button */}
-                    <Card className="shadow-md bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-200">
-                      <CardContent className="p-6">
+                    <Card className="shadow-sm border">
+                      <CardContent className="p-4">
                         <Button
                           type="submit"
-                          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                          className="w-full"
                           size="lg"
                           disabled={isSubmitting}
                         >
