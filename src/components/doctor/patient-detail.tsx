@@ -13,8 +13,10 @@ import {
   Pill,
   Microscope,
   Bed,
-  ChevronDown
+  ChevronDown,
+  UserPlus
 } from 'lucide-react';
+import { CreateReferralDialog } from '@/components/referrals/create-referral-dialog';
 
 interface PatientDetailComponentProps {
   patientId: string;
@@ -133,6 +135,15 @@ export function PatientDetailComponent({
             Order Lab Test
           </Button>
         )}
+        <CreateReferralDialog
+          defaultPatientId={patientId}
+          trigger={
+            <Button variant="outline" size="sm">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Refer to Specialist
+            </Button>
+          }
+        />
       </div>
 
       {/* Tabs with patient data */}

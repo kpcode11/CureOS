@@ -1,38 +1,51 @@
-import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-import { prisma } from '@/lib/prisma';
-import { requirePermission } from '@/lib/authorization';
-import { createAudit } from '@/services/audit.service';
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { prisma } from "@/lib/prisma";
+import { requirePermission } from "@/lib/authorization";
+import { createAudit } from "@/services/audit.service";
 
 export async function GET(req: Request) {
   try {
-    await requirePermission(req, 'admin.users.read');
+    await requirePermission(req, "admin.users.read");
   } catch (err) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  const users = await prisma.user.findMany({ select: { id: true, email: true, name: true, role: true, roleEntityId: true, createdAt: true } });
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      roleEntityId: true,
+      createdAt: true,
+    },
+  });
   return NextResponse.json(users);
 }
 
 export async function POST(req: Request) {
   try {
-    await requirePermission(req, 'admin.users.create');
+    await requirePermission(req, "admin.users.create");
   } catch (err) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const { email, password, name, role, roleEntityId } = await req.json();
-  if (!email || !password) return NextResponse.json({ error: 'email & password required' }, { status: 400 });
+  if (!email || !password)
+    return NextResponse.json(
+      { error: "email & password required" },
+      { status: 400 },
+    );
   const hashed = await bcrypt.hash(password, 10);
-  
+
   // Determine final role and roleEntityId
   let finalRole = role;
   let finalRoleEntityId = roleEntityId;
 
   // If roleEntityId is provided but role is not, look up the role name
   if (finalRoleEntityId && !finalRole) {
-    const roleEntity = await prisma.roleEntity.findUnique({ 
+    const roleEntity = await prisma.roleEntity.findUnique({
       where: { id: finalRoleEntityId },
-      select: { name: true }
+      select: { name: true },
     });
     if (roleEntity) {
       finalRole = roleEntity.name;
@@ -41,9 +54,9 @@ export async function POST(req: Request) {
 
   // If role is provided but roleEntityId is not, look up the roleEntityId
   if (!finalRoleEntityId && finalRole) {
-    const roleEntity = await prisma.roleEntity.findUnique({ 
+    const roleEntity = await prisma.roleEntity.findUnique({
       where: { name: finalRole },
-      select: { id: true }
+      select: { id: true },
     });
     if (roleEntity) {
       finalRoleEntityId = roleEntity.id;
@@ -52,26 +65,51 @@ export async function POST(req: Request) {
 
   // Default to RECEPTIONIST if no role is specified
   if (!finalRole) {
-    finalRole = 'RECEPTIONIST';
+    finalRole = "RECEPTIONIST";
   }
 
-  const user = await prisma.user.create({ 
-    data: { 
-      email, 
-      password: hashed, 
-      name: name ?? '', 
-      role: finalRole, 
-      roleEntityId: finalRoleEntityId 
-    } 
+  // Normalize role name to uppercase for consistent mapping
+  const normalizedRole = finalRole.toUpperCase();
+
+  // Map RoleEntity names to User.role enum values
+  const roleMapping: Record<string, string> = {
+    ADMINISTRATOR: "ADMIN",
+    DOCTOR: "DOCTOR",
+    NURSE: "NURSE",
+    PHARMACIST: "PHARMACIST",
+    LAB_TECH: "LAB_TECH",
+    RECEPTIONIST: "RECEPTIONIST",
+    EMERGENCY: "EMERGENCY",
+    PATIENT: "ADMIN", // Fallback
+    BILLING_OFFICER: "ADMIN", // Fallback
+  };
+
+  const userRoleEnum = roleMapping[normalizedRole] || normalizedRole;
+
+  console.log("[POST /api/admin/users] Role mapping:", {
+    finalRole,
+    normalizedRole,
+    userRoleEnum,
+    hasMapping: normalizedRole in roleMapping,
   });
-  
-  await createAudit({ 
-    actorId: null, 
-    action: 'user.create', 
-    resource: 'User', 
-    resourceId: user.id, 
-    meta: { email, role: finalRole, roleEntityId: finalRoleEntityId } 
+
+  const user = await prisma.user.create({
+    data: {
+      email,
+      password: hashed,
+      name: name ?? "",
+      role: userRoleEnum as any,
+      roleEntityId: finalRoleEntityId,
+    },
   });
-  
+
+  await createAudit({
+    actorId: null,
+    action: "user.create",
+    resource: "User",
+    resourceId: user.id,
+    meta: { email, role: finalRole, roleEntityId: finalRoleEntityId },
+  });
+
   return NextResponse.json({ id: user.id, email: user.email });
 }

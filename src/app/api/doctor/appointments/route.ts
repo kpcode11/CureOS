@@ -75,7 +75,19 @@ export async function GET(req: Request) {
       where,
       include: {
         patient: { select: { id: true, firstName: true, lastName: true, phone: true, email: true } },
-        doctor: { select: { id: true, specialization: true, user: { select: { name: true } } } }
+        doctor: { select: { id: true, specialization: true, user: { select: { name: true } } } },
+        referral: {
+          select: {
+            id: true,
+            urgency: true,
+            fromDoctor: {
+              select: {
+                id: true,
+                user: { select: { name: true } }
+              }
+            }
+          }
+        }
       },
       orderBy: { dateTime: 'desc' },
       take: 200

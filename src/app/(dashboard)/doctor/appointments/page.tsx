@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Loader,
 } from "lucide-react";
+import { ReferralBadge } from "@/components/referrals/referral-badge";
 
 interface Appointment {
   id: string;
@@ -23,6 +24,15 @@ interface Appointment {
   reason: string;
   status: string;
   createdAt: string;
+  referral?: {
+    id: string;
+    urgency: string;
+    fromDoctor: {
+      user: {
+        name: string;
+      };
+    };
+  } | null;
 }
 
 export default function DoctorAppointmentsPage() {
@@ -148,6 +158,11 @@ export default function DoctorAppointmentsPage() {
                             </span>
                           </div>
                         </div>
+
+                        {/* Referral Badge */}
+                        {appointment.referral && (
+                          <ReferralBadge referral={appointment.referral} />
+                        )}
 
                         {/* Appointment Details */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
