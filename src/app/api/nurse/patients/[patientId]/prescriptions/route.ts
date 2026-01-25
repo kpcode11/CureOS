@@ -7,15 +7,26 @@ export async function GET(
   { params }: { params: { patientId: string } },
 ) {
   try {
-    await requirePermission(req, "lab.read");
+    await requirePermission(req, "prescription.read");
   } catch (err) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { patientId } = await params;
-  const rows = await prisma.labTest.findMany({
+  const prescriptions = await prisma.prescription.findMany({
     where: { patientId },
-    orderBy: { orderedAt: "desc" },
+    include: {
+      doctor: {
+        select: {
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
   });
-  return NextResponse.json(rows);
+  return NextResponse.json(prescriptions);
 }
