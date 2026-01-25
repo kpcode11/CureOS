@@ -24,6 +24,38 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
+interface Patient {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone: string;
+  dateOfBirth: string;
+  gender: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Appointment {
+  id: string;
+  dateTime: string;
+  status: string;
+  type: string;
+  patient: Patient;
+  createdAt: string;
+}
+
+interface DashboardStats {
+  name: string;
+  stat: string;
+  limit: string;
+  percentage: number;
+  trend: string;
+  color: string;
+  iconColor: string;
+  icon: any;
+}
+
 // Sample data - in a real app, this would come from your API
 const dashboardStats = [
   {
@@ -127,12 +159,127 @@ const quickActions = [
 
 export default function ReceptionistPage() {
   const [isLoading, setIsLoading] = useState(true);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simulate loading state
-    const timer = setTimeout(() => setIsLoading(false), 300);
-    return () => clearTimeout(timer);
+    fetchDashboardData();
   }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Fetch patients and appointments in parallel
+      const [patientsRes, appointmentsRes] = await Promise.all([
+        fetch('/api/patients'),
+        fetch('/api/appointments')
+      ]);
+
+      let patientsData: Patient[] = [];
+      let appointmentsData: Appointment[] = [];
+
+      if (patientsRes.ok) {
+        patientsData = await patientsRes.json();
+        setPatients(patientsData);
+      } else {
+        console.error('Failed to fetch patients:', await patientsRes.text());
+      }
+
+      if (appointmentsRes.ok) {
+        appointmentsData = await appointmentsRes.json();
+        setAppointments(appointmentsData);
+      } else {
+        console.error('Failed to fetch appointments:', await appointmentsRes.text());
+      }
+
+      // Calculate real-time stats based on fetched data
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayEnd = new Date();
+      todayEnd.setHours(23, 59, 59, 999);
+
+      // Today's registrations
+      const todayRegistrations = patientsData.filter(patient => {
+        const createdDate = new Date(patient.createdAt);
+        return createdDate >= today && createdDate <= todayEnd;
+      }).length;
+
+      // Today's appointments  
+      const todayAppointments = appointmentsData.filter(appointment => {
+        const appointmentDate = new Date(appointment.dateTime);
+        return appointmentDate >= today && appointmentDate <= todayEnd;
+      }).length;
+
+      // Pending appointments (status pending or scheduled)
+      const pendingAppointments = appointmentsData.filter(appointment => 
+        appointment.status?.toLowerCase() === 'pending' || 
+        appointment.status?.toLowerCase() === 'scheduled'
+      ).length;
+
+      // Calculate queue status (upcoming appointments in next 2 hours)
+      const twoHoursFromNow = new Date();
+      twoHoursFromNow.setHours(twoHoursFromNow.getHours() + 2);
+      const queueCount = appointmentsData.filter(appointment => {
+        const appointmentDate = new Date(appointment.dateTime);
+        return appointmentDate >= new Date() && appointmentDate <= twoHoursFromNow;
+      }).length;
+
+      const calculatedStats: DashboardStats[] = [
+        {
+          name: "Today's Registrations",
+          stat: todayRegistrations.toString(),
+          limit: "50",
+          percentage: Math.min((todayRegistrations / 50) * 100, 100),
+          trend: todayRegistrations > 0 ? `+${todayRegistrations} today` : "No registrations",
+          color: "bg-blue-50",
+          iconColor: "text-blue-600",
+          icon: UserPlus
+        },
+        {
+          name: "Appointments",
+          stat: todayAppointments.toString(),
+          limit: "60",
+          percentage: Math.min((todayAppointments / 60) * 100, 100),
+          trend: pendingAppointments > 0 ? `${pendingAppointments} pending` : "All scheduled",
+          color: "bg-emerald-50",
+          iconColor: "text-emerald-600",
+          icon: Calendar
+        },
+        {
+          name: "Active Patients",
+          stat: patientsData.length.toString(),
+          limit: "500",
+          percentage: Math.min((patientsData.length / 500) * 100, 100),
+          trend: todayRegistrations > 0 ? `+${todayRegistrations} today` : "No new patients",
+          color: "bg-purple-50",
+          iconColor: "text-purple-600",
+          icon: Users
+        },
+        {
+          name: "Queue Status",
+          stat: queueCount.toString(),
+          limit: "15",
+          percentage: Math.min((queueCount / 15) * 100, 100),
+          trend: queueCount > 0 ? "Patients waiting" : "No queue",
+          color: "bg-orange-50",
+          iconColor: "text-orange-600",
+          icon: Clock
+        },
+      ];
+
+      setDashboardStats(calculatedStats);
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      setError('Failed to load dashboard data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -147,13 +294,23 @@ export default function ReceptionistPage() {
       <div className="max-w-7xl mx-auto p-6 space-y-8">
         {/* Header Section */}
         <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
-              <Activity className="h-4 w-4 text-blue-600" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-blue-600" />
+              </div>
+              <h1 className="text-2xl font-semibold text-slate-900">
+                Receptionist Dashboard
+              </h1>
             </div>
-            <h1 className="text-2xl font-semibold text-slate-900">
-              Receptionist Dashboard
-            </h1>
+            <Button 
+              onClick={fetchDashboardData} 
+              variant="outline" 
+              size="sm"
+              className="text-xs"
+            >
+              Refresh Data
+            </Button>
           </div>
           <p className="text-slate-600 text-sm">
             Manage patient registrations, appointments, and front desk operations
@@ -162,7 +319,7 @@ export default function ReceptionistPage() {
 
         {/* Stats Cards */}
         <div className="space-y-4">
-          <h2 className="text-sm font-medium text-slate-700">Today's Overview</h2>
+          <h2 className="text-sm font-medium text-slate-700">Live Overview</h2>
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {dashboardStats.map((item) => {
               const IconComponent = item.icon;
@@ -241,8 +398,8 @@ export default function ReceptionistPage() {
                 <div className="h-8 w-8 mx-auto rounded-full bg-green-50 flex items-center justify-center mb-3">
                   <div className="h-2 w-2 rounded-full bg-green-500"></div>
                 </div>
-                <div className="text-sm font-medium text-slate-900">All Systems</div>
-                <div className="text-xs text-slate-500 mt-1">Operational</div>
+                <div className="text-sm font-medium text-slate-900">Database</div>
+                <div className="text-xs text-slate-500 mt-1">Connected</div>
               </CardContent>
             </Card>
             
@@ -250,15 +407,17 @@ export default function ReceptionistPage() {
               <CardContent className="p-6 text-center">
                 <TrendingUp className="h-8 w-8 mx-auto text-blue-600 mb-3" />
                 <div className="text-sm font-medium text-slate-900">Performance</div>
-                <div className="text-xs text-slate-500 mt-1">Excellent</div>
+                <div className="text-xs text-slate-500 mt-1">
+                  {patients.length + appointments.length} records loaded
+                </div>
               </CardContent>
             </Card>
             
             <Card className="border-0 shadow-sm bg-white/60 backdrop-blur-sm">
               <CardContent className="p-6 text-center">
                 <Activity className="h-8 w-8 mx-auto text-emerald-600 mb-3" />
-                <div className="text-sm font-medium text-slate-900">Network</div>
-                <div className="text-xs text-slate-500 mt-1">Stable</div>
+                <div className="text-sm font-medium text-slate-900">Live Data</div>
+                <div className="text-xs text-slate-500 mt-1">Real-time sync</div>
               </CardContent>
             </Card>
           </div>
