@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getSession } from "@/lib/authorization";
+import { prisma } from "@/lib/prisma";
 import { transcribeAudio } from "@/lib/whisper";
 import { parsePrescription } from "@/lib/prescriptionParser";
 import * as fs from "fs";
@@ -8,9 +8,9 @@ import * as path from "path";
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
+    const sessionRes = await getSession(req);
 
-    if (!session?.user?.id || session.user.role !== "DOCTOR") {
+    if (!sessionRes?.user?.id || sessionRes.user.role !== "DOCTOR") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -42,8 +42,8 @@ export async function POST(req: NextRequest) {
     const transcription = await transcribeAudio(audioPath);
     const parsedData = await parsePrescription(transcription);
 
-    const doctor = await db.doctor.findUnique({
-      where: { userId: session.user.id },
+    const doctor = await prisma.doctor.findUnique({
+      where: { userId: sessionRes.user.id },
     });
 
     if (!doctor) {
@@ -53,13 +53,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const prescription = await db.prescription.create({
+    const prescription = await prisma.prescription.create({
       data: {
         patientId,
         doctorId: doctor.id,
         medications: parsedData.medications,
         instructions: parsedData.additionalNotes,
-        transcription,
         dispensed: false,
       },
     });
