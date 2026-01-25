@@ -114,6 +114,13 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
           icon: <Home className="size-4" />,
           link: "/pharmacist",
         };
+      case "BILLING_OFFICER":
+        return {
+          id: "dashboard",
+          title: "Dashboard",
+          icon: <Home className="size-4" />,
+          link: "/billing",
+        };
       default:
         return {
           id: "dashboard",
@@ -304,12 +311,6 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
           link: "/receptionist/appointments",
         },
         {
-          id: "patients",
-          title: "Patient Records",
-          icon: <Users className="size-4" />,
-          link: "/receptionist/patients",
-        },
-        {
           id: "search",
           title: "Search Patients",
           icon: <Search className="size-4" />,
@@ -320,12 +321,6 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
           title: "Emergency",
           icon: <AlertTriangle className="size-4" />,
           link: "/receptionist/emergency",
-        },
-        {
-          id: "referrals",
-          title: "Referrals",
-          icon: <ArrowRightLeft className="size-4" />,
-          link: "/receptionist/referrals",
         },
       ];
 

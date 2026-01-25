@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 import {
   Card,
   CardContent,
@@ -55,17 +56,18 @@ export default function PatientSearch() {
 
   useEffect(() => {
     fetchPatients();
-    
+
     // Set up visibility change listener to refresh when page becomes visible
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log('Page became visible, refreshing patients...');
+        console.log("Page became visible, refreshing patients...");
         fetchPatients();
       }
     };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
   const fetchPatients = async () => {
@@ -73,11 +75,15 @@ export default function PatientSearch() {
       setLoading(true);
       const response = await fetch("/api/patients");
       if (!response.ok) {
-        console.error('Failed to fetch patients:', response.status, response.statusText);
+        console.error(
+          "Failed to fetch patients:",
+          response.status,
+          response.statusText,
+        );
         return;
       }
       const data = await response.json();
-      console.log('Fetched patients:', data);
+      console.log("Fetched patients:", data);
       setPatients(data || []);
     } catch (error) {
       console.error("Failed to fetch patients:", error);
@@ -132,8 +138,10 @@ export default function PatientSearch() {
               className="gap-2"
               disabled={loading}
             >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Refreshing...' : 'Refresh'}
+              <RefreshCw
+                className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+              />
+              {loading ? "Refreshing..." : "Refresh"}
             </Button>
             <Button
               onClick={() => router.push("/receptionist/registration")}
@@ -239,9 +247,13 @@ export default function PatientSearch() {
           </CardHeader>
           <CardContent className="p-0">
             {loading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-                <span className="ml-3 text-slate-600">Loading patients...</span>
+              <div className="p-6 space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <SkeletonShinyGradient
+                    key={i}
+                    className="h-16 rounded-lg bg-muted"
+                  />
+                ))}
               </div>
             ) : (
               <div className="overflow-x-auto">

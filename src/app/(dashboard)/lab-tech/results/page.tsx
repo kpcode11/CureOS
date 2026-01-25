@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 import {
   Table,
   TableBody,
@@ -166,8 +167,15 @@ export default function ResultsPage() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      Loading completed tests...
+                    <TableCell colSpan={7}>
+                      <div className="space-y-3 py-4">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <SkeletonShinyGradient
+                            key={i}
+                            className="h-16 rounded-lg bg-muted"
+                          />
+                        ))}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : filteredTests.length === 0 ? (

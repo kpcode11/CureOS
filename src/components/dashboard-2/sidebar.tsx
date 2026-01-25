@@ -140,8 +140,6 @@ const getMenuItems = (role?: string) => {
           href: "/receptionist/appointments",
         },
         { title: "Emergency", icon: Activity, href: "/receptionist/emergency" },
-        { title: "Patients", icon: Users, href: "/receptionist/patients" },
-        { title: "Referrals", icon: FileText, href: "/receptionist/referrals" },
         {
           title: "Registration",
           icon: UserCircle,

@@ -34,6 +34,7 @@ import { LeadSourcesChart } from "@/components/dashboard-2/lead-sources-chart";
 import { RevenueFlowChart } from "@/components/dashboard-2/revenue-flow-chart";
 import { DealsTable } from "@/components/dashboard-2/deals-table";
 import GooeyDepartmentDashboard from "@/components/gooey-department-dashboard";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 
 interface StatCard {
   title: string;
@@ -175,31 +176,42 @@ export default function AdminPage() {
 
           {/* Stats Cards Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 p-3 sm:p-4 lg:p-6 rounded-xl border bg-card">
-            {stats.map((stat, index) => (
-              <Link
-                key={stat.title}
-                href={stat.link || "#"}
-                className={`group flex flex-col justify-between p-4 rounded-lg transition-all ${stat.color} hover:shadow-md cursor-pointer`}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    {stat.icon}
-                    <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
-                      {stat.title}
-                    </span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
-                    {isLoading ? "-" : stat.value}
-                  </p>
-                  <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
-                    <TrendingUp className="w-3 h-3" />
-                    {stat.change}
-                  </div>
-                </div>
-              </Link>
-            ))}
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonShinyGradient
+                  key={i}
+                  className="h-32 rounded-lg bg-muted"
+                />
+              ))
+            ) : (
+              <>
+                {stats.map((stat, index) => (
+                  <Link
+                    key={stat.title}
+                    href={stat.link || "#"}
+                    className={`group flex flex-col justify-between p-4 rounded-lg transition-all ${stat.color} hover:shadow-md cursor-pointer`}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        {stat.icon}
+                        <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
+                          {stat.title}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
+                        {isLoading ? "-" : stat.value}
+                      </p>
+                      <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                        <TrendingUp className="w-3 h-3" />
+                        {stat.change}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </>
+            )}
           </div>
 
           {/* Charts */}

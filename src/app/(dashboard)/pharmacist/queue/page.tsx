@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 
@@ -246,12 +247,14 @@ export default function DispenseQueuePage() {
           transition={{ delay: 0.2 }}
         >
           {loading ? (
-            <Card className="border-slate-200">
-              <CardContent className="py-12 text-center">
-                <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-                <p className="text-slate-600">Loading queue...</p>
-              </CardContent>
-            </Card>
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonShinyGradient
+                  key={i}
+                  className="h-40 rounded-lg bg-muted"
+                />
+              ))}
+            </div>
           ) : queue.length === 0 ? (
             <Card className="border-green-200 bg-green-50">
               <CardContent className="py-16 text-center">

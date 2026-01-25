@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 
 interface AuditLog {
   id: string;
@@ -247,8 +248,13 @@ export default function AuditLogsPage() {
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+                <div className="space-y-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <SkeletonShinyGradient
+                      key={i}
+                      className="h-16 rounded-lg bg-muted"
+                    />
+                  ))}
                 </div>
               ) : filteredLogs.length === 0 ? (
                 <div className="text-center py-12">

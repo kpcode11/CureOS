@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 import {
   Dialog,
   DialogContent,
@@ -263,8 +264,28 @@ export default function ReceptionistReferralsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="space-y-6">
+            <SkeletonShinyGradient className="h-12 w-96 rounded-lg bg-muted" />
+            <div className="grid gap-4 md:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonShinyGradient
+                  key={i}
+                  className="h-24 rounded-lg bg-muted"
+                />
+              ))}
+            </div>
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonShinyGradient
+                  key={i}
+                  className="h-48 rounded-lg bg-muted"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

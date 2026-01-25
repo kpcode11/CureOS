@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 import {
   Card,
   CardContent,
@@ -251,13 +252,13 @@ export default function AppointmentBooking() {
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    
+
     // Update selectedPatient when patientId changes
     if (field === "patientId") {
       const patient = patients.find((p) => p.id === value);
       setSelectedPatient(patient || null);
     }
-    
+
     // Update selectedDoctor when doctorId changes
     if (field === "doctorId") {
       const doctor = doctors.find((d) => d.id === value);
@@ -271,10 +272,16 @@ export default function AppointmentBooking() {
 
     try {
       // Validate form data
-      if (!formData.patientId || !formData.doctorId || !formData.date || !formData.time) {
+      if (
+        !formData.patientId ||
+        !formData.doctorId ||
+        !formData.date ||
+        !formData.time
+      ) {
         toast({
           title: "Validation Error",
-          description: "Please fill in all required fields (Patient, Doctor, Date, Time)",
+          description:
+            "Please fill in all required fields (Patient, Doctor, Date, Time)",
           variant: "destructive",
         });
         setIsSubmitting(false);
@@ -445,11 +452,13 @@ export default function AppointmentBooking() {
             </CardHeader>
             <CardContent className="p-0">
               {loadingAppointments ? (
-                <div className="flex items-center justify-center py-16">
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-                  <span className="ml-3 text-slate-600">
-                    Loading appointments...
-                  </span>
+                <div className="p-6 space-y-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <SkeletonShinyGradient
+                      key={i}
+                      className="h-16 rounded-lg bg-muted"
+                    />
+                  ))}
                 </div>
               ) : (
                 <div className="overflow-x-auto">
