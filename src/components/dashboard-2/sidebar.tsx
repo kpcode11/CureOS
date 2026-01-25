@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import {
   Sidebar,
   SidebarContent,
@@ -50,44 +51,109 @@ import {
   CreditCard,
   Globe,
   Shield,
+  Stethoscope,
+  Pill,
+  TestTube,
+  Bed,
+  Activity,
+  Package2,
+  Briefcase,
+  DollarSign,
+  ClipboardList,
 } from "lucide-react";
 
-const menuItems = [
-  {
+const getMenuItems = (role?: string) => {
+  const baseItems = [{
     title: "Dashboard",
     icon: LayoutGrid,
-    href: "/admin",
+    href: role === 'ADMIN' ? "/admin" : `/${role?.toLowerCase()}`,
     isActive: true,
-  },
-  {
-    title: "Users",
-    icon: Users,
-    href: "/admin/rbac?tab=users",
-  },
-  {
-    title: "Roles",
-    icon: UserCircle,
-    href: "/admin/rbac?tab=roles",
-  },
-  {
-    title: "Permissions",
-    icon: Settings,
-    href: "/admin/rbac?tab=permissions",
-  },
-];
+  }];
 
-const folders = [
-  { name: "Billing", hasNotification: false, href: "/billing" },
-  { name: "Doctor Portal", hasNotification: false, href: "/doctor" },
-  { name: "Emergency", hasNotification: true, href: "/emergency" },
-  { name: "Laboratory", hasNotification: false, href: "/lab-tech" },
-  { name: "Pharmacy", hasNotification: true, href: "/pharmacist" },
-];
+  switch (role) {
+    case 'ADMIN':
+      return [
+        ...baseItems,
+        { title: "RBAC", icon: Shield, href: "/admin/rbac" },
+        { title: "Users", icon: Users, href: "/admin/users" },
+        { title: "Reports", icon: BarChart, href: "/admin/reports" },
+        { title: "Settings", icon: Settings, href: "/admin/settings" },
+        { title: "Insurance", icon: CreditCard, href: "/admin/insurance" },
+      ];
+    case 'DOCTOR':
+      return [
+        ...baseItems,
+        { title: "Appointments", icon: Calendar, href: "/doctor/appointments" },
+        { title: "Emergency", icon: Activity, href: "/doctor/emergency" },
+        { title: "Patients", icon: Users, href: "/doctor/patients" },
+        { title: "Prescriptions", icon: Pill, href: "/doctor/prescriptions" },
+        { title: "Referrals", icon: FileText, href: "/doctor/referrals" },
+        { title: "Surgeries", icon: Briefcase, href: "/doctor/surgeries" },
+      ];
+    case 'NURSE':
+      return [
+        ...baseItems,
+        { title: "Bed Assignments", icon: Bed, href: "/nurse/bed-assignments" },
+        { title: "Beds", icon: Bed, href: "/nurse/beds" },
+        { title: "Medication", icon: Pill, href: "/nurse/medication" },
+        { title: "Nursing Records", icon: FileText, href: "/nurse/nursing-records" },
+        { title: "Patients", icon: Users, href: "/nurse/patients" },
+        { title: "Vitals", icon: Activity, href: "/nurse/vitals" },
+        { title: "Ward", icon: LayoutGrid, href: "/nurse/ward" },
+      ];
+    case 'PHARMACIST':
+      return [
+        ...baseItems,
+        { title: "Dispense", icon: Package2, href: "/pharmacist/dispense" },
+        { title: "Inventory", icon: LayoutGrid, href: "/pharmacist/inventory" },
+        { title: "Prescriptions", icon: Pill, href: "/pharmacist/prescriptions" },
+        { title: "Queue", icon: ClipboardList, href: "/pharmacist/queue" },
+        { title: "Safety Alerts", icon: Activity, href: "/pharmacist/safety-alerts" },
+      ];
+    case 'LAB_TECH':
+      return [
+        ...baseItems,
+        { title: "Critical", icon: Activity, href: "/lab-tech/critical" },
+        { title: "Orders", icon: ClipboardList, href: "/lab-tech/orders" },
+        { title: "Results", icon: TestTube, href: "/lab-tech/results" },
+      ];
+    case 'RECEPTIONIST':
+      return [
+        ...baseItems,
+        { title: "Appointments", icon: Calendar, href: "/receptionist/appointments" },
+        { title: "Emergency", icon: Activity, href: "/receptionist/emergency" },
+        { title: "Patients", icon: Users, href: "/receptionist/patients" },
+        { title: "Referrals", icon: FileText, href: "/receptionist/referrals" },
+        { title: "Registration", icon: UserCircle, href: "/receptionist/registration" },
+        { title: "Search", icon: Globe, href: "/receptionist/search" },
+      ];
+    default:
+      return baseItems;
+  }
+};
+
+const getDepartments = (role?: string) => {
+  if (role === 'ADMIN') {
+    return [
+      { name: "Billing", hasNotification: false, href: "/billing" },
+      { name: "Doctor Portal", hasNotification: false, href: "/doctor" },
+      { name: "Emergency", hasNotification: true, href: "/emergency" },
+      { name: "Laboratory", hasNotification: false, href: "/lab-tech" },
+      { name: "Pharmacy", hasNotification: true, href: "/pharmacist" },
+    ];
+  }
+  return [];
+};
 
 export function DashboardSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
   const [foldersOpen, setFoldersOpen] = React.useState(true);
+  
+  const menuItems = getMenuItems(userRole);
+  const folders = getDepartments(userRole);
 
   return (
     <Sidebar collapsible="offcanvas" className="lg:border-r-0!" {...props}>
@@ -102,14 +168,20 @@ export function DashboardSidebar({
 
       <SidebarContent className="px-3 sm:px-4 lg:px-5">
         <div className="flex items-center gap-2 sm:gap-3 rounded-lg border bg-card p-2 sm:p-3 mb-3 sm:mb-4">
-          <div className="flex size-8 sm:size-[34px] items-center justify-center rounded-lg bg-linear-to-b from-[#6e3ff3] to-[#aa8ef9] text-white shrink-0">
-            <Atom className="size-4 sm:size-5" />
-          </div>
+          <Avatar className="size-8 sm:size-[34px] shrink-0">
+            <AvatarFallback className="bg-linear-to-b from-[#6e3ff3] to-[#aa8ef9] text-white text-xs sm:text-sm font-semibold">
+              {session?.user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'C'}
+            </AvatarFallback>
+          </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-xs sm:text-sm">CureOS Hospital</p>
+            <p className="font-semibold text-xs sm:text-sm">
+              {session?.user?.name ? `${session.user.name}'s Workspace` : 'CureOS Hospital'}
+            </p>
             <div className="flex items-center gap-1 text-muted-foreground">
               <Users className="size-3 sm:size-3.5" />
-              <span className="text-[10px] sm:text-xs">Professional</span>
+              <span className="text-[10px] sm:text-xs">
+                {userRole ? `${userRole} Portal` : 'Portal'}
+              </span>
             </div>
           </div>
         </div>
@@ -150,44 +222,46 @@ export function DashboardSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <Collapsible open={foldersOpen} onOpenChange={setFoldersOpen}>
-          <SidebarGroup className="p-0">
-            <SidebarGroupLabel className="flex items-center justify-between px-0 text-[10px] sm:text-[11px] font-semibold tracking-wider text-muted-foreground">
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center gap-1.5 cursor-pointer">
-                  <ChevronDown
-                    className={`size-3 sm:size-3.5 transition-transform ${
-                      foldersOpen ? "" : "-rotate-90"
-                    }`}
-                  />
-                  DEPARTMENTS
-                </div>
-              </CollapsibleTrigger>
-              <MoreHorizontal className="size-4 cursor-pointer hover:text-foreground transition-colors" />
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu className="mt-2">
-                  {folders.map((folder) => (
-                    <SidebarMenuItem key={folder.name}>
-                      <SidebarMenuButton asChild className="h-9 sm:h-[38px]">
-                        <Link href={folder.href || "#"}>
-                          <Folder className="size-4 sm:size-5 text-muted-foreground" />
-                          <span className="flex-1 text-muted-foreground text-sm truncate">
-                            {folder.name}
-                          </span>
-                          {folder.hasNotification && (
-                            <div className="size-1.5 rounded-full bg-[#6e3ff3] shrink-0" />
-                          )}
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+        {folders.length > 0 && (
+          <Collapsible open={foldersOpen} onOpenChange={setFoldersOpen}>
+            <SidebarGroup className="p-0">
+              <SidebarGroupLabel className="flex items-center justify-between px-0 text-[10px] sm:text-[11px] font-semibold tracking-wider text-muted-foreground">
+                <CollapsibleTrigger asChild>
+                  <div className="flex items-center gap-1.5 cursor-pointer">
+                    <ChevronDown
+                      className={`size-3 sm:size-3.5 transition-transform ${
+                        foldersOpen ? "" : "-rotate-90"
+                      }`}
+                    />
+                    DEPARTMENTS
+                  </div>
+                </CollapsibleTrigger>
+                <MoreHorizontal className="size-4 cursor-pointer hover:text-foreground transition-colors" />
+              </SidebarGroupLabel>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu className="mt-2">
+                    {folders.map((folder) => (
+                      <SidebarMenuItem key={folder.name}>
+                        <SidebarMenuButton asChild className="h-9 sm:h-[38px]">
+                          <Link href={folder.href || "#"}>
+                            <Folder className="size-4 sm:size-5 text-muted-foreground" />
+                            <span className="flex-1 text-muted-foreground text-sm truncate">
+                              {folder.name}
+                            </span>
+                            {folder.hasNotification && (
+                              <div className="size-1.5 rounded-full bg-[#6e3ff3] shrink-0" />
+                            )}
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="px-3 sm:px-4 lg:px-5 pb-3 sm:pb-4 lg:pb-5">
@@ -195,12 +269,16 @@ export function DashboardSidebar({
           <DropdownMenuTrigger asChild>
             <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg cursor-pointer hover:bg-accent transition-colors">
               <Avatar className="size-7 sm:size-8">
-                <AvatarFallback className="text-xs">JC</AvatarFallback>
+                <AvatarFallback className="text-xs">
+                  {session?.user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-xs sm:text-sm">John Connor</p>
+                <p className="font-semibold text-xs sm:text-sm">
+                  {session?.user?.name || 'Unknown User'}
+                </p>
                 <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                  Admin
+                  {session?.user?.role || 'No Role'}
                 </p>
               </div>
               <ChevronsUpDown className="size-4 text-muted-foreground shrink-0" />
