@@ -14,7 +14,8 @@ export function WelcomeSection() {
     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6">
       <div className="space-y-2 sm:space-y-5">
         <h2 className="text-lg sm:text-[22px] font-semibold leading-relaxed">
-          Welcome Back, John!
+          Welcome Back
+          
         </h2>
         <p className="text-sm sm:text-base text-muted-foreground">
           Today you have <span className="text-foreground font-medium">3 new leads</span>,{" "}
