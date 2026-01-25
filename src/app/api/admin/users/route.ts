@@ -1,24 +1,33 @@
-import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-import { prisma } from '@/lib/prisma';
-import { requirePermission } from '@/lib/authorization';
-import { createAudit } from '@/services/audit.service';
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { prisma } from "@/lib/prisma";
+import { requirePermission } from "@/lib/authorization";
+import { createAudit } from "@/services/audit.service";
 
 export async function GET(req: Request) {
   try {
-    await requirePermission(req, 'admin.users.read');
+    await requirePermission(req, "admin.users.read");
   } catch (err) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  const users = await prisma.user.findMany({ select: { id: true, email: true, name: true, role: true, roleEntityId: true, createdAt: true } });
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      roleEntityId: true,
+      createdAt: true,
+    },
+  });
   return NextResponse.json(users);
 }
 
 export async function POST(req: Request) {
   try {
-    await requirePermission(req, 'admin.users.create');
+    await requirePermission(req, "admin.users.create");
   } catch (err) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const body = await req.json().catch(() => null);

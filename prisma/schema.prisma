@@ -47,19 +47,22 @@ model Patient {
   emrRecords       EMR[]
   labTests         LabTest[]
   prescriptions    Prescription[]
+  referrals        Referral[]
 }
 
 model Doctor {
-  id             String         @id @default(cuid())
-  userId         String         @unique
-  specialization String
-  licenseNumber  String         @unique
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  appointments   Appointment[]
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  prescriptions  Prescription[]
-  surgeries      Surgery[]
+  id                String         @id @default(cuid())
+  userId            String         @unique
+  specialization    String
+  licenseNumber     String         @unique
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  appointments      Appointment[]
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prescriptions     Prescription[]
+  referralsSent     Referral[]     @relation("ReferralsFrom")
+  referralsReceived Referral[]     @relation("ReferralsTo")
+  surgeries         Surgery[]
 }
 
 model Nurse {
@@ -112,19 +115,22 @@ model Admin {
 }
 
 model Appointment {
-  id             String            @id @default(cuid())
-  patientId      String
-  doctorId       String
-  receptionistId String?
-  dateTime       DateTime
-  reason         String
-  status         AppointmentStatus @default(SCHEDULED)
-  notes          String?
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  doctor         Doctor            @relation(fields: [doctorId], references: [id])
-  patient        Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  receptionist   Receptionist?     @relation(fields: [receptionistId], references: [id])
+  id                                           String            @id @default(cuid())
+  patientId                                    String
+  doctorId                                     String
+  receptionistId                               String?
+  dateTime                                     DateTime
+  reason                                       String
+  status                                       AppointmentStatus @default(SCHEDULED)
+  notes                                        String?
+  createdAt                                    DateTime          @default(now())
+  updatedAt                                    DateTime          @updatedAt
+  referralId                                   String?           @unique
+  doctor                                       Doctor            @relation(fields: [doctorId], references: [id])
+  patient                                      Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  receptionist                                 Receptionist?     @relation(fields: [receptionistId], references: [id])
+  referral                                     Referral?         @relation(fields: [referralId], references: [id])
+  Referral_Referral_appointmentIdToAppointment Referral?         @relation("Referral_appointmentIdToAppointment")
 }
 
 model EMR {
@@ -141,51 +147,51 @@ model EMR {
 }
 
 model Prescription {
-  id               String      @id @default(cuid())
-  patientId        String
-  doctorId         String
-  pharmacistId     String?
-  medications      Json
-  instructions     String
-  dispensed        Boolean     @default(false)
-  dispensedAt      DateTime?
-  pharmacistNotes  String?
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-  doctor           Doctor      @relation(fields: [doctorId], references: [id])
-  patient          Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  pharmacist       Pharmacist? @relation(fields: [pharmacistId], references: [id])
+  id              String      @id @default(cuid())
+  patientId       String
+  doctorId        String
+  pharmacistId    String?
+  medications     Json
+  instructions    String
+  dispensed       Boolean     @default(false)
+  dispensedAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  pharmacistNotes String?
+  doctor          Doctor      @relation(fields: [doctorId], references: [id])
+  patient         Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  pharmacist      Pharmacist? @relation(fields: [pharmacistId], references: [id])
 }
 
 model LabTest {
-  id          String        @id @default(cuid())
-  patientId   String
-  labTechId   String?
-  testType    String
-  results     Json?
-  status      LabTestStatus @default(PENDING)
+  id           String        @id @default(cuid())
+  patientId    String
+  testType     String
+  priority     String        @default("ROUTINE")
+  results      Json?
+  labTechId    String?
+  completedAt  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   instructions String?
-  priority    String        @default("ROUTINE") // ROUTINE or URGENT
-  orderedAt   DateTime      @default(now())
-  completedAt DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  labTech     LabTech?      @relation(fields: [labTechId], references: [id])
-  patient     Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  orderedAt    DateTime      @default(now())
+  status       LabTestStatus @default(PENDING)
+  labTech      LabTech?      @relation(fields: [labTechId], references: [id])
+  patient      Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
 }
 
 model Surgery {
-  id              String        @id @default(cuid())
-  doctorId        String
-  patientName     String
-  surgeryType     String
-  scheduledAt     DateTime
-  status          SurgeryStatus @default(SCHEDULED)
-  notes           String?
+  id               String        @id @default(cuid())
+  doctorId         String
+  patientName      String
+  surgeryType      String
+  scheduledAt      DateTime
+  status           SurgeryStatus @default(SCHEDULED)
+  notes            String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
   anesthesiologist String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  doctor          Doctor        @relation(fields: [doctorId], references: [id])
+  doctor           Doctor        @relation(fields: [doctorId], references: [id])
 }
 
 model Bed {
@@ -286,9 +292,9 @@ model RoleEntity {
   id              String           @id @default(cuid())
   name            String           @unique
   description     String?
-  isSystemRole    Boolean          @default(false)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
+  isSystemRole    Boolean          @default(false)
   rolePermissions RolePermission[]
   users           User[]
 }
@@ -331,6 +337,39 @@ model AuditLog {
   actor      User?    @relation("AuditLog_actor", fields: [actorId], references: [id])
 
   @@index([actorId])
+}
+
+model Referral {
+  id                                              String          @id @default(cuid())
+  fromDoctorId                                    String
+  toDoctorId                                      String
+  patientId                                       String
+  reason                                          String
+  urgency                                         ReferralUrgency @default(ROUTINE)
+  status                                          ReferralStatus  @default(PENDING)
+  clinicalNotes                                   String?
+  requestedTests                                  String[]
+  attachments                                     String[]
+  acceptedBy                                      String?
+  acceptedAt                                      DateTime?
+  rejectedReason                                  String?
+  rejectedAt                                      DateTime?
+  appointmentId                                   String?         @unique
+  expiresAt                                       DateTime?
+  metadata                                        Json?
+  createdAt                                       DateTime        @default(now())
+  updatedAt                                       DateTime        @updatedAt
+  appointment                                     Appointment?
+  Appointment_Referral_appointmentIdToAppointment Appointment?    @relation("Referral_appointmentIdToAppointment", fields: [appointmentId], references: [id])
+  fromDoctor                                      Doctor          @relation("ReferralsFrom", fields: [fromDoctorId], references: [id])
+  patient                                         Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  toDoctor                                        Doctor          @relation("ReferralsTo", fields: [toDoctorId], references: [id])
+
+  @@index([fromDoctorId])
+  @@index([toDoctorId])
+  @@index([patientId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 enum Role {
@@ -396,4 +435,18 @@ enum IncidentStatus {
   INVESTIGATING
   RESOLVED
   CLOSED
+}
+
+enum ReferralStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CONVERTED
+  EXPIRED
+}
+
+enum ReferralUrgency {
+  ROUTINE
+  URGENT
+  EMERGENCY
 }

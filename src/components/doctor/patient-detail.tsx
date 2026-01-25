@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useDoctor, PatientDetail, Appointment } from '@/hooks/use-doctor';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useEffect, useState } from "react";
+import { useDoctor, PatientDetail, Appointment } from "@/hooks/use-doctor";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Loader,
   AlertCircle,
@@ -13,8 +13,10 @@ import {
   Pill,
   Microscope,
   Bed,
-  ChevronDown
-} from 'lucide-react';
+  ChevronDown,
+  UserPlus,
+} from "lucide-react";
+import { CreateReferralDialog } from "@/components/referrals/create-referral-dialog";
 
 interface PatientDetailComponentProps {
   patientId: string;
@@ -27,7 +29,7 @@ export function PatientDetailComponent({
   patientId,
   onOpenEMR,
   onOpenPrescription,
-  onOpenLabOrder
+  onOpenLabOrder,
 }: PatientDetailComponentProps) {
   const { getPatientDetail, loading, error } = useDoctor();
   const [patient, setPatient] = useState<PatientDetail | null>(null);
@@ -73,7 +75,8 @@ export function PatientDetailComponent({
     );
   }
 
-  const age = new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear();
+  const age =
+    new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear();
 
   return (
     <div className="space-y-4">
@@ -86,7 +89,8 @@ export function PatientDetailComponent({
                 {patient.firstName} {patient.lastName}
               </CardTitle>
               <p className="text-sm text-gray-600 mt-1">
-                {age} years old • {patient.gender} • {patient.bloodType || 'Type: N/A'}
+                {age} years old • {patient.gender} •{" "}
+                {patient.bloodType || "Type: N/A"}
               </p>
             </div>
           </div>
@@ -133,6 +137,15 @@ export function PatientDetailComponent({
             Order Lab Test
           </Button>
         )}
+        <CreateReferralDialog
+          defaultPatientId={patientId}
+          trigger={
+            <Button variant="outline" size="sm">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Refer to Specialist
+            </Button>
+          }
+        />
       </div>
 
       {/* Tabs with patient data */}
@@ -168,9 +181,7 @@ export function PatientDetailComponent({
             patient.emrRecords.map((emr) => (
               <Card key={emr.id}>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base">
-                    {emr.diagnosis}
-                  </CardTitle>
+                  <CardTitle className="text-base">{emr.diagnosis}</CardTitle>
                   <p className="text-xs text-gray-500">
                     {new Date(emr.createdAt).toLocaleDateString()}
                   </p>
@@ -220,11 +231,11 @@ export function PatientDetailComponent({
                       </p>
                       <span
                         className={`inline-block mt-2 px-2 py-1 rounded text-xs font-medium ${
-                          apt.status === 'COMPLETED'
-                            ? 'bg-green-100 text-green-800'
-                            : apt.status === 'CANCELLED'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-blue-100 text-blue-800'
+                          apt.status === "COMPLETED"
+                            ? "bg-green-100 text-green-800"
+                            : apt.status === "CANCELLED"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-blue-100 text-blue-800"
                         }`}
                       >
                         {apt.status}
@@ -262,11 +273,11 @@ export function PatientDetailComponent({
                       </p>
                       <span
                         className={`inline-block mt-2 px-2 py-1 rounded text-xs font-medium ${
-                          lab.status === 'COMPLETED'
-                            ? 'bg-green-100 text-green-800'
-                            : lab.status === 'FAILED'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-yellow-100 text-yellow-800'
+                          lab.status === "COMPLETED"
+                            ? "bg-green-100 text-green-800"
+                            : lab.status === "FAILED"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
                         {lab.status}
@@ -309,11 +320,11 @@ export function PatientDetailComponent({
                     <span
                       className={`px-2 py-1 rounded text-xs font-medium ${
                         rx.dispensed
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-orange-100 text-orange-800'
+                          ? "bg-green-100 text-green-800"
+                          : "bg-orange-100 text-orange-800"
                       }`}
                     >
-                      {rx.dispensed ? 'Dispensed' : 'Pending'}
+                      {rx.dispensed ? "Dispensed" : "Pending"}
                     </span>
                   </div>
                 </CardHeader>
