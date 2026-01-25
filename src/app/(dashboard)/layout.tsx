@@ -3,17 +3,19 @@
 import React from "react";
 import { SessionProvider } from "next-auth/react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { DashboardSidebar } from "@/components/sidebar-02/app-sidebar";
+import { DashboardSidebar } from "@/components/dashboard-2/sidebar";
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider className="bg-sidebar">
       <DashboardSidebar />
-      <SidebarInset>
-        <main className="flex-1 overflow-auto">
-          {children}
-        </main>
-      </SidebarInset>
+      <div className="h-svh overflow-hidden lg:p-2 w-full">
+        <div className="lg:border lg:rounded-md overflow-hidden flex flex-col h-full w-full bg-background">
+          <main className="flex-1 overflow-auto">
+            {children}
+          </main>
+        </div>
+      </div>
     </SidebarProvider>
   );
 }
