@@ -114,6 +114,13 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
           icon: <Home className="size-4" />,
           link: "/pharmacist",
         };
+      case "BILLING_OFFICER":
+        return {
+          id: "dashboard",
+          title: "Dashboard",
+          icon: <Home className="size-4" />,
+          link: "/billing",
+        };
       default:
         return {
           id: "dashboard",

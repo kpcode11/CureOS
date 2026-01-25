@@ -2,13 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "motion/react";
+import { useSession } from "next-auth/react";
 import {
-  CreditCard,
-  DollarSign,
+  IndianRupee,
   Search,
-  Filter,
-  Plus,
   Clock,
   CheckCircle2,
   AlertCircle,
@@ -16,17 +13,14 @@ import {
   ArrowRight,
   TrendingUp,
   FileText,
+  Users,
+  Command,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface BillingRecord {
   id: string;
@@ -67,6 +61,7 @@ const statusConfig = {
 };
 
 export default function BillingPage() {
+  const { data: session } = useSession();
   const [bills, setBills] = useState<BillingRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -108,212 +103,173 @@ export default function BillingPage() {
     overdue: bills.filter((b) => b.status === "OVERDUE").length,
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-      {/* Hero Header */}
-      <motion.div
-        className="relative bg-white border-b"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-blue-600 rounded-lg">
-                  <CreditCard className="w-6 h-6 text-white" />
-                </div>
-                <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
-                  Billing & Payments
-                </h1>
-              </div>
-              <p className="text-slate-600 text-lg">
-                Manage invoices, payments, and financial records
-              </p>
+    <div className="h-svh overflow-hidden lg:p-2 w-full">
+      <div className="lg:border lg:rounded-md overflow-hidden flex flex-col h-full w-full bg-background">
+        {/* Header */}
+        <header className="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 border-b bg-card sticky top-0 z-10 w-full">
+          <h1 className="text-base sm:text-lg font-medium flex-1 truncate">
+            Billing & Payments
+          </h1>
+
+          <div className="hidden md:block relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
+            <Input
+              placeholder="Search Anything..."
+              className="pl-10 pr-14 w-[180px] lg:w-[220px] h-9 bg-card border"
+            />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 bg-muted px-1 py-0.5 rounded text-xs text-muted-foreground">
+              <Command className="size-3" />
+              <span>K</span>
             </div>
-            <Link href="/billing/create">
-              <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg">
-                <Plus className="w-4 h-4 mr-2" />
-                New Invoice
-              </Button>
+          </div>
+
+          <ThemeToggle />
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 bg-background w-full">
+          {/* Welcome Section */}
+          <div className="space-y-2 sm:space-y-3">
+            <h2 className="text-lg sm:text-[22px] font-semibold leading-relaxed">
+              Welcome Back, {session?.user?.name || "Billing Officer"}!
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Financial overview and billing management
+            </p>
+          </div>
+
+          {/* Stats Cards Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 p-3 sm:p-4 lg:p-6 rounded-xl border bg-card">
+            <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-blue-50 dark:bg-blue-900/20">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <IndianRupee className="w-5 h-5" />
+                  <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
+                    Total Revenue
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
+                  ₹{loading ? "0" : stats.total.toLocaleString()}
+                </p>
+                <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                  <TrendingUp className="w-3 h-3" />
+                  +12.5%
+                </div>
+              </div>
+            </div>
+
+            <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-yellow-50 dark:bg-yellow-900/20">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Clock className="w-5 h-5" />
+                  <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
+                    Pending
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
+                  {loading ? "-" : stats.pending}
+                </p>
+              </div>
+            </div>
+
+            <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-green-50 dark:bg-green-900/20">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
+                    Paid
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
+                  {loading ? "-" : stats.paid}
+                </p>
+              </div>
+            </div>
+
+            <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-red-50 dark:bg-red-900/20">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <AlertCircle className="w-5 h-5" />
+                  <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
+                    Overdue
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
+                  {loading ? "-" : stats.overdue}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+            <Link
+              href="/billing/overdue"
+              className="group relative overflow-hidden rounded-lg border bg-card p-4 transition-all hover:bg-accent hover:border-primary/20"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-md bg-red-100 dark:bg-red-900/30 p-2 text-red-600 dark:text-red-400">
+                    <AlertCircle className="h-4 w-4" />
+                  </div>
+                  <h4 className="font-medium text-sm">View Overdue Bills</h4>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </div>
+            </Link>
+
+            <Link
+              href="/billing/audit-logs"
+              className="group relative overflow-hidden rounded-lg border bg-card p-4 transition-all hover:bg-accent hover:border-primary/20"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-md bg-blue-100 dark:bg-blue-900/30 p-2 text-blue-600 dark:text-blue-400">
+                    <FileText className="h-4 w-4" />
+                  </div>
+                  <h4 className="font-medium text-sm">Audit Logs</h4>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </div>
+            </Link>
+
+            <Link
+              href="/billing/patient"
+              className="group relative overflow-hidden rounded-lg border bg-card p-4 transition-all hover:bg-accent hover:border-primary/20"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-md bg-purple-100 dark:bg-purple-900/30 p-2 text-purple-600 dark:text-purple-400">
+                    <Users className="h-4 w-4" />
+                  </div>
+                  <h4 className="font-medium text-sm">Search by Patient</h4>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </div>
             </Link>
           </div>
-        </div>
-      </motion.div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.div variants={itemVariants}>
-            <Card className="border-none shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-blue-100 text-sm font-medium">
-                      Total Revenue
-                    </p>
-                    <p className="text-3xl font-bold mt-2">
-                      ₹{stats.total.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="p-3 bg-white/20 rounded-lg">
-                    <DollarSign className="w-8 h-8" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 mt-4 text-blue-100">
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="text-sm">+12.5% from last month</span>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div variants={itemVariants}>
-            <Card className="border-none shadow-lg hover:shadow-xl transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-600 text-sm font-medium">
-                      Pending
-                    </p>
-                    <p className="text-3xl font-bold text-slate-900 mt-2">
-                      {stats.pending}
-                    </p>
-                  </div>
-                  <div className="p-3 bg-yellow-100 rounded-lg">
-                    <Clock className="w-8 h-8 text-yellow-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div variants={itemVariants}>
-            <Card className="border-none shadow-lg hover:shadow-xl transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-600 text-sm font-medium">Paid</p>
-                    <p className="text-3xl font-bold text-slate-900 mt-2">
-                      {stats.paid}
-                    </p>
-                  </div>
-                  <div className="p-3 bg-green-100 rounded-lg">
-                    <CheckCircle2 className="w-8 h-8 text-green-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div variants={itemVariants}>
-            <Card className="border-none shadow-lg hover:shadow-xl transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-600 text-sm font-medium">
-                      Overdue
-                    </p>
-                    <p className="text-3xl font-bold text-slate-900 mt-2">
-                      {stats.overdue}
-                    </p>
-                  </div>
-                  <div className="p-3 bg-red-100 rounded-lg">
-                    <AlertCircle className="w-8 h-8 text-red-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </motion.div>
-
-        {/* Quick Links */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Link href="/billing/overdue">
-            <Card className="border-2 border-red-200 hover:border-red-300 hover:shadow-lg transition-all cursor-pointer">
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-600" />
-                  <span className="font-semibold text-slate-900">
-                    View Overdue Bills
-                  </span>
-                </div>
-                <ArrowRight className="w-5 h-5 text-slate-400" />
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/billing/audit-logs">
-            <Card className="border-2 border-blue-200 hover:border-blue-300 hover:shadow-lg transition-all cursor-pointer">
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                  <span className="font-semibold text-slate-900">
-                    Audit Logs
-                  </span>
-                </div>
-                <ArrowRight className="w-5 h-5 text-slate-400" />
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/billing/patient">
-            <Card className="border-2 border-purple-200 hover:border-purple-300 hover:shadow-lg transition-all cursor-pointer">
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Search className="w-5 h-5 text-purple-600" />
-                  <span className="font-semibold text-slate-900">
-                    Search by Patient
-                  </span>
-                </div>
-                <ArrowRight className="w-5 h-5 text-slate-400" />
-              </CardContent>
-            </Card>
-          </Link>
-        </motion.div>
-
-        {/* Filters & Search */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card className="mb-6 border-none shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row gap-4">
+          {/* Search & Filters */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex flex-col md:flex-row gap-3">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
                     type="text"
                     placeholder="Search by patient ID or description..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 border-slate-200 focus:border-blue-500 h-11"
+                    className="pl-9 h-9"
                   />
                 </div>
                 <div className="flex gap-2 flex-wrap">
@@ -321,13 +277,13 @@ export default function BillingPage() {
                     (status) => (
                       <Button
                         key={status}
+                        size="sm"
                         variant={
                           statusFilter === status ? "default" : "outline"
                         }
                         onClick={() => setStatusFilter(status)}
-                        className={statusFilter === status ? "bg-blue-600" : ""}
+                        className="h-9 text-xs"
                       >
-                        <Filter className="w-4 h-4 mr-2" />
                         {status}
                       </Button>
                     ),
@@ -336,112 +292,111 @@ export default function BillingPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
 
-        {/* Billing Table */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <Card className="border-none shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl">Recent Invoices</CardTitle>
-              <CardDescription>
-                Showing {filteredBills.length} of {bills.length} total bills
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+          {/* Invoices Table */}
+          <Card>
+            <CardContent className="p-0">
+              <div className="px-4 sm:px-6 py-4 border-b">
+                <h3 className="text-base sm:text-lg font-semibold">
+                  Recent Invoices
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  Showing {filteredBills.length} of {bills.length} total bills
+                </p>
+              </div>
+
               {loading ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                 </div>
               ) : filteredBills.length === 0 ? (
                 <div className="text-center py-12">
-                  <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                  <p className="text-slate-600 text-lg">No bills found</p>
+                  <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="text-muted-foreground text-sm">
+                    No bills found
+                  </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-slate-200">
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                      <tr className="border-b bg-muted/50">
+                        <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">
                           Invoice ID
                         </th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
-                          Patient ID
+                        <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">
+                          Patient
                         </th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                        <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">
                           Description
                         </th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                        <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">
                           Amount
                         </th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                        <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">
                           Due Date
                         </th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                        <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">
                           Status
                         </th>
-                        <th className="text-left py-4 px-4 font-semibold text-slate-700">
+                        <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground">
                           Actions
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredBills.map((bill, index) => {
+                      {filteredBills.map((bill) => {
                         const StatusIcon = statusConfig[bill.status].icon;
                         return (
-                          <motion.tr
+                          <tr
                             key={bill.id}
-                            className="border-b border-slate-100 hover:bg-blue-50/50 transition-colors"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
+                            className="border-b hover:bg-muted/50 transition-colors"
                           >
-                            <td className="py-4 px-4">
-                              <span className="font-mono text-sm text-slate-600">
+                            <td className="py-3 px-4">
+                              <span className="font-mono text-xs text-muted-foreground">
                                 {bill.id.slice(0, 8)}
                               </span>
                             </td>
-                            <td className="py-4 px-4">
-                              <span className="font-medium text-slate-900">
+                            <td className="py-3 px-4">
+                              <span className="text-sm font-medium">
                                 {bill.patientId.slice(0, 8)}
                               </span>
                             </td>
-                            <td className="py-4 px-4 max-w-xs truncate">
-                              {bill.description}
+                            <td className="py-3 px-4 max-w-xs truncate">
+                              <span className="text-sm">
+                                {bill.description}
+                              </span>
                             </td>
-                            <td className="py-4 px-4">
-                              <span className="font-bold text-slate-900">
+                            <td className="py-3 px-4">
+                              <span className="text-sm font-semibold">
                                 ₹{bill.amount.toLocaleString()}
                               </span>
                             </td>
-                            <td className="py-4 px-4 text-slate-600">
+                            <td className="py-3 px-4 text-sm text-muted-foreground">
                               {new Date(bill.dueDate).toLocaleDateString()}
                             </td>
-                            <td className="py-4 px-4">
+                            <td className="py-3 px-4">
                               <Badge
-                                className={`${statusConfig[bill.status].color} border flex items-center gap-1 w-fit`}
+                                variant="outline"
+                                className={`${statusConfig[bill.status].color} border flex items-center gap-1 w-fit text-xs`}
                               >
                                 <StatusIcon className="w-3 h-3" />
                                 {statusConfig[bill.status].label}
                               </Badge>
                             </td>
-                            <td className="py-4 px-4">
+                            <td className="py-3 px-4">
                               <Link href={`/billing/${bill.id}`}>
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                  className="h-8 text-xs"
                                 >
-                                  View Details
-                                  <ArrowRight className="w-4 h-4 ml-1" />
+                                  View
+                                  <ArrowRight className="w-3 h-3 ml-1" />
                                 </Button>
                               </Link>
                             </td>
-                          </motion.tr>
+                          </tr>
                         );
                       })}
                     </tbody>
@@ -450,7 +405,7 @@ export default function BillingPage() {
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </main>
       </div>
     </div>
   );
