@@ -1,20 +1,26 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Plus, FileText, Clock, CheckCircle, XCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Plus, FileText, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -31,7 +37,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 
 interface Patient {
   id: string;
@@ -49,9 +55,14 @@ interface InsurancePolicy {
   coverageAmount: number;
   startDate: string;
   endDate: string;
-  status: 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'SUSPENDED';
+  status: "ACTIVE" | "EXPIRED" | "CANCELLED" | "SUSPENDED";
   patient: Patient;
-  claims: Array<{ id: string; claimNumber: string; status: string; claimAmount: number }>;
+  claims: Array<{
+    id: string;
+    claimNumber: string;
+    status: string;
+    claimAmount: number;
+  }>;
   createdAt: string;
 }
 
@@ -59,16 +70,16 @@ export default function PoliciesPage() {
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>("");
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    patientId: '',
-    provider: '',
-    policyNumber: '',
-    policyType: '',
-    coverageAmount: '',
-    startDate: '',
-    endDate: '',
+    patientId: "",
+    provider: "",
+    policyNumber: "",
+    policyType: "",
+    coverageAmount: "",
+    startDate: "",
+    endDate: "",
   });
 
   useEffect(() => {
@@ -80,12 +91,12 @@ export default function PoliciesPage() {
     try {
       const url = statusFilter
         ? `/api/insurance/policies?status=${statusFilter}`
-        : '/api/insurance/policies';
+        : "/api/insurance/policies";
       const res = await fetch(url);
       const data = await res.json();
       setPolicies(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('Failed to fetch policies:', err);
+      console.error("Failed to fetch policies:", err);
       setPolicies([]);
     } finally {
       setLoading(false);
@@ -94,11 +105,11 @@ export default function PoliciesPage() {
 
   const fetchPatients = async () => {
     try {
-      const res = await fetch('/api/patients');
+      const res = await fetch("/api/patients");
       const data = await res.json();
       setPatients(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('Failed to fetch patients:', err);
+      console.error("Failed to fetch patients:", err);
       setPatients([]);
     }
   };
@@ -106,60 +117,70 @@ export default function PoliciesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/insurance/policies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/insurance/policies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      
+
       if (res.ok) {
         setOpen(false);
         fetchPolicies();
         setFormData({
-          patientId: '',
-          provider: '',
-          policyNumber: '',
-          policyType: '',
-          coverageAmount: '',
-          startDate: '',
-          endDate: '',
+          patientId: "",
+          provider: "",
+          policyNumber: "",
+          policyType: "",
+          coverageAmount: "",
+          startDate: "",
+          endDate: "",
         });
       } else {
         const error = await res.json();
-        alert(error.error || 'Failed to create policy');
+        alert(error.error || "Failed to create policy");
       }
     } catch (err) {
-      console.error('Failed to create policy:', err);
-      alert('Failed to create policy');
+      console.error("Failed to create policy:", err);
+      alert("Failed to create policy");
     }
   };
 
   const stats = {
     total: policies.length,
-    active: policies.filter(p => p.status === 'ACTIVE').length,
-    expired: policies.filter(p => p.status === 'EXPIRED').length,
+    active: policies.filter((p) => p.status === "ACTIVE").length,
+    expired: policies.filter((p) => p.status === "EXPIRED").length,
     totalCoverage: policies
-      .filter(p => p.status === 'ACTIVE')
+      .filter((p) => p.status === "ACTIVE")
       .reduce((sum, p) => sum + p.coverageAmount, 0),
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return 'bg-green-500';
-      case 'EXPIRED': return 'bg-gray-500';
-      case 'CANCELLED': return 'bg-red-500';
-      case 'SUSPENDED': return 'bg-yellow-500';
-      default: return 'bg-gray-500';
+      case "ACTIVE":
+        return "bg-green-500";
+      case "EXPIRED":
+        return "bg-gray-500";
+      case "CANCELLED":
+        return "bg-red-500";
+      case "SUSPENDED":
+        return "bg-yellow-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return <CheckCircle className="h-4 w-4" />;
-      case 'EXPIRED': return <Clock className="h-4 w-4" />;
-      case 'CANCELLED': return <XCircle className="h-4 w-4" />;
-      case 'SUSPENDED': return <Clock className="h-4 w-4" />;
-      default: return <FileText className="h-4 w-4" />;
+      case "ACTIVE":
+        return <CheckCircle className="h-4 w-4" />;
+      case "EXPIRED":
+        return <Clock className="h-4 w-4" />;
+      case "CANCELLED":
+        return <XCircle className="h-4 w-4" />;
+      case "SUSPENDED":
+        return <Clock className="h-4 w-4" />;
+      default:
+        return <FileText className="h-4 w-4" />;
     }
   };
 
@@ -167,8 +188,12 @@ export default function PoliciesPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Insurance Policies</h2>
-          <p className="text-muted-foreground">Manage patient insurance policies</p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            Insurance Policies
+          </h2>
+          <p className="text-muted-foreground">
+            Manage patient insurance policies
+          </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -190,7 +215,9 @@ export default function PoliciesPage() {
                   <Label htmlFor="patientId">Patient</Label>
                   <Select
                     value={formData.patientId}
-                    onValueChange={(value) => setFormData({ ...formData, patientId: value })}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, patientId: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select patient" />
@@ -198,7 +225,8 @@ export default function PoliciesPage() {
                     <SelectContent>
                       {patients.map((patient) => (
                         <SelectItem key={patient.id} value={patient.id}>
-                          {patient.firstName} {patient.lastName} - {patient.email}
+                          {patient.firstName} {patient.lastName} -{" "}
+                          {patient.email}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -211,7 +239,9 @@ export default function PoliciesPage() {
                       id="provider"
                       placeholder="e.g., Blue Cross Blue Shield"
                       value={formData.provider}
-                      onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, provider: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -221,7 +251,12 @@ export default function PoliciesPage() {
                       id="policyNumber"
                       placeholder="e.g., POL-123456"
                       value={formData.policyNumber}
-                      onChange={(e) => setFormData({ ...formData, policyNumber: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          policyNumber: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -233,7 +268,9 @@ export default function PoliciesPage() {
                       id="policyType"
                       placeholder="e.g., Health, Life, Dental"
                       value={formData.policyType}
-                      onChange={(e) => setFormData({ ...formData, policyType: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, policyType: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -244,7 +281,12 @@ export default function PoliciesPage() {
                       type="number"
                       placeholder="e.g., 500000"
                       value={formData.coverageAmount}
-                      onChange={(e) => setFormData({ ...formData, coverageAmount: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          coverageAmount: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -256,7 +298,9 @@ export default function PoliciesPage() {
                       id="startDate"
                       type="date"
                       value={formData.startDate}
-                      onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, startDate: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -266,7 +310,9 @@ export default function PoliciesPage() {
                       id="endDate"
                       type="date"
                       value={formData.endDate}
-                      onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, endDate: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -289,7 +335,9 @@ export default function PoliciesPage() {
         >
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Policies</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Policies
+              </CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -305,7 +353,9 @@ export default function PoliciesPage() {
         >
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Policies</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Active Policies
+              </CardTitle>
               <CheckCircle className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
@@ -321,7 +371,9 @@ export default function PoliciesPage() {
         >
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Expired Policies</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Expired Policies
+              </CardTitle>
               <Clock className="h-4 w-4 text-gray-500" />
             </CardHeader>
             <CardContent>
@@ -337,11 +389,15 @@ export default function PoliciesPage() {
         >
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Coverage</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Coverage
+              </CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₹{stats.totalCoverage.toLocaleString()}</div>
+              <div className="text-2xl font-bold">
+                ₹{stats.totalCoverage.toLocaleString()}
+              </div>
             </CardContent>
           </Card>
         </motion.div>
@@ -375,7 +431,7 @@ export default function PoliciesPage() {
         <CardHeader>
           <CardTitle>Insurance Policies</CardTitle>
           <CardDescription>
-            {loading ? 'Loading...' : `${policies.length} policies found`}
+            {loading ? "Loading..." : `${policies.length} policies found`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -395,16 +451,22 @@ export default function PoliciesPage() {
             <TableBody>
               {policies.map((policy) => (
                 <TableRow key={policy.id}>
-                  <TableCell className="font-medium">{policy.policyNumber}</TableCell>
+                  <TableCell className="font-medium">
+                    {policy.policyNumber}
+                  </TableCell>
                   <TableCell>
                     {policy.patient.firstName} {policy.patient.lastName}
                   </TableCell>
                   <TableCell>{policy.provider}</TableCell>
                   <TableCell>{policy.policyType}</TableCell>
-                  <TableCell>₹{policy.coverageAmount.toLocaleString()}</TableCell>
+                  <TableCell>
+                    ₹{policy.coverageAmount.toLocaleString()}
+                  </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      <div>{new Date(policy.startDate).toLocaleDateString()}</div>
+                      <div>
+                        {new Date(policy.startDate).toLocaleDateString()}
+                      </div>
                       <div className="text-muted-foreground">
                         to {new Date(policy.endDate).toLocaleDateString()}
                       </div>

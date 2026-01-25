@@ -1,21 +1,21 @@
-import { NextResponse } from 'next/server';
-import { requirePermission } from '@/lib/authorization';
-import { prisma } from '@/lib/prisma';
-import { createAudit } from '@/services/audit.service';
+import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/authorization";
+import { prisma } from "@/lib/prisma";
+import { createAudit } from "@/services/audit.service";
 
 // GET all insurance policies
 export async function GET(req: Request) {
   try {
-    await requirePermission(req, 'insurance.read');
+    await requirePermission(req, "insurance.read");
   } catch (err) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
     const url = new URL(req.url);
-    const status = url.searchParams.get('status');
-    const patientId = url.searchParams.get('patientId');
-    
+    const status = url.searchParams.get("status");
+    const patientId = url.searchParams.get("patientId");
+
     const where: any = {};
     if (status) where.status = status;
     if (patientId) where.patientId = patientId;
@@ -41,14 +41,17 @@ export async function GET(req: Request) {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: 200,
     });
 
     return NextResponse.json(policies);
   } catch (err) {
-    console.error('Insurance policies GET error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("Insurance policies GET error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -56,10 +59,10 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   let actorId: string | null = null;
   try {
-    const res = await requirePermission(req, 'insurance.create');
+    const res = await requirePermission(req, "insurance.create");
     actorId = res.session?.user?.id ?? null;
   } catch (err) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
@@ -75,10 +78,18 @@ export async function POST(req: Request) {
     } = body;
 
     // Validation
-    if (!patientId || !provider || !policyNumber || !policyType || !coverageAmount || !startDate || !endDate) {
+    if (
+      !patientId ||
+      !provider ||
+      !policyNumber ||
+      !policyType ||
+      !coverageAmount ||
+      !startDate ||
+      !endDate
+    ) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
+        { error: "Missing required fields" },
+        { status: 400 },
       );
     }
 
@@ -88,7 +99,7 @@ export async function POST(req: Request) {
     });
 
     if (!patient) {
-      return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
+      return NextResponse.json({ error: "Patient not found" }, { status: 404 });
     }
 
     // Check if policy number already exists
@@ -98,8 +109,8 @@ export async function POST(req: Request) {
 
     if (existing) {
       return NextResponse.json(
-        { error: 'Policy number already exists' },
-        { status: 409 }
+        { error: "Policy number already exists" },
+        { status: 409 },
       );
     }
 
@@ -112,7 +123,7 @@ export async function POST(req: Request) {
         coverageAmount: parseFloat(coverageAmount),
         startDate: new Date(startDate),
         endDate: new Date(endDate),
-        status: 'ACTIVE',
+        status: "ACTIVE",
       },
       include: {
         patient: {
@@ -126,8 +137,8 @@ export async function POST(req: Request) {
 
     await createAudit({
       actorId,
-      action: 'insurance.policy.create',
-      resource: 'InsurancePolicy',
+      action: "insurance.policy.create",
+      resource: "InsurancePolicy",
       resourceId: policy.id,
       meta: {
         policyNumber: policy.policyNumber,
@@ -138,7 +149,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json(policy, { status: 201 });
   } catch (err) {
-    console.error('Insurance policy POST error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("Insurance policy POST error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

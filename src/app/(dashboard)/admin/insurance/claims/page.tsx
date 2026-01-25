@@ -1,21 +1,34 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Plus, FileText, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  Plus,
+  FileText,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +37,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -32,7 +45,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 
 interface Patient {
   id: string;
@@ -55,7 +68,7 @@ interface InsuranceClaim {
   claimAmount: number;
   approvedAmount: number | null;
   claimDate: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'PROCESSING' | 'PAID';
+  status: "PENDING" | "APPROVED" | "REJECTED" | "PROCESSING" | "PAID";
   description: string;
   documents: string[];
   notes: string | null;
@@ -69,21 +82,23 @@ export default function ClaimsPage() {
   const [claims, setClaims] = useState<InsuranceClaim[]>([]);
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>("");
   const [open, setOpen] = useState(false);
   const [processOpen, setProcessOpen] = useState(false);
-  const [selectedClaim, setSelectedClaim] = useState<InsuranceClaim | null>(null);
+  const [selectedClaim, setSelectedClaim] = useState<InsuranceClaim | null>(
+    null,
+  );
   const [formData, setFormData] = useState({
-    policyId: '',
-    patientId: '',
-    claimAmount: '',
-    description: '',
-    documents: '',
+    policyId: "",
+    patientId: "",
+    claimAmount: "",
+    description: "",
+    documents: "",
   });
   const [processData, setProcessData] = useState({
-    status: '',
-    approvedAmount: '',
-    notes: '',
+    status: "",
+    approvedAmount: "",
+    notes: "",
   });
 
   useEffect(() => {
@@ -95,12 +110,12 @@ export default function ClaimsPage() {
     try {
       const url = statusFilter
         ? `/api/insurance/claims?status=${statusFilter}`
-        : '/api/insurance/claims';
+        : "/api/insurance/claims";
       const res = await fetch(url);
       const data = await res.json();
       setClaims(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('Failed to fetch claims:', err);
+      console.error("Failed to fetch claims:", err);
       setClaims([]);
     } finally {
       setLoading(false);
@@ -109,11 +124,11 @@ export default function ClaimsPage() {
 
   const fetchPolicies = async () => {
     try {
-      const res = await fetch('/api/insurance/policies?status=ACTIVE');
+      const res = await fetch("/api/insurance/policies?status=ACTIVE");
       const data = await res.json();
       setPolicies(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('Failed to fetch policies:', err);
+      console.error("Failed to fetch policies:", err);
       setPolicies([]);
     }
   };
@@ -121,32 +136,34 @@ export default function ClaimsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/insurance/claims', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/insurance/claims", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          documents: formData.documents ? formData.documents.split(',').map(d => d.trim()) : [],
+          documents: formData.documents
+            ? formData.documents.split(",").map((d) => d.trim())
+            : [],
         }),
       });
-      
+
       if (res.ok) {
         setOpen(false);
         fetchClaims();
         setFormData({
-          policyId: '',
-          patientId: '',
-          claimAmount: '',
-          description: '',
-          documents: '',
+          policyId: "",
+          patientId: "",
+          claimAmount: "",
+          description: "",
+          documents: "",
         });
       } else {
         const error = await res.json();
-        alert(error.error || 'Failed to create claim');
+        alert(error.error || "Failed to create claim");
       }
     } catch (err) {
-      console.error('Failed to create claim:', err);
-      alert('Failed to create claim');
+      console.error("Failed to create claim:", err);
+      alert("Failed to create claim");
     }
   };
 
@@ -156,27 +173,27 @@ export default function ClaimsPage() {
 
     try {
       const res = await fetch(`/api/insurance/claims/${selectedClaim.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(processData),
       });
-      
+
       if (res.ok) {
         setProcessOpen(false);
         setSelectedClaim(null);
         fetchClaims();
         setProcessData({
-          status: '',
-          approvedAmount: '',
-          notes: '',
+          status: "",
+          approvedAmount: "",
+          notes: "",
         });
       } else {
         const error = await res.json();
-        alert(error.error || 'Failed to process claim');
+        alert(error.error || "Failed to process claim");
       }
     } catch (err) {
-      console.error('Failed to process claim:', err);
-      alert('Failed to process claim');
+      console.error("Failed to process claim:", err);
+      alert("Failed to process claim");
     }
   };
 
@@ -184,42 +201,54 @@ export default function ClaimsPage() {
     setSelectedClaim(claim);
     setProcessData({
       status: claim.status,
-      approvedAmount: claim.approvedAmount?.toString() || '',
-      notes: claim.notes || '',
+      approvedAmount: claim.approvedAmount?.toString() || "",
+      notes: claim.notes || "",
     });
     setProcessOpen(true);
   };
 
   const stats = {
     total: claims.length,
-    pending: claims.filter(c => c.status === 'PENDING').length,
-    approved: claims.filter(c => c.status === 'APPROVED').length,
-    rejected: claims.filter(c => c.status === 'REJECTED').length,
+    pending: claims.filter((c) => c.status === "PENDING").length,
+    approved: claims.filter((c) => c.status === "APPROVED").length,
+    rejected: claims.filter((c) => c.status === "REJECTED").length,
     totalClaimed: claims.reduce((sum, c) => sum + c.claimAmount, 0),
     totalApproved: claims
-      .filter(c => c.approvedAmount)
+      .filter((c) => c.approvedAmount)
       .reduce((sum, c) => sum + (c.approvedAmount || 0), 0),
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING': return 'bg-yellow-500';
-      case 'PROCESSING': return 'bg-blue-500';
-      case 'APPROVED': return 'bg-green-500';
-      case 'REJECTED': return 'bg-red-500';
-      case 'PAID': return 'bg-purple-500';
-      default: return 'bg-gray-500';
+      case "PENDING":
+        return "bg-yellow-500";
+      case "PROCESSING":
+        return "bg-blue-500";
+      case "APPROVED":
+        return "bg-green-500";
+      case "REJECTED":
+        return "bg-red-500";
+      case "PAID":
+        return "bg-purple-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'PENDING': return <Clock className="h-4 w-4" />;
-      case 'PROCESSING': return <AlertCircle className="h-4 w-4" />;
-      case 'APPROVED': return <CheckCircle className="h-4 w-4" />;
-      case 'REJECTED': return <XCircle className="h-4 w-4" />;
-      case 'PAID': return <CheckCircle className="h-4 w-4" />;
-      default: return <FileText className="h-4 w-4" />;
+      case "PENDING":
+        return <Clock className="h-4 w-4" />;
+      case "PROCESSING":
+        return <AlertCircle className="h-4 w-4" />;
+      case "APPROVED":
+        return <CheckCircle className="h-4 w-4" />;
+      case "REJECTED":
+        return <XCircle className="h-4 w-4" />;
+      case "PAID":
+        return <CheckCircle className="h-4 w-4" />;
+      default:
+        return <FileText className="h-4 w-4" />;
     }
   };
 
@@ -227,8 +256,12 @@ export default function ClaimsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Insurance Claims</h2>
-          <p className="text-muted-foreground">Process and manage insurance claims</p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            Insurance Claims
+          </h2>
+          <p className="text-muted-foreground">
+            Process and manage insurance claims
+          </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -251,11 +284,11 @@ export default function ClaimsPage() {
                   <Select
                     value={formData.policyId}
                     onValueChange={(value) => {
-                      const policy = policies.find(p => p.id === value);
-                      setFormData({ 
-                        ...formData, 
+                      const policy = policies.find((p) => p.id === value);
+                      setFormData({
+                        ...formData,
                         policyId: value,
-                        patientId: (policy as any)?.patientId || '',
+                        patientId: (policy as any)?.patientId || "",
                       });
                     }}
                   >
@@ -265,7 +298,8 @@ export default function ClaimsPage() {
                     <SelectContent>
                       {policies.map((policy: any) => (
                         <SelectItem key={policy.id} value={policy.id}>
-                          {policy.policyNumber} - {policy.provider} ({policy.patient.firstName} {policy.patient.lastName})
+                          {policy.policyNumber} - {policy.provider} (
+                          {policy.patient.firstName} {policy.patient.lastName})
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -278,7 +312,9 @@ export default function ClaimsPage() {
                     type="number"
                     placeholder="e.g., 50000"
                     value={formData.claimAmount}
-                    onChange={(e) => setFormData({ ...formData, claimAmount: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, claimAmount: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -288,18 +324,24 @@ export default function ClaimsPage() {
                     id="description"
                     placeholder="Describe the treatment/procedure"
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     required
                     rows={4}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="documents">Documents (comma-separated URLs)</Label>
+                  <Label htmlFor="documents">
+                    Documents (comma-separated URLs)
+                  </Label>
                   <Input
                     id="documents"
                     placeholder="e.g., https://example.com/doc1.pdf, https://example.com/doc2.pdf"
                     value={formData.documents}
-                    onChange={(e) => setFormData({ ...formData, documents: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, documents: e.target.value })
+                    }
                   />
                 </div>
               </div>
@@ -320,7 +362,9 @@ export default function ClaimsPage() {
         >
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Claims</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Claims
+              </CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -384,11 +428,15 @@ export default function ClaimsPage() {
         >
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Claimed</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Claimed
+              </CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₹{stats.totalClaimed.toLocaleString()}</div>
+              <div className="text-2xl font-bold">
+                ₹{stats.totalClaimed.toLocaleString()}
+              </div>
             </CardContent>
           </Card>
         </motion.div>
@@ -400,11 +448,15 @@ export default function ClaimsPage() {
         >
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Approved</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Approved
+              </CardTitle>
               <CheckCircle className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₹{stats.totalApproved.toLocaleString()}</div>
+              <div className="text-2xl font-bold">
+                ₹{stats.totalApproved.toLocaleString()}
+              </div>
             </CardContent>
           </Card>
         </motion.div>
@@ -439,7 +491,7 @@ export default function ClaimsPage() {
         <CardHeader>
           <CardTitle>Insurance Claims</CardTitle>
           <CardDescription>
-            {loading ? 'Loading...' : `${claims.length} claims found`}
+            {loading ? "Loading..." : `${claims.length} claims found`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -459,21 +511,31 @@ export default function ClaimsPage() {
             <TableBody>
               {claims.map((claim) => (
                 <TableRow key={claim.id}>
-                  <TableCell className="font-medium">{claim.claimNumber}</TableCell>
+                  <TableCell className="font-medium">
+                    {claim.claimNumber}
+                  </TableCell>
                   <TableCell>
                     {claim.patient.firstName} {claim.patient.lastName}
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
                       <div>{claim.policy.policyNumber}</div>
-                      <div className="text-muted-foreground">{claim.policy.provider}</div>
+                      <div className="text-muted-foreground">
+                        {claim.policy.provider}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>₹{claim.claimAmount.toLocaleString()}</TableCell>
                   <TableCell>
-                    {claim.approvedAmount ? `₹${claim.approvedAmount.toLocaleString()}` : '-'}
+                    {claim.approvedAmount
+                      ? `₹${claim.approvedAmount.toLocaleString()}`
+                      : "-"}
                   </TableCell>
-                  <TableCell>{new Date(claim.claimDate || claim.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {new Date(
+                      claim.claimDate || claim.createdAt,
+                    ).toLocaleDateString()}
+                  </TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(claim.status)}>
                       <span className="flex items-center gap-1">
@@ -513,7 +575,9 @@ export default function ClaimsPage() {
                 <Label htmlFor="status">Status</Label>
                 <Select
                   value={processData.status}
-                  onValueChange={(value) => setProcessData({ ...processData, status: value })}
+                  onValueChange={(value) =>
+                    setProcessData({ ...processData, status: value })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
@@ -534,7 +598,12 @@ export default function ClaimsPage() {
                   type="number"
                   placeholder="e.g., 45000"
                   value={processData.approvedAmount}
-                  onChange={(e) => setProcessData({ ...processData, approvedAmount: e.target.value })}
+                  onChange={(e) =>
+                    setProcessData({
+                      ...processData,
+                      approvedAmount: e.target.value,
+                    })
+                  }
                 />
               </div>
               <div className="grid gap-2">
@@ -543,7 +612,9 @@ export default function ClaimsPage() {
                   id="notes"
                   placeholder="Add processing notes"
                   value={processData.notes}
-                  onChange={(e) => setProcessData({ ...processData, notes: e.target.value })}
+                  onChange={(e) =>
+                    setProcessData({ ...processData, notes: e.target.value })
+                  }
                   rows={4}
                 />
               </div>

@@ -1,15 +1,18 @@
-import { NextResponse } from 'next/server';
-import { requirePermission } from '@/lib/authorization';
-import { prisma } from '@/lib/prisma';
-import { createAudit } from '@/services/audit.service';
+import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/authorization";
+import { prisma } from "@/lib/prisma";
+import { createAudit } from "@/services/audit.service";
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: Request,
+  { params }: { params: { id: string } },
+) {
   let actorId: string | null = null;
   try {
-    const res = await requirePermission(req, 'insurance.update');
+    const res = await requirePermission(req, "insurance.update");
     actorId = res.session?.user?.id ?? null;
   } catch (err) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
@@ -22,16 +25,20 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     });
 
     if (!existing) {
-      return NextResponse.json({ error: 'Claim not found' }, { status: 404 });
+      return NextResponse.json({ error: "Claim not found" }, { status: 404 });
     }
 
     const updated = await prisma.insuranceClaim.update({
       where: { id },
       data: {
         status: status || existing.status,
-        approvedAmount: approvedAmount !== undefined ? parseFloat(approvedAmount) : existing.approvedAmount,
+        approvedAmount:
+          approvedAmount !== undefined
+            ? parseFloat(approvedAmount)
+            : existing.approvedAmount,
         notes: notes || existing.notes,
-        processedAt: status && status !== 'PENDING' ? new Date() : existing.processedAt,
+        processedAt:
+          status && status !== "PENDING" ? new Date() : existing.processedAt,
       },
       include: {
         patient: {
@@ -51,8 +58,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     await createAudit({
       actorId,
-      action: 'insurance.claim.update',
-      resource: 'InsuranceClaim',
+      action: "insurance.claim.update",
+      resource: "InsuranceClaim",
       resourceId: id,
       before: existing,
       after: updated,
@@ -60,7 +67,10 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     return NextResponse.json(updated);
   } catch (err) {
-    console.error('Insurance claim PATCH error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("Insurance claim PATCH error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
