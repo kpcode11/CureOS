@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 import Link from "next/link";
 
 interface Prescription {
@@ -188,12 +189,14 @@ export default function PrescriptionsPage() {
           className="space-y-4"
         >
           {loading ? (
-            <Card className="border-slate-200">
-              <CardContent className="py-12 text-center">
-                <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-                <p className="text-slate-600">Loading prescriptions...</p>
-              </CardContent>
-            </Card>
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonShinyGradient
+                  key={i}
+                  className="h-48 rounded-lg bg-muted"
+                />
+              ))}
+            </div>
           ) : filteredPrescriptions.length === 0 ? (
             <Card className="border-slate-200">
               <CardContent className="py-12 text-center">

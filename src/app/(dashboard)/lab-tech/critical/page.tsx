@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 import {
   Table,
   TableBody,
@@ -182,8 +183,15 @@ export default function CriticalTestsPage() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      Loading critical tests...
+                    <TableCell colSpan={7}>
+                      <div className="space-y-3 py-4">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <SkeletonShinyGradient
+                            key={i}
+                            className="h-16 rounded-lg bg-muted"
+                          />
+                        ))}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : tests.length === 0 ? (

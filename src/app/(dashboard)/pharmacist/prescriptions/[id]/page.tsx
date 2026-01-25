@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 
@@ -184,13 +185,13 @@ export default function PrescriptionDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-50 p-8">
-        <div className="max-w-5xl mx-auto">
-          <Card className="border-slate-200">
-            <CardContent className="py-12 text-center">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-slate-600">Loading prescription details...</p>
-            </CardContent>
-          </Card>
+        <div className="max-w-5xl mx-auto space-y-6">
+          <SkeletonShinyGradient className="h-12 rounded-lg bg-muted" />
+          <SkeletonShinyGradient className="h-48 rounded-lg bg-muted" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <SkeletonShinyGradient className="h-64 rounded-lg bg-muted" />
+            <SkeletonShinyGradient className="h-64 rounded-lg bg-muted" />
+          </div>
         </div>
       </div>
     );

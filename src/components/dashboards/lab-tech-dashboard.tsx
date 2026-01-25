@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 import {
   FlaskConical,
   Clock,
@@ -172,57 +173,69 @@ export function LabTechDashboard() {
       )}
 
       {/* Main Stats Cards - Stats-02 Style */}
-      <div className="grid grid-cols-1 divide-y bg-border divide-border overflow-hidden rounded-lg md:grid-cols-3 md:divide-x md:divide-y-0">
-        {mainStats.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Card
-              key={item.metric}
-              className="rounded-none border-0 shadow-sm py-0 hover:bg-accent/50 transition-colors cursor-pointer group"
-              onClick={() => item.href && (window.location.href = item.href)}
-            >
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center justify-between mb-2">
-                  <CardTitle className="text-sm font-normal text-muted-foreground">
-                    {item.metric}
-                  </CardTitle>
-                  <div className={cn("p-2 rounded-lg", item.bgColor)}>
-                    <Icon className={cn("h-4 w-4", item.color)} />
+      {loading ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <SkeletonShinyGradient
+              key={i}
+              className="h-32 rounded-lg bg-muted"
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 divide-y bg-border divide-border overflow-hidden rounded-lg md:grid-cols-3 md:divide-x md:divide-y-0">
+          {mainStats.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Card
+                key={item.metric}
+                className="rounded-none border-0 shadow-sm py-0 hover:bg-accent/50 transition-colors cursor-pointer group"
+                onClick={() => item.href && (window.location.href = item.href)}
+              >
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <CardTitle className="text-sm font-normal text-muted-foreground">
+                      {item.metric}
+                    </CardTitle>
+                    <div className={cn("p-2 rounded-lg", item.bgColor)}>
+                      <Icon className={cn("h-4 w-4", item.color)} />
+                    </div>
                   </div>
-                </div>
-                <div className="mt-1 flex items-baseline gap-2 md:block lg:flex">
-                  <div className="flex items-baseline text-2xl font-semibold text-foreground">
-                    {item.current}
-                    <span className="ml-2 text-sm font-medium text-muted-foreground">
-                      from {item.previous}
-                    </span>
-                  </div>
+                  <div className="mt-1 flex items-baseline gap-2 md:block lg:flex">
+                    <div className="flex items-baseline text-2xl font-semibold text-foreground">
+                      {item.current}
+                      <span className="ml-2 text-sm font-medium text-muted-foreground">
+                        from {item.previous}
+                      </span>
+                    </div>
 
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "inline-flex items-center px-1.5 ps-2.5 py-0.5 text-xs font-medium md:mt-2 lg:mt-0",
-                      item.trend === "up"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800"
-                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
-                    )}
-                  >
-                    {item.trend === "up" ? (
-                      <TrendingUp className="mr-0.5 -ml-1 h-5 w-5 shrink-0 self-center text-green-500" />
-                    ) : (
-                      <TrendingDown className="mr-0.5 -ml-1 h-5 w-5 shrink-0 self-center text-red-500" />
-                    )}
-                    <span className="sr-only">
-                      {item.trend === "up" ? "Increased" : "Decreased"} by{" "}
-                    </span>
-                    {item.difference}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "inline-flex items-center px-1.5 ps-2.5 py-0.5 text-xs font-medium md:mt-2 lg:mt-0",
+                        item.trend === "up"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800"
+                          : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
+                      )}
+                    >
+                      {item.trend === "up" ? (
+                        <TrendingUp className="mr-0.5 -ml-1 h-5 w-5 shrink-0 self-center text-green-500" />
+                      ) : (
+                        <TrendingDown className="mr-0.5 -ml-1 h-5 w-5 shrink-0 self-center text-red-500" />
+                      )}
+                      <span className="sr-only">
+                        {item.trend === "up" ? "Increased" : "Decreased"}{" "}
+                        by{" "}
+                      </span>
+                      {item.difference}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {/* Secondary Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

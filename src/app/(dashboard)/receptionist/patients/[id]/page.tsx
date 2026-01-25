@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 import {
   Card,
   CardContent,
@@ -260,12 +261,16 @@ export default function PatientDetailsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
-          <p className="mt-4 text-slate-600 font-medium">
-            Loading patient details...
-          </p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="space-y-6">
+            <SkeletonShinyGradient className="h-12 w-96 rounded-lg bg-muted" />
+            <div className="grid gap-6 md:grid-cols-2">
+              <SkeletonShinyGradient className="h-96 rounded-lg bg-muted" />
+              <SkeletonShinyGradient className="h-96 rounded-lg bg-muted" />
+            </div>
+            <SkeletonShinyGradient className="h-64 rounded-lg bg-muted" />
+          </div>
         </div>
       </div>
     );

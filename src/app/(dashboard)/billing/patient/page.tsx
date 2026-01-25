@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 
 interface Patient {
   id: string;
@@ -216,85 +217,96 @@ export default function PatientBillingSearchPage() {
 
           {/* Stats Cards Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 p-3 sm:p-4 lg:p-6 rounded-xl border bg-card">
-            <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-blue-50 dark:bg-blue-900/20 hover:shadow-md cursor-pointer">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <IndianRupee className="w-5 h-5" />
-                  <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
-                    Total Revenue
-                  </span>
+            {loadingPatients ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonShinyGradient
+                  key={i}
+                  className="h-32 rounded-lg bg-muted"
+                />
+              ))
+            ) : (
+              <>
+                <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-blue-50 dark:bg-blue-900/20 hover:shadow-md cursor-pointer">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <IndianRupee className="w-5 h-5" />
+                      <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
+                        Total Revenue
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
+                      ₹{stats.totalRevenue.toLocaleString()}
+                    </p>
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                      <TrendingUp className="w-3 h-3" />
+                      +12%
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
-                  ₹{stats.totalRevenue.toLocaleString()}
-                </p>
-                <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
-                  <TrendingUp className="w-3 h-3" />
-                  +12%
-                </div>
-              </div>
-            </div>
 
-            <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-green-50 dark:bg-green-900/20 hover:shadow-md cursor-pointer">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <CheckCircle2 className="w-5 h-5" />
-                  <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
-                    Paid Bills
-                  </span>
+                <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-green-50 dark:bg-green-900/20 hover:shadow-md cursor-pointer">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
+                        Paid Bills
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
+                      {stats.paidBills}
+                    </p>
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                      <TrendingUp className="w-3 h-3" />
+                      +8%
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
-                  {stats.paidBills}
-                </p>
-                <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
-                  <TrendingUp className="w-3 h-3" />
-                  +8%
-                </div>
-              </div>
-            </div>
 
-            <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-yellow-50 dark:bg-yellow-900/20 hover:shadow-md cursor-pointer">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Clock className="w-5 h-5" />
-                  <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
-                    Pending Bills
-                  </span>
+                <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-yellow-50 dark:bg-yellow-900/20 hover:shadow-md cursor-pointer">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Clock className="w-5 h-5" />
+                      <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
+                        Pending Bills
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
+                      {stats.pendingBills}
+                    </p>
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                      <TrendingUp className="w-3 h-3" />
+                      +4%
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
-                  {stats.pendingBills}
-                </p>
-                <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
-                  <TrendingUp className="w-3 h-3" />
-                  +4%
-                </div>
-              </div>
-            </div>
 
-            <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-purple-50 dark:bg-purple-900/20 hover:shadow-md cursor-pointer">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <FileText className="w-5 h-5" />
-                  <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
-                    Total Bills
-                  </span>
+                <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-purple-50 dark:bg-purple-900/20 hover:shadow-md cursor-pointer">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <FileText className="w-5 h-5" />
+                      <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
+                        Total Bills
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
+                      {stats.totalBills}
+                    </p>
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                      <TrendingUp className="w-3 h-3" />
+                      +15%
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
-                  {stats.totalBills}
-                </p>
-                <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
-                  <TrendingUp className="w-3 h-3" />
-                  +15%
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
           {/* Patient Selector */}
@@ -402,6 +414,19 @@ export default function PatientBillingSearchPage() {
                           <p className="text-sm text-muted-foreground">
                             No billing records found
                           </p>
+                        </td>
+                      </tr>
+                    ) : loadingBilling ? (
+                      <tr>
+                        <td colSpan={7} className="p-4">
+                          <div className="space-y-3">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <SkeletonShinyGradient
+                                key={i}
+                                className="h-16 rounded-lg bg-muted"
+                              />
+                            ))}
+                          </div>
                         </td>
                       </tr>
                     ) : (

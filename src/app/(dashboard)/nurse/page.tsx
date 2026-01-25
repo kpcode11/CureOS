@@ -21,6 +21,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 
 export default function NurseDashboardPage() {
   const router = useRouter();

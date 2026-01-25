@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 import { Loader2 } from "lucide-react";
 import { useNurse } from "@/hooks/use-nurse";
 
@@ -33,7 +34,16 @@ export default function WardAssignmentsPage(){
             <CardDescription>{wardAssignments.length} active</CardDescription>
           </CardHeader>
           <CardContent>
-            {wardLoading ? <div className="py-12 flex items-center justify-center"><Loader2 className="animate-spin mr-2"/>Loading…</div> : (
+            {wardLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <SkeletonShinyGradient
+                    key={i}
+                    className="h-12 rounded-lg bg-muted"
+                  />
+                ))}
+              </div>
+            ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>

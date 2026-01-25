@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 
 interface BillingRecord {
   id: string;
@@ -112,65 +113,76 @@ export default function OverdueBillsPage() {
         <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 bg-background w-full">
           {/* Stats Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 p-3 sm:p-4 lg:p-6 rounded-xl border bg-card">
-            <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-red-50 dark:bg-red-900/20 hover:shadow-md cursor-pointer">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <IndianRupee className="w-5 h-5" />
-                  <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
-                    Total Overdue Amount
-                  </span>
+            {loading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonShinyGradient
+                  key={i}
+                  className="h-32 rounded-lg bg-muted"
+                />
+              ))
+            ) : (
+              <>
+                <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-red-50 dark:bg-red-900/20 hover:shadow-md cursor-pointer">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <IndianRupee className="w-5 h-5" />
+                      <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
+                        Total Overdue Amount
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
+                      ₹{totalOverdue.toLocaleString()}
+                    </p>
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-red-600 dark:text-red-400">
+                      <TrendingUp className="w-3 h-3" />
+                      Action required
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
-                  ₹{totalOverdue.toLocaleString()}
-                </p>
-                <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-red-600 dark:text-red-400">
-                  <TrendingUp className="w-3 h-3" />
-                  Action required
-                </div>
-              </div>
-            </div>
 
-            <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-orange-50 dark:bg-orange-900/20 hover:shadow-md cursor-pointer">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <AlertTriangle className="w-5 h-5" />
-                  <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
-                    Total Overdue Bills
-                  </span>
+                <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-orange-50 dark:bg-orange-900/20 hover:shadow-md cursor-pointer">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <AlertTriangle className="w-5 h-5" />
+                      <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
+                        Total Overdue Bills
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
+                      {bills.length}
+                    </p>
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                      <TrendingUp className="w-3 h-3" />
+                      +0%
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
-                  {bills.length}
-                </p>
-                <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
-                  <TrendingUp className="w-3 h-3" />
-                  +0%
-                </div>
-              </div>
-            </div>
 
-            <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-yellow-50 dark:bg-yellow-900/20 hover:shadow-md cursor-pointer">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Clock className="w-5 h-5" />
-                  <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
-                    Avg Days Overdue
-                  </span>
+                <div className="group flex flex-col justify-between p-4 rounded-lg transition-all bg-yellow-50 dark:bg-yellow-900/20 hover:shadow-md cursor-pointer">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Clock className="w-5 h-5" />
+                      <span className="text-[10px] sm:text-xs lg:text-sm font-medium">
+                        Avg Days Overdue
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
+                      {avgDaysOverdue}
+                    </p>
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                      <TrendingUp className="w-3 h-3" />
+                      Tracking
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
-                  {avgDaysOverdue}
-                </p>
-                <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
-                  <TrendingUp className="w-3 h-3" />
-                  Tracking
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
           {/* Search & Bills Table */}
@@ -201,8 +213,13 @@ export default function OverdueBillsPage() {
               </div>
 
               {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+                <div className="space-y-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <SkeletonShinyGradient
+                      key={i}
+                      className="h-16 rounded-lg bg-muted"
+                    />
+                  ))}
                 </div>
               ) : filteredBills.length === 0 ? (
                 <div className="text-center py-12">

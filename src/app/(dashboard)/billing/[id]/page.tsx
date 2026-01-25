@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 
 interface BillingRecord {
   id: string;
@@ -102,8 +103,25 @@ export default function BillingDetailPage() {
   if (loading) {
     return (
       <div className="h-svh overflow-hidden lg:p-2 w-full">
-        <div className="lg:border lg:rounded-md overflow-hidden flex items-center justify-center bg-container h-full w-full bg-background">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        <div className="lg:border lg:rounded-md overflow-hidden flex flex-col bg-container h-full w-full bg-background">
+          <div className="flex items-center gap-3 px-6 py-4 border-b bg-card">
+            <SkeletonShinyGradient className="h-10 w-10 rounded-lg bg-muted" />
+            <div className="flex-1 space-y-2">
+              <SkeletonShinyGradient className="h-5 w-48 rounded bg-muted" />
+              <SkeletonShinyGradient className="h-4 w-32 rounded bg-muted" />
+            </div>
+          </div>
+          <div className="flex-1 p-6 space-y-6">
+            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <SkeletonShinyGradient className="h-96 rounded-lg bg-muted" />
+              </div>
+              <div className="space-y-4">
+                <SkeletonShinyGradient className="h-64 rounded-lg bg-muted" />
+                <SkeletonShinyGradient className="h-32 rounded-lg bg-muted" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );

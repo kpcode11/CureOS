@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 import Link from "next/link";
 
 interface LowStockItem {
@@ -203,12 +204,14 @@ export default function SafetyAlertsPage() {
 
         {/* Critical & Warning Items */}
         {loading ? (
-          <Card className="border-slate-200">
-            <CardContent className="py-12 text-center">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-slate-600">Loading alerts...</p>
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <SkeletonShinyGradient
+                key={i}
+                className="h-32 rounded-lg bg-muted"
+              />
+            ))}
+          </div>
         ) : lowStockItems.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
+import { SkeletonShinyGradient } from "@/components/ui/skeleton-shiny";
 
 export default function DispensePage() {
   const router = useRouter();
@@ -18,13 +19,13 @@ export default function DispensePage() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="text-center"
+        className="text-center space-y-4"
       >
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <SkeletonShinyGradient className="w-16 h-16 rounded-full mx-auto bg-muted" />
         <p className="text-slate-600 text-lg">
           Redirecting to dispense queue...
         </p>
-        <ArrowRight className="w-6 h-6 text-blue-600 mx-auto mt-4 animate-pulse" />
+        <ArrowRight className="w-6 h-6 text-blue-600 mx-auto animate-pulse" />
       </motion.div>
     </div>
   );
