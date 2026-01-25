@@ -111,6 +111,7 @@ export interface HealthIndex {
   lastUpdated: string;
   dataPoints: number;
   historicalScores: Array<{ date: string; score: number }>;
+  hasSufficientData: boolean;
 }
 
 /**

@@ -44,6 +44,7 @@ export interface HealthIndexResult {
   lastUpdated: Date;
   dataPoints: number;
   historicalScores: Array<{ date: Date; score: number }>;
+  hasSufficientData: boolean; // True only when EMR diagnosis or completed lab tests exist
 }
 
 // Normal ranges for vitals
@@ -438,6 +439,11 @@ export async function calculateHealthIndex(patientId: string): Promise<HealthInd
   const hospitalizationScore = scoreHospitalization(bedAssignments);
   const diagnosisScore = scoreDiagnosis(emrRecords);
 
+  // Check if there's sufficient clinical data (at least one EMR with diagnosis OR one completed lab test)
+  const hasEmrDiagnosis = emrRecords.length > 0 && emrRecords.some(e => e.diagnosis && e.diagnosis.trim() !== '');
+  const hasCompletedLabTests = labTests.some(t => t.status === 'COMPLETED' && t.results);
+  const hasSufficientData = hasEmrDiagnosis || hasCompletedLabTests;
+
   // Weighted average for overall score
   // Weights: Vitals (30%), Labs (25%), Diagnosis (20%), Hospitalization (15%), Medications (10%)
   const overallScore = Math.round(
@@ -498,5 +504,6 @@ export async function calculateHealthIndex(patientId: string): Promise<HealthInd
     lastUpdated: new Date(),
     dataPoints: emrRecords.length + labTests.length + prescriptions.length,
     historicalScores,
+    hasSufficientData,
   };
 }
