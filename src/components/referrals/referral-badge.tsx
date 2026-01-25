@@ -18,7 +18,10 @@ interface ReferralBadgeProps {
   compact?: boolean;
 }
 
-export function ReferralBadge({ referral, compact = false }: ReferralBadgeProps) {
+export function ReferralBadge({
+  referral,
+  compact = false,
+}: ReferralBadgeProps) {
   if (!referral) return null;
 
   const urgencyColors = {
@@ -27,7 +30,9 @@ export function ReferralBadge({ referral, compact = false }: ReferralBadgeProps)
     EMERGENCY: "bg-red-100 text-red-800 border-red-300",
   };
 
-  const urgencyColor = urgencyColors[referral.urgency as keyof typeof urgencyColors] || urgencyColors.ROUTINE;
+  const urgencyColor =
+    urgencyColors[referral.urgency as keyof typeof urgencyColors] ||
+    urgencyColors.ROUTINE;
 
   if (compact) {
     return (
@@ -46,7 +51,9 @@ export function ReferralBadge({ referral, compact = false }: ReferralBadgeProps)
       </Badge>
       {referral.urgency && (
         <Badge className={urgencyColor}>
-          {referral.urgency === "EMERGENCY" && <AlertCircle className="h-3 w-3 mr-1" />}
+          {referral.urgency === "EMERGENCY" && (
+            <AlertCircle className="h-3 w-3 mr-1" />
+          )}
           {referral.urgency}
         </Badge>
       )}

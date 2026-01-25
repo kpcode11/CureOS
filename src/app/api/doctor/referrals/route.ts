@@ -1,12 +1,12 @@
-import { NextResponse } from 'next/server';
-import { requirePermission } from '@/lib/authorization';
-import { prisma } from '@/lib/prisma';
-import { createAudit } from '@/services/audit.service';
+import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/authorization";
+import { prisma } from "@/lib/prisma";
+import { createAudit } from "@/services/audit.service";
 
 /**
  * POST /api/doctor/referrals
  * Create a new referral from current doctor to another doctor
- * 
+ *
  * RBAC: referral.create (doctor permission)
  * Body:
  * - toDoctorId: target doctor ID
@@ -18,88 +18,102 @@ import { createAudit } from '@/services/audit.service';
  * - expiresAt: optional expiration date
  */
 export async function POST(req: Request) {
-  console.log('[POST /api/doctor/referrals] Handler called');
+  console.log("[POST /api/doctor/referrals] Handler called");
   let sessionRes;
   try {
-    sessionRes = await requirePermission(req, 'referral.create');
-    console.log('[POST /api/doctor/referrals] Permission check passed');
+    sessionRes = await requirePermission(req, "referral.create");
+    console.log("[POST /api/doctor/referrals] Permission check passed");
   } catch (err) {
-    console.log('[POST /api/doctor/referrals] Permission check failed:', err);
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    console.log("[POST /api/doctor/referrals] Permission check failed:", err);
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
-    console.log('[POST /api/doctor/referrals] Request received');
-    
+    console.log("[POST /api/doctor/referrals] Request received");
+
     const userId = sessionRes.session?.user?.id;
     if (!userId) {
-      console.log('[POST /api/doctor/referrals] No userId in session');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.log("[POST /api/doctor/referrals] No userId in session");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get current doctor
     const fromDoctor = await prisma.doctor.findUnique({
       where: { userId },
-      select: { id: true }
+      select: { id: true },
     });
 
     if (!fromDoctor) {
-      console.log('[POST /api/doctor/referrals] Doctor profile not found for userId:', userId);
-      return NextResponse.json({ error: 'Doctor profile not found' }, { status: 404 });
+      console.log(
+        "[POST /api/doctor/referrals] Doctor profile not found for userId:",
+        userId,
+      );
+      return NextResponse.json(
+        { error: "Doctor profile not found" },
+        { status: 404 },
+      );
     }
 
-    console.log('[POST /api/doctor/referrals] Doctor found:', fromDoctor.id);
+    console.log("[POST /api/doctor/referrals] Doctor found:", fromDoctor.id);
 
     const body = await req.json();
-    console.log('[POST /api/doctor/referrals] Body received:', body);
+    console.log("[POST /api/doctor/referrals] Body received:", body);
     const {
       toDoctorId,
       patientId,
       reason,
-      urgency = 'ROUTINE',
+      urgency = "ROUTINE",
       clinicalNotes,
       requestedTests = [],
-      expiresAt
+      expiresAt,
     } = body;
 
     // Validation
     if (!toDoctorId || !patientId || !reason) {
-      console.log('[Referral Create] Validation failed:', { toDoctorId, patientId, reason, body });
+      console.log("[Referral Create] Validation failed:", {
+        toDoctorId,
+        patientId,
+        reason,
+        body,
+      });
       return NextResponse.json(
-        { 
-          error: 'Missing required fields: toDoctorId, patientId, reason',
-          received: { toDoctorId, patientId, reason }
+        {
+          error: "Missing required fields: toDoctorId, patientId, reason",
+          received: { toDoctorId, patientId, reason },
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Cannot refer to self
     if (toDoctorId === fromDoctor.id) {
       return NextResponse.json(
-        { error: 'Cannot refer patient to yourself' },
-        { status: 400 }
+        { error: "Cannot refer patient to yourself" },
+        { status: 400 },
       );
     }
 
     // Verify target doctor exists
     const toDoctor = await prisma.doctor.findUnique({
       where: { id: toDoctorId },
-      include: { user: { select: { name: true, email: true } } }
+      include: { user: { select: { name: true, email: true } } },
     });
 
     if (!toDoctor) {
-      return NextResponse.json({ error: 'Target doctor not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "Target doctor not found" },
+        { status: 404 },
+      );
     }
 
     // Verify patient exists
     const patient = await prisma.patient.findUnique({
       where: { id: patientId },
-      select: { id: true, firstName: true, lastName: true }
+      select: { id: true, firstName: true, lastName: true },
     });
 
     if (!patient) {
-      return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
+      return NextResponse.json({ error: "Patient not found" }, { status: 404 });
     }
 
     // Create referral
@@ -113,32 +127,32 @@ export async function POST(req: Request) {
         clinicalNotes,
         requestedTests,
         expiresAt: expiresAt ? new Date(expiresAt) : null,
-        status: 'PENDING'
+        status: "PENDING",
       },
       include: {
         fromDoctor: {
-          include: { user: { select: { name: true, email: true } } }
+          include: { user: { select: { name: true, email: true } } },
         },
         toDoctor: {
-          include: { user: { select: { name: true, email: true } } }
+          include: { user: { select: { name: true, email: true } } },
         },
         patient: {
-          select: { id: true, firstName: true, lastName: true, phone: true }
-        }
-      }
+          select: { id: true, firstName: true, lastName: true, phone: true },
+        },
+      },
     });
 
     // Audit log
     await createAudit({
       actorId: userId,
-      action: 'referral.create',
-      resource: 'Referral',
+      action: "referral.create",
+      resource: "Referral",
       resourceId: referral.id,
       meta: {
         toDoctorId,
         patientId,
-        urgency
-      }
+        urgency,
+      },
     });
 
     // TODO: Send notification to target doctor and receptionist
@@ -146,24 +160,27 @@ export async function POST(req: Request) {
 
     return NextResponse.json(referral, { status: 201 });
   } catch (err: any) {
-    console.error('[POST /api/doctor/referrals] Error:', err);
-    console.error('[POST /api/doctor/referrals] Error details:', {
+    console.error("[POST /api/doctor/referrals] Error:", err);
+    console.error("[POST /api/doctor/referrals] Error details:", {
       message: err.message,
       code: err.code,
       meta: err.meta,
-      stack: err.stack
+      stack: err.stack,
     });
-    return NextResponse.json({ 
-      error: 'Internal server error',
-      details: err.message 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        details: err.message,
+      },
+      { status: 500 },
+    );
   }
 }
 
 /**
  * GET /api/doctor/referrals
  * Get referrals for current doctor (sent and received)
- * 
+ *
  * Query params:
  * - type: 'sent'|'received' (default: both)
  * - status: 'PENDING'|'ACCEPTED'|'REJECTED'|'CONVERTED'|'EXPIRED'
@@ -172,48 +189,53 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   let sessionRes;
   try {
-    sessionRes = await requirePermission(req, 'referral.read');
+    sessionRes = await requirePermission(req, "referral.read");
   } catch (err) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
     const userId = sessionRes.session?.user?.id;
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const doctor = await prisma.doctor.findUnique({
       where: { userId },
-      select: { id: true }
+      select: { id: true },
     });
 
     if (!doctor) {
-      return NextResponse.json({ error: 'Doctor profile not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "Doctor profile not found" },
+        { status: 404 },
+      );
     }
 
     const url = new URL(req.url);
-    const type = url.searchParams.get('type');
-    const status = url.searchParams.get('status');
-    const patientId = url.searchParams.get('patientId');
+    const type = url.searchParams.get("type");
+    const status = url.searchParams.get("status");
+    const patientId = url.searchParams.get("patientId");
 
     const where: any = {};
 
     // Filter by type
-    if (type === 'sent') {
+    if (type === "sent") {
       where.fromDoctorId = doctor.id;
-    } else if (type === 'received') {
+    } else if (type === "received") {
       where.toDoctorId = doctor.id;
     } else {
       // Both sent and received
-      where.OR = [
-        { fromDoctorId: doctor.id },
-        { toDoctorId: doctor.id }
-      ];
+      where.OR = [{ fromDoctorId: doctor.id }, { toDoctorId: doctor.id }];
     }
 
     // Filter by status
-    if (status && ['PENDING', 'ACCEPTED', 'REJECTED', 'CONVERTED', 'EXPIRED'].includes(status)) {
+    if (
+      status &&
+      ["PENDING", "ACCEPTED", "REJECTED", "CONVERTED", "EXPIRED"].includes(
+        status,
+      )
+    ) {
       where.status = status;
     }
 
@@ -226,33 +248,42 @@ export async function GET(req: Request) {
       where,
       include: {
         fromDoctor: {
-          include: { user: { select: { name: true, email: true } } }
+          include: { user: { select: { name: true, email: true } } },
         },
         toDoctor: {
-          include: { user: { select: { name: true, email: true } } }
+          include: { user: { select: { name: true, email: true } } },
         },
         patient: {
-          select: { id: true, firstName: true, lastName: true, phone: true, dateOfBirth: true }
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            dateOfBirth: true,
+          },
         },
         appointment: {
-          select: { id: true, dateTime: true, status: true }
-        }
+          select: { id: true, dateTime: true, status: true },
+        },
       },
-      orderBy: { createdAt: 'desc' },
-      take: 100
+      orderBy: { createdAt: "desc" },
+      take: 100,
     });
 
     await createAudit({
       actorId: userId,
-      action: 'referral.list',
-      resource: 'Referral',
-      resourceId: 'bulk',
-      meta: { count: referrals.length, type }
+      action: "referral.list",
+      resource: "Referral",
+      resourceId: "bulk",
+      meta: { count: referrals.length, type },
     });
 
     return NextResponse.json(referrals);
   } catch (err) {
-    console.error('[GET /api/doctor/referrals] Error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("[GET /api/doctor/referrals] Error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

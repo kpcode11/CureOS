@@ -5,12 +5,12 @@ import { prisma } from "@/lib/prisma";
 /**
  * GET /api/doctors
  * Get list of all doctors
- * 
+ *
  * RBAC: doctor.read OR referral.create (doctors can see other doctors for referrals)
  */
 export async function GET(req: Request) {
   let sessionRes;
-  
+
   try {
     // Try doctor.read first
     sessionRes = await requirePermission(req, "doctor.read");
@@ -36,15 +36,18 @@ export async function GET(req: Request) {
       },
       orderBy: {
         user: {
-          name: 'asc'
-        }
+          name: "asc",
+        },
       },
       take: 200,
     });
 
     return NextResponse.json(doctors);
   } catch (error) {
-    console.error('[GET /api/doctors] Error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("[GET /api/doctors] Error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

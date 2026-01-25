@@ -74,10 +74,14 @@ export default function ReceptionistReferralsPage() {
   const { toast } = useToast();
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedReferral, setSelectedReferral] = useState<Referral | null>(null);
-  const [actionDialog, setActionDialog] = useState<"accept" | "reject" | null>(null);
+  const [selectedReferral, setSelectedReferral] = useState<Referral | null>(
+    null,
+  );
+  const [actionDialog, setActionDialog] = useState<"accept" | "reject" | null>(
+    null,
+  );
   const [actionLoading, setActionLoading] = useState(false);
-  
+
   const [acceptData, setAcceptData] = useState({
     notes: "",
     createAppointment: false,
@@ -116,20 +120,23 @@ export default function ReceptionistReferralsPage() {
 
     try {
       setActionLoading(true);
-      const response = await fetch(`/api/referrals/${selectedReferral.id}/accept`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          notes: acceptData.notes,
-          createAppointment: acceptData.createAppointment,
-          appointmentData: acceptData.createAppointment
-            ? {
-                dateTime: acceptData.appointmentDateTime,
-                notes: acceptData.appointmentNotes,
-              }
-            : undefined,
-        }),
-      });
+      const response = await fetch(
+        `/api/referrals/${selectedReferral.id}/accept`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            notes: acceptData.notes,
+            createAppointment: acceptData.createAppointment,
+            appointmentData: acceptData.createAppointment
+              ? {
+                  dateTime: acceptData.appointmentDateTime,
+                  notes: acceptData.appointmentNotes,
+                }
+              : undefined,
+          }),
+        },
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -168,11 +175,14 @@ export default function ReceptionistReferralsPage() {
 
     try {
       setActionLoading(true);
-      const response = await fetch(`/api/referrals/${selectedReferral.id}/reject`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: rejectData.reason }),
-      });
+      const response = await fetch(
+        `/api/referrals/${selectedReferral.id}/reject`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reason: rejectData.reason }),
+        },
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -201,11 +211,26 @@ export default function ReceptionistReferralsPage() {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { color: string; icon: any }> = {
-      PENDING: { color: "bg-yellow-100 text-yellow-800 border-yellow-300", icon: ClockIcon },
-      ACCEPTED: { color: "bg-blue-100 text-blue-800 border-blue-300", icon: CheckCircle2 },
-      CONVERTED: { color: "bg-green-100 text-green-800 border-green-300", icon: CheckCircle2 },
-      REJECTED: { color: "bg-red-100 text-red-800 border-red-300", icon: XCircle },
-      EXPIRED: { color: "bg-gray-100 text-gray-800 border-gray-300", icon: AlertCircle },
+      PENDING: {
+        color: "bg-yellow-100 text-yellow-800 border-yellow-300",
+        icon: ClockIcon,
+      },
+      ACCEPTED: {
+        color: "bg-blue-100 text-blue-800 border-blue-300",
+        icon: CheckCircle2,
+      },
+      CONVERTED: {
+        color: "bg-green-100 text-green-800 border-green-300",
+        icon: CheckCircle2,
+      },
+      REJECTED: {
+        color: "bg-red-100 text-red-800 border-red-300",
+        icon: XCircle,
+      },
+      EXPIRED: {
+        color: "bg-gray-100 text-gray-800 border-gray-300",
+        icon: AlertCircle,
+      },
     };
     const config = variants[status] || variants.PENDING;
     const Icon = config.icon;
@@ -233,7 +258,7 @@ export default function ReceptionistReferralsPage() {
 
   const pendingCount = referrals.filter((r) => r.status === "PENDING").length;
   const emergencyCount = referrals.filter(
-    (r) => r.status === "PENDING" && r.urgency === "EMERGENCY"
+    (r) => r.status === "PENDING" && r.urgency === "EMERGENCY",
   ).length;
 
   if (loading) {
@@ -277,7 +302,9 @@ export default function ReceptionistReferralsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold text-red-600">{emergencyCount}</p>
+                <p className="text-3xl font-bold text-red-600">
+                  {emergencyCount}
+                </p>
               </CardContent>
             </Card>
             <Card>
@@ -341,17 +368,25 @@ export default function ReceptionistReferralsPage() {
                       <div className="flex items-center gap-2 text-sm">
                         <User className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">
-                          {referral.patient.firstName} {referral.patient.lastName}
+                          {referral.patient.firstName}{" "}
+                          {referral.patient.lastName}
                         </span>
                         <span className="text-muted-foreground">
                           • {referral.patient.gender} •{" "}
-                          {format(new Date(referral.patient.dateOfBirth), "MMM dd, yyyy")}
+                          {format(
+                            new Date(referral.patient.dateOfBirth),
+                            "MMM dd, yyyy",
+                          )}
                         </span>
                       </div>
 
                       <div className="bg-blue-50 p-3 rounded-md">
-                        <p className="text-sm font-medium text-blue-900 mb-1">Reason:</p>
-                        <p className="text-sm text-blue-800">{referral.reason}</p>
+                        <p className="text-sm font-medium text-blue-900 mb-1">
+                          Reason:
+                        </p>
+                        <p className="text-sm text-blue-800">
+                          {referral.reason}
+                        </p>
                       </div>
 
                       {referral.clinicalNotes && (
@@ -365,18 +400,25 @@ export default function ReceptionistReferralsPage() {
                         </div>
                       )}
 
-                      {referral.requestedTests && referral.requestedTests.length > 0 && (
-                        <div>
-                          <p className="text-sm font-medium mb-1">Requested Tests:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {referral.requestedTests.map((test, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs">
-                                {test}
-                              </Badge>
-                            ))}
+                      {referral.requestedTests &&
+                        referral.requestedTests.length > 0 && (
+                          <div>
+                            <p className="text-sm font-medium mb-1">
+                              Requested Tests:
+                            </p>
+                            <div className="flex flex-wrap gap-1">
+                              {referral.requestedTests.map((test, idx) => (
+                                <Badge
+                                  key={idx}
+                                  variant="outline"
+                                  className="text-xs"
+                                >
+                                  {test}
+                                </Badge>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
                       {referral.appointment && (
                         <div className="flex items-center gap-2 text-sm bg-green-50 p-3 rounded-md">
@@ -385,18 +427,29 @@ export default function ReceptionistReferralsPage() {
                             Appointment Scheduled:
                           </span>
                           <span className="text-green-800">
-                            {format(new Date(referral.appointment.dateTime), "MMM dd, yyyy hh:mm a")}
+                            {format(
+                              new Date(referral.appointment.dateTime),
+                              "MMM dd, yyyy hh:mm a",
+                            )}
                           </span>
                         </div>
                       )}
 
                       <div className="flex justify-between items-center pt-2 border-t">
                         <span className="text-xs text-muted-foreground">
-                          Created: {format(new Date(referral.createdAt), "MMM dd, yyyy hh:mm a")}
+                          Created:{" "}
+                          {format(
+                            new Date(referral.createdAt),
+                            "MMM dd, yyyy hh:mm a",
+                          )}
                         </span>
                         {referral.expiresAt && (
                           <span className="text-xs text-orange-600">
-                            Expires: {format(new Date(referral.expiresAt), "MMM dd, yyyy")}
+                            Expires:{" "}
+                            {format(
+                              new Date(referral.expiresAt),
+                              "MMM dd, yyyy",
+                            )}
                           </span>
                         )}
                       </div>
@@ -465,7 +518,8 @@ export default function ReceptionistReferralsPage() {
             <div className="space-y-2">
               <Label>Patient</Label>
               <p className="text-sm font-medium">
-                {selectedReferral?.patient.firstName} {selectedReferral?.patient.lastName}
+                {selectedReferral?.patient.firstName}{" "}
+                {selectedReferral?.patient.lastName}
               </p>
             </div>
 
@@ -488,7 +542,10 @@ export default function ReceptionistReferralsPage() {
                 id="createAppointment"
                 checked={acceptData.createAppointment}
                 onChange={(e) =>
-                  setAcceptData({ ...acceptData, createAppointment: e.target.checked })
+                  setAcceptData({
+                    ...acceptData,
+                    createAppointment: e.target.checked,
+                  })
                 }
                 className="h-4 w-4"
               />
@@ -501,14 +558,18 @@ export default function ReceptionistReferralsPage() {
               <>
                 <div className="space-y-2">
                   <Label htmlFor="appointmentDateTime">
-                    Appointment Date & Time <span className="text-red-500">*</span>
+                    Appointment Date & Time{" "}
+                    <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="appointmentDateTime"
                     type="datetime-local"
                     value={acceptData.appointmentDateTime}
                     onChange={(e) =>
-                      setAcceptData({ ...acceptData, appointmentDateTime: e.target.value })
+                      setAcceptData({
+                        ...acceptData,
+                        appointmentDateTime: e.target.value,
+                      })
                     }
                     required={acceptData.createAppointment}
                   />
@@ -521,7 +582,10 @@ export default function ReceptionistReferralsPage() {
                     placeholder="Additional appointment notes..."
                     value={acceptData.appointmentNotes}
                     onChange={(e) =>
-                      setAcceptData({ ...acceptData, appointmentNotes: e.target.value })
+                      setAcceptData({
+                        ...acceptData,
+                        appointmentNotes: e.target.value,
+                      })
                     }
                     rows={2}
                   />
@@ -574,7 +638,8 @@ export default function ReceptionistReferralsPage() {
             <div className="space-y-2">
               <Label>Patient</Label>
               <p className="text-sm font-medium">
-                {selectedReferral?.patient.firstName} {selectedReferral?.patient.lastName}
+                {selectedReferral?.patient.firstName}{" "}
+                {selectedReferral?.patient.lastName}
               </p>
             </div>
 
@@ -586,7 +651,9 @@ export default function ReceptionistReferralsPage() {
                 id="rejectReason"
                 placeholder="E.g., Patient needs different specialty, doctor unavailable..."
                 value={rejectData.reason}
-                onChange={(e) => setRejectData({ ...rejectData, reason: e.target.value })}
+                onChange={(e) =>
+                  setRejectData({ ...rejectData, reason: e.target.value })
+                }
                 rows={4}
                 required
               />
