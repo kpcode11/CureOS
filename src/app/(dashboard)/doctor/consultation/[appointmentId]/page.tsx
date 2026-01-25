@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { VoiceTextarea, VoiceMedicationInput } from "@/components/ui/voice-input";
 import {
   ChevronLeft,
   User,
@@ -375,12 +376,11 @@ export default function ConsultationPage() {
                   <CardTitle className="text-lg">Chief Complaint</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Textarea
+                  <VoiceTextarea
                     placeholder="Patient's primary complaint..."
                     value={complaint}
-                    onChange={(e) => setComplaint(e.target.value)}
+                    onChange={setComplaint}
                     rows={2}
-                    className="resize-none"
                   />
                 </CardContent>
               </Card>
@@ -448,12 +448,11 @@ export default function ConsultationPage() {
                   <CardTitle className="text-lg">Symptoms *</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Textarea
+                  <VoiceTextarea
                     placeholder="Describe patient's symptoms..."
                     value={symptoms}
-                    onChange={(e) => setSymptoms(e.target.value)}
+                    onChange={setSymptoms}
                     rows={3}
-                    className="resize-none"
                     required
                   />
                 </CardContent>
@@ -464,12 +463,11 @@ export default function ConsultationPage() {
                   <CardTitle className="text-lg">Diagnosis *</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Textarea
+                  <VoiceTextarea
                     placeholder="Enter diagnosis..."
                     value={diagnosis}
-                    onChange={(e) => setDiagnosis(e.target.value)}
+                    onChange={setDiagnosis}
                     rows={3}
-                    className="resize-none"
                     required
                   />
                 </CardContent>
@@ -480,12 +478,11 @@ export default function ConsultationPage() {
                   <CardTitle className="text-lg">Additional Notes</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Textarea
+                  <VoiceTextarea
                     placeholder="Any additional clinical notes..."
                     value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
+                    onChange={setNotes}
                     rows={3}
-                    className="resize-none"
                   />
                 </CardContent>
               </Card>
@@ -518,28 +515,10 @@ export default function ConsultationPage() {
                           </button>
                         )}
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <Input
-                          placeholder="Drug name *"
-                          value={med.name}
-                          onChange={(e) => updateMedication(index, "name", e.target.value)}
-                        />
-                        <Input
-                          placeholder="Dosage *"
-                          value={med.dosage}
-                          onChange={(e) => updateMedication(index, "dosage", e.target.value)}
-                        />
-                        <Input
-                          placeholder="Frequency *"
-                          value={med.frequency}
-                          onChange={(e) => updateMedication(index, "frequency", e.target.value)}
-                        />
-                        <Input
-                          placeholder="Duration"
-                          value={med.duration}
-                          onChange={(e) => updateMedication(index, "duration", e.target.value)}
-                        />
-                      </div>
+                      <VoiceMedicationInput
+                        medication={med}
+                        onUpdate={(field: "name" | "dosage" | "frequency" | "duration", value: string) => updateMedication(index, field, value)}
+                      />
                     </div>
                   ))}
                 </CardContent>
@@ -550,12 +529,11 @@ export default function ConsultationPage() {
                   <CardTitle className="text-lg">Instructions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Textarea
+                  <VoiceTextarea
                     placeholder="Special instructions for patient (e.g., take with food, avoid dairy, follow-up in 2 weeks)"
                     value={prescriptionInstructions}
-                    onChange={(e) => setPrescriptionInstructions(e.target.value)}
+                    onChange={setPrescriptionInstructions}
                     rows={3}
-                    className="resize-none"
                   />
                 </CardContent>
               </Card>
