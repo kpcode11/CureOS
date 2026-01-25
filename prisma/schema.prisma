@@ -49,6 +49,8 @@ model Patient {
   labTests         LabTest[]
   prescriptions    Prescription[]
   referrals        Referral[]
+  insurancePolicies InsurancePolicy[]
+  insuranceClaims   InsuranceClaim[]
 }
 
 model Doctor {
@@ -251,6 +253,45 @@ model Billing {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   patient     Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+}
+
+model InsurancePolicy {
+  id              String              @id @default(cuid())
+  patientId       String
+  provider        String
+  policyNumber    String              @unique
+  policyType      String
+  coverageAmount  Float
+  startDate       DateTime
+  endDate         DateTime
+  status          InsurancePolicyStatus @default(ACTIVE)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  patient         Patient             @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  claims          InsuranceClaim[]
+}
+
+model InsuranceClaim {
+  id              String              @id @default(cuid())
+  policyId        String
+  patientId       String
+  claimNumber     String              @unique
+  claimAmount     Float
+  approvedAmount  Float?
+  claimDate       DateTime            @default(now())
+  status          InsuranceClaimStatus @default(PENDING)
+  description     String
+  documents       String[]
+  notes           String?
+  processedAt     DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  policy          InsurancePolicy     @relation(fields: [policyId], references: [id])
+  patient         Patient             @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([policyId])
+  @@index([status])
 }
 
 model Inventory {
@@ -460,4 +501,19 @@ enum ReferralUrgency {
   ROUTINE
   URGENT
   EMERGENCY
+}
+
+enum InsurancePolicyStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  SUSPENDED
+}
+
+enum InsuranceClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PROCESSING
+  PAID
 }
