@@ -95,7 +95,8 @@ export default function LabOrdersPage() {
   const fetchTests = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/lab-tech/lab-tests");
+      // Fetch all statuses so the tabs can filter client-side
+      const res = await fetch("/api/lab-tech/lab-tests?status=PENDING,IN_PROGRESS,COMPLETED,CANCELLED");
       if (res.ok) {
         const data = await res.json();
         setTests(data);

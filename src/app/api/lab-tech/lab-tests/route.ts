@@ -28,7 +28,23 @@ export async function GET(req: Request) {
   }
 
   try {
-    const rows = await prisma.labTest.findMany({ where, orderBy: { orderedAt: 'desc' }, take: 200 });
+    const rows = await prisma.labTest.findMany({
+      where,
+      include: {
+        patient: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            dateOfBirth: true,
+            gender: true,
+            phone: true,
+          },
+        },
+      },
+      orderBy: { orderedAt: 'desc' },
+      take: 200,
+    });
     return NextResponse.json(rows);
   } catch (err) {
     console.error('lab-tests GET error', err);
