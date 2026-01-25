@@ -17,10 +17,6 @@ export function WelcomeSection() {
           Welcome Back
           
         </h2>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          Today you have <span className="text-foreground font-medium">3 new leads</span>,{" "}
-          <span className="text-foreground font-medium">2 follow-ups due</span>
-        </p>
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
@@ -54,7 +50,7 @@ export function WelcomeSection() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Button size="sm" className="gap-2 sm:gap-3 h-8 sm:h-9 text-xs sm:text-sm bg-linear-to-b from-foreground to-foreground/90 text-background">
+        <Button size="sm" className="gap-2 sm:gap-3 h-8 sm:h-9 text-xs sm:text-sm">
           <Plus className="size-3 sm:size-4" />
           <span className="hidden xs:inline">Create New</span>
           <span className="xs:hidden">New</span>

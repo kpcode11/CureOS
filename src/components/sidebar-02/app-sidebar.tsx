@@ -145,18 +145,6 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
           icon: <Lock className="size-4" />,
           link: "/admin/rbac?tab=permissions",
         },
-        {
-          id: "reports",
-          title: "Reports",
-          icon: <FileText className="size-4" />,
-          link: "/admin/reports",
-        },
-        {
-          id: "billing",
-          title: "Billing",
-          icon: <DollarSign className="size-4" />,
-          link: "/admin/billing",
-        },
       ];
 
     case "DOCTOR":

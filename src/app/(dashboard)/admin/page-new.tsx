@@ -137,6 +137,19 @@ export default function AdminPageNew() {
               </p>
             </div>
 
+            {/* Department Analytics */}
+            <div className="border rounded-xl bg-card overflow-hidden">
+              <div className="p-4 sm:p-6 border-b bg-card">
+                <h3 className="text-base sm:text-lg font-semibold">Department Analytics</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Real-time metrics across all hospital departments
+                </p>
+              </div>
+              <div className="overflow-auto">
+                <GooeyDepartmentDashboard />
+              </div>
+            </div>
+
             {/* Stats Cards Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 p-3 sm:p-4 lg:p-6 rounded-xl border bg-card">
               {stats.map((stat, index) => (
@@ -164,19 +177,6 @@ export default function AdminPageNew() {
                   </div>
                 </Link>
               ))}
-            </div>
-
-            {/* Department Analytics */}
-            <div className="border rounded-xl bg-card overflow-hidden">
-              <div className="p-4 sm:p-6 border-b bg-card">
-                <h3 className="text-base sm:text-lg font-semibold">Department Analytics</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Real-time metrics across all hospital departments
-                </p>
-              </div>
-              <div className="overflow-auto">
-                <GooeyDepartmentDashboard />
-              </div>
             </div>
 
             {/* Quick Actions */}

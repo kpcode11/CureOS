@@ -15,6 +15,7 @@ import { ChevronDown, Plus, Download, FileText } from "lucide-react";
 import { DashboardSidebar } from "@/components/dashboard-2/sidebar";
 import { DashboardHeader } from "@/components/dashboard-2/header";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import GooeyDepartmentDashboard from "@/components/gooey-department-dashboard";
 
 interface StatCard {
   title: string;
@@ -135,6 +136,19 @@ export default function AdminDashboard2Page() {
                   <Plus className="w-4 h-4" />
                   <span className="hidden xs:inline">Add Report</span>
                 </Button>
+              </div>
+            </div>
+
+            {/* Department Analytics */}
+            <div className="border rounded-xl bg-card overflow-hidden">
+              <div className="p-4 sm:p-6 border-b bg-card">
+                <h3 className="text-base sm:text-lg font-semibold">Department Analytics</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Real-time metrics across all hospital departments
+                </p>
+              </div>
+              <div className="overflow-auto">
+                <GooeyDepartmentDashboard />
               </div>
             </div>
 

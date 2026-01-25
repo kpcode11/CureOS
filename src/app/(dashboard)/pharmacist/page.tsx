@@ -291,39 +291,31 @@ export default function PharmacistDashboard() {
 
           {/* Quick Actions */}
           <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-base mb-4">Quick Actions</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Common pharmacy tasks
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <CardContent className="p-4">
+              <h3 className="font-medium text-sm mb-3">Quick Actions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <Link href="/pharmacist/dispense">
-                  <div className="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-xl transition-all duration-300 hover:shadow-xl cursor-pointer group">
-                    <Pill className="w-8 h-8 mb-4" />
-                    <h3 className="text-lg font-semibold mb-1">
-                      Dispense Prescription
-                    </h3>
-                    <p className="text-sm opacity-90">
-                      Process pending prescriptions
-                    </p>
+                  <div className="border-2 border-blue-600 hover:bg-blue-50 p-4 rounded-lg transition-colors cursor-pointer group">
+                    <div className="flex items-center gap-3">
+                      <Pill className="w-5 h-5 text-blue-600" />
+                      <span className="text-sm font-medium">Dispense</span>
+                    </div>
                   </div>
                 </Link>
                 <Link href="/pharmacist/inventory">
-                  <div className="bg-emerald-600 hover:bg-emerald-700 text-white p-6 rounded-xl transition-all duration-300 hover:shadow-xl cursor-pointer group">
-                    <Package className="w-8 h-8 mb-4" />
-                    <h3 className="text-lg font-semibold mb-1">
-                      Manage Inventory
-                    </h3>
-                    <p className="text-sm opacity-90">Update stock levels</p>
+                  <div className="border-2 border-emerald-600 hover:bg-emerald-50 p-4 rounded-lg transition-colors cursor-pointer group">
+                    <div className="flex items-center gap-3">
+                      <Package className="w-5 h-5 text-emerald-600" />
+                      <span className="text-sm font-medium">Inventory</span>
+                    </div>
                   </div>
                 </Link>
                 <Link href="/pharmacist/safety-alerts">
-                  <div className="bg-amber-600 hover:bg-amber-700 text-white p-6 rounded-xl transition-all duration-300 hover:shadow-xl cursor-pointer group">
-                    <AlertTriangle className="w-8 h-8 mb-4" />
-                    <h3 className="text-lg font-semibold mb-1">
-                      Safety Alerts
-                    </h3>
-                    <p className="text-sm opacity-90">Review critical alerts</p>
+                  <div className="border-2 border-amber-600 hover:bg-amber-50 p-4 rounded-lg transition-colors cursor-pointer group">
+                    <div className="flex items-center gap-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-600" />
+                      <span className="text-sm font-medium">Safety Alerts</span>
+                    </div>
                   </div>
                 </Link>
               </div>

@@ -78,7 +78,6 @@ const getMenuItems = (role?: string) => {
         ...baseItems,
         { title: "RBAC", icon: Shield, href: "/admin/rbac" },
         { title: "Users", icon: Users, href: "/admin/users" },
-        { title: "Reports", icon: BarChart, href: "/admin/reports" },
         { title: "Settings", icon: Settings, href: "/admin/settings" },
         { title: "Insurance", icon: CreditCard, href: "/admin/insurance" },
       ];
