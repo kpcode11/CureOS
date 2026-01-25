@@ -7,7 +7,7 @@ export async function GET(req: Request) {
   try {
     await requirePermission(req, "appointment.read");
   } catch (err) {
-    console.error('[Appointment GET] Permission denied:', err);
+    console.error("[Appointment GET] Permission denied:", err);
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       receptionistId = receptionist?.id ?? null;
     }
   } catch (err) {
-    console.error('[Appointment POST] Permission denied:', err);
+    console.error("[Appointment POST] Permission denied:", err);
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -58,7 +58,12 @@ export async function POST(req: Request) {
 
   // Validate required fields
   if (!body.patientId || !body.doctorId || !body.dateTime || !body.reason) {
-    console.error('[Appointment POST] Missing fields:', { patientId: body.patientId, doctorId: body.doctorId, dateTime: body.dateTime, reason: body.reason });
+    console.error("[Appointment POST] Missing fields:", {
+      patientId: body.patientId,
+      doctorId: body.doctorId,
+      dateTime: body.dateTime,
+      reason: body.reason,
+    });
     return NextResponse.json(
       {
         error: "Missing required fields: patientId, doctorId, dateTime, reason",
@@ -98,7 +103,7 @@ export async function POST(req: Request) {
         patientId: body.patientId,
         amount: consultationFee,
         description: `Consultation with Dr. ${appointment.doctor.user.name} - ${body.reason}`,
-        status: 'PENDING',
+        status: "PENDING",
         dueDate: dueDate,
       },
     });
@@ -116,10 +121,10 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log('[Appointment POST] Successfully created:', appointment.id);
+    console.log("[Appointment POST] Successfully created:", appointment.id);
     return NextResponse.json(appointment);
   } catch (error) {
-    console.error('[Appointment POST] Creation failed:', error);
+    console.error("[Appointment POST] Creation failed:", error);
     return NextResponse.json(
       { error: "Failed to create appointment", details: String(error) },
       { status: 500 },

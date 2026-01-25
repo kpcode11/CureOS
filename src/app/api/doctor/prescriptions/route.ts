@@ -236,8 +236,8 @@ export async function POST(req: Request) {
         data: {
           patientId,
           amount: medicationCost,
-          description: `Prescription - ${medications.map((m: any) => m.name).join(', ')}`,
-          status: 'PENDING',
+          description: `Prescription - ${medications.map((m: any) => m.name).join(", ")}`,
+          status: "PENDING",
           dueDate: dueDate,
         },
       });

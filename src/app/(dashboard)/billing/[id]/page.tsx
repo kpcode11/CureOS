@@ -198,7 +198,7 @@ export default function BillingDetailPage() {
                         <span className="text-sm font-medium">Patient</span>
                       </div>
                       <p className="text-lg font-semibold text-slate-900">
-                        {bill.patient?.name || 'Unknown Patient'}
+                        {bill.patient?.name || "Unknown Patient"}
                       </p>
                       <p className="text-sm text-slate-600">
                         MRN: {bill.patient?.mrn || bill.patientId}
