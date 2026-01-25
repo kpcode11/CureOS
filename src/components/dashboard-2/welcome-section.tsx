@@ -15,14 +15,17 @@ export function WelcomeSection() {
       <div className="space-y-2 sm:space-y-5">
         <h2 className="text-lg sm:text-[22px] font-semibold leading-relaxed">
           Welcome Back
-          
         </h2>
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2 sm:gap-3 h-8 sm:h-9 text-xs sm:text-sm">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 sm:gap-3 h-8 sm:h-9 text-xs sm:text-sm"
+            >
               <span className="hidden xs:inline">Import/Export</span>
               <span className="xs:hidden">
                 <Download className="size-4" />
@@ -50,7 +53,10 @@ export function WelcomeSection() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Button size="sm" className="gap-2 sm:gap-3 h-8 sm:h-9 text-xs sm:text-sm">
+        <Button
+          size="sm"
+          className="gap-2 sm:gap-3 h-8 sm:h-9 text-xs sm:text-sm"
+        >
           <Plus className="size-3 sm:size-4" />
           <span className="hidden xs:inline">Create New</span>
           <span className="xs:hidden">New</span>
