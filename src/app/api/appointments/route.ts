@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { createAudit } from "@/services/audit.service";
+import {
+  SeverityLevel,
+  ProblemCategory,
+  AppointmentMetadata,
+  stringifyAppointmentMetadata,
+  parseAppointmentMetadata,
+  SEVERITY_LEVELS,
+  PROBLEM_TYPES,
+} from "@/types/scheduling";
 
 export async function GET(req: Request) {
   try {
@@ -31,7 +40,17 @@ export async function GET(req: Request) {
     take: 200,
   });
 
-  return NextResponse.json(appointments);
+  // Enrich appointments with parsed metadata
+  const enrichedAppointments = appointments.map(apt => {
+    const metadata = parseAppointmentMetadata(apt.notes);
+    return {
+      ...apt,
+      metadata, // Parsed severity, problemCategory, etc.
+      displayNotes: metadata?.originalNotes || apt.notes, // Show original notes to users
+    };
+  });
+
+  return NextResponse.json(enrichedAppointments);
 }
 
 export async function POST(req: Request) {
@@ -67,6 +86,39 @@ export async function POST(req: Request) {
     );
   }
 
+  // Build appointment notes with metadata if severity/problemCategory provided
+  let notesData: string | null = body.notes || null;
+  
+  if (body.severity && body.problemCategory) {
+    // Validate severity
+    if (!SEVERITY_LEVELS[body.severity as SeverityLevel]) {
+      return NextResponse.json(
+        { error: `Invalid severity: ${body.severity}. Valid values: LOW, MODERATE, HIGH` },
+        { status: 400 },
+      );
+    }
+    
+    // Validate problem category
+    if (!PROBLEM_TYPES[body.problemCategory as ProblemCategory]) {
+      return NextResponse.json(
+        { error: `Invalid problemCategory: ${body.problemCategory}` },
+        { status: 400 },
+      );
+    }
+
+    const metadata: AppointmentMetadata = {
+      severity: body.severity as SeverityLevel,
+      problemCategory: body.problemCategory as ProblemCategory,
+      problemDescription: body.problemDescription,
+      symptoms: body.symptoms,
+      autoAssigned: body.autoAssigned || false,
+      assignmentReason: body.assignmentReason,
+      originalNotes: body.notes,
+    };
+    
+    notesData = stringifyAppointmentMetadata(metadata);
+  }
+
   try {
     const appointment = await prisma.appointment.create({
       data: {
@@ -75,7 +127,7 @@ export async function POST(req: Request) {
         receptionistId: receptionistId,
         dateTime: new Date(body.dateTime),
         reason: body.reason,
-        notes: body.notes || null,
+        notes: notesData,
         status: "SCHEDULED",
       },
       include: {

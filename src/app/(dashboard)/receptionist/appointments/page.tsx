@@ -15,6 +15,10 @@ import {
   List,
   Eye,
   Loader2,
+  AlertTriangle,
+  Sparkles,
+  Activity,
+  Brain,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +48,37 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+
+// Severity and Problem Types
+type SeverityLevel = 'LOW' | 'MODERATE' | 'HIGH';
+type ProblemCategory = 
+  | 'HEART' | 'BONE_JOINT' | 'EAR_NOSE_THROAT' | 'EYE' | 'SKIN' 
+  | 'DIGESTIVE' | 'RESPIRATORY' | 'NEUROLOGICAL' | 'DENTAL' 
+  | 'GENERAL' | 'PEDIATRIC' | 'GYNECOLOGY' | 'UROLOGY' | 'MENTAL_HEALTH';
+
+const SEVERITY_OPTIONS: { value: SeverityLevel; label: string; color: string; description: string }[] = [
+  { value: 'LOW', label: 'Low', color: 'bg-green-500', description: 'Routine checkup, minor issues' },
+  { value: 'MODERATE', label: 'Moderate', color: 'bg-yellow-500', description: 'Non-urgent but needs attention' },
+  { value: 'HIGH', label: 'High', color: 'bg-red-500', description: 'Urgent, needs senior doctor' },
+];
+
+const PROBLEM_CATEGORIES: { value: ProblemCategory; label: string; icon: string; examples: string }[] = [
+  { value: 'HEART', label: 'Heart/Cardiac', icon: '❤️', examples: 'Chest pain, palpitations, BP issues' },
+  { value: 'BONE_JOINT', label: 'Bone & Joint', icon: '🦴', examples: 'Fractures, joint pain, arthritis' },
+  { value: 'EAR_NOSE_THROAT', label: 'ENT', icon: '👂', examples: 'Hearing, sinus, throat problems' },
+  { value: 'EYE', label: 'Eye/Vision', icon: '👁️', examples: 'Vision issues, eye pain, cataracts' },
+  { value: 'SKIN', label: 'Skin', icon: '🩹', examples: 'Rash, acne, skin infections' },
+  { value: 'DIGESTIVE', label: 'Digestive/GI', icon: '🫃', examples: 'Stomach pain, acid reflux, liver' },
+  { value: 'RESPIRATORY', label: 'Respiratory', icon: '🫁', examples: 'Breathing issues, asthma, cough' },
+  { value: 'NEUROLOGICAL', label: 'Neurological', icon: '🧠', examples: 'Headache, seizures, numbness' },
+  { value: 'DENTAL', label: 'Dental', icon: '🦷', examples: 'Toothache, gum problems' },
+  { value: 'GENERAL', label: 'General/Primary', icon: '🏥', examples: 'Fever, cold, annual checkup' },
+  { value: 'PEDIATRIC', label: 'Pediatric', icon: '👶', examples: 'Child health, vaccinations' },
+  { value: 'GYNECOLOGY', label: 'Gynecology/OB', icon: '🤰', examples: 'Women\'s health, pregnancy' },
+  { value: 'UROLOGY', label: 'Urology', icon: '🚿', examples: 'Kidney, urinary issues' },
+  { value: 'MENTAL_HEALTH', label: 'Mental Health', icon: '🧘', examples: 'Anxiety, depression, stress' },
+];
 
 interface Patient {
   id: string;
@@ -70,6 +105,29 @@ interface Appointment {
   notes: string | null;
   patient: Patient;
   doctor: Doctor;
+  metadata?: {
+    severity?: SeverityLevel;
+    problemCategory?: ProblemCategory;
+    autoAssigned?: boolean;
+    assignmentReason?: string;
+  };
+}
+
+interface DoctorRecommendation {
+  success: boolean;
+  doctor?: {
+    id: string;
+    name: string;
+    specialization: string;
+    seniority: string;
+  };
+  reason: string;
+  alternativeDoctors?: Array<{
+    id: string;
+    name: string;
+    specialization: string;
+    seniority: string;
+  }>;
 }
 
 export default function AppointmentBooking() {
@@ -86,6 +144,14 @@ export default function AppointmentBooking() {
   const [loadingDoctors, setLoadingDoctors] = useState(true);
   const [loadingAppointments, setLoadingAppointments] = useState(true);
   const [activeTab, setActiveTab] = useState<"book" | "list">("list");
+
+  // Smart scheduling states
+  const [useSmartScheduling, setUseSmartScheduling] = useState(true);
+  const [severity, setSeverity] = useState<SeverityLevel | "">("");
+  const [problemCategory, setProblemCategory] = useState<ProblemCategory | "">("");
+  const [symptoms, setSymptoms] = useState("");
+  const [recommendation, setRecommendation] = useState<DoctorRecommendation | null>(null);
+  const [loadingRecommendation, setLoadingRecommendation] = useState(false);
 
   const [formData, setFormData] = useState({
     patientId: "",
@@ -262,8 +328,67 @@ export default function AppointmentBooking() {
     if (field === "doctorId") {
       const doctor = doctors.find((d) => d.id === value);
       setSelectedDoctor(doctor || null);
+      // Clear recommendation when manually selecting doctor
+      if (useSmartScheduling) {
+        setRecommendation(null);
+      }
     }
   };
+
+  // Fetch doctor recommendation based on severity and problem category
+  const fetchRecommendation = async () => {
+    if (!severity || !problemCategory || !formData.date || !formData.time) {
+      return;
+    }
+
+    setLoadingRecommendation(true);
+    try {
+      const dateTime = new Date(`${formData.date}T${formData.time}`);
+      const params = new URLSearchParams({
+        severity,
+        problemCategory,
+        dateTime: dateTime.toISOString(),
+      });
+
+      const response = await fetch(`/api/appointments/smart?${params}`);
+      if (response.ok) {
+        const data = await response.json();
+        setRecommendation(data);
+        
+        // Auto-select the recommended doctor
+        if (data.success && data.doctor) {
+          setFormData(prev => ({ ...prev, doctorId: data.doctor.id }));
+          const doctor = doctors.find(d => d.id === data.doctor.id);
+          setSelectedDoctor(doctor || null);
+        }
+      } else {
+        const errorData = await response.json();
+        setRecommendation({
+          success: false,
+          reason: errorData.reason || errorData.error || 'Failed to get recommendation',
+          alternativeDoctors: errorData.alternativeDoctors,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch recommendation:', error);
+      setRecommendation({
+        success: false,
+        reason: 'Failed to connect to recommendation service',
+      });
+    } finally {
+      setLoadingRecommendation(false);
+    }
+  };
+
+  // Trigger recommendation when severity, problem category, or time changes
+  useEffect(() => {
+    if (useSmartScheduling && severity && problemCategory && formData.date && formData.time) {
+      const timeoutId = setTimeout(() => {
+        fetchRecommendation();
+      }, 500); // Debounce
+      return () => clearTimeout(timeoutId);
+    }
+  }, [severity, problemCategory, formData.date, formData.time, useSmartScheduling]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -271,10 +396,32 @@ export default function AppointmentBooking() {
 
     try {
       // Validate form data
-      if (!formData.patientId || !formData.doctorId || !formData.date || !formData.time) {
+      if (!formData.patientId || !formData.date || !formData.time) {
         toast({
           title: "Validation Error",
-          description: "Please fill in all required fields (Patient, Doctor, Date, Time)",
+          description: "Please fill in all required fields (Patient, Date, Time)",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // For smart scheduling, severity and problem category are required
+      if (useSmartScheduling && (!severity || !problemCategory)) {
+        toast({
+          title: "Validation Error",
+          description: "Please select severity level and problem category for smart scheduling",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // For manual scheduling, doctor is required
+      if (!useSmartScheduling && !formData.doctorId) {
+        toast({
+          title: "Validation Error",
+          description: "Please select a doctor for manual scheduling",
           variant: "destructive",
         });
         setIsSubmitting(false);
@@ -294,35 +441,68 @@ export default function AppointmentBooking() {
         return;
       }
 
-      const response = await fetch("/api/appointments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          patientId: formData.patientId,
-          doctorId: formData.doctorId,
-          dateTime: dateTime.toISOString(),
-          reason: formData.reason,
-          notes: formData.notes,
-        }),
-      });
+      let response;
+      
+      if (useSmartScheduling && severity && problemCategory) {
+        // Use smart scheduling API
+        response = await fetch("/api/appointments/smart", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            patientId: formData.patientId,
+            dateTime: dateTime.toISOString(),
+            severity,
+            problemCategory,
+            problemDescription: formData.reason,
+            symptoms: symptoms ? symptoms.split(',').map(s => s.trim()) : undefined,
+            notes: formData.notes,
+            preferredDoctorId: formData.doctorId || undefined,
+            autoAssign: !formData.doctorId, // Auto-assign if no doctor selected
+          }),
+        });
+      } else {
+        // Use standard scheduling API
+        response = await fetch("/api/appointments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            patientId: formData.patientId,
+            doctorId: formData.doctorId,
+            dateTime: dateTime.toISOString(),
+            reason: formData.reason,
+            notes: formData.notes,
+            severity: severity || undefined,
+            problemCategory: problemCategory || undefined,
+          }),
+        });
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
-        const errorMsg = errorData.error || "Failed to book appointment";
+        const errorMsg = errorData.error || errorData.reason || "Failed to book appointment";
         throw new Error(errorMsg);
       }
 
-      const appointment = await response.json();
+      const result = await response.json();
+      // Handle both smart and standard API responses
+      const appointment = result.appointment || result;
       setBookedAppointment(appointment);
 
       // Refresh appointments list
       fetchAppointments();
 
+      // Show success message with assignment info if available
+      const assignmentInfo = result.assignment?.autoAssigned 
+        ? ` (Auto-assigned: ${result.assignment.reason})`
+        : '';
+      
       toast({
         title: "✅ Appointment Booked Successfully!",
-        description: `Appointment scheduled for ${new Date(appointment.dateTime).toLocaleString()} with ${appointment.doctor.user.name}`,
+        description: `Appointment scheduled for ${new Date(appointment.dateTime).toLocaleString()} with Dr. ${appointment.doctor.user.name}${assignmentInfo}`,
       });
 
       // Reset form
@@ -375,6 +555,12 @@ export default function AppointmentBooking() {
       reason: "",
       notes: "",
     });
+    setSeverity("");
+    setProblemCategory("");
+    setSymptoms("");
+    setRecommendation(null);
+    setSelectedPatient(null);
+    setSelectedDoctor(null);
   };
 
   const getStatusBadge = (status: string) => {
@@ -682,6 +868,23 @@ export default function AppointmentBooking() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6 pt-6">
+                      {/* Smart Scheduling Toggle */}
+                      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-purple-500 flex items-center justify-center">
+                            <Sparkles className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <Label className="text-slate-900 font-semibold">Smart Doctor Assignment</Label>
+                            <p className="text-sm text-slate-600">Auto-assign best available doctor based on severity & specialty</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={useSmartScheduling}
+                          onCheckedChange={setUseSmartScheduling}
+                        />
+                      </div>
+
                       {/* Patient Selection */}
                       <div className="space-y-2">
                         <Label
@@ -724,21 +927,177 @@ export default function AppointmentBooking() {
                         </Select>
                       </div>
 
-                      {/* Doctor Selection */}
+                      {/* Smart Scheduling Fields */}
+                      {useSmartScheduling && (
+                        <>
+                          {/* Severity Selection */}
+                          <div className="space-y-2">
+                            <Label className="text-slate-700 font-semibold flex items-center gap-2">
+                              <AlertTriangle className="h-4 w-4 text-orange-600" />
+                              Severity Level <span className="text-red-500">*</span>
+                            </Label>
+                            <div className="grid grid-cols-3 gap-3">
+                              {SEVERITY_OPTIONS.map((option) => (
+                                <button
+                                  key={option.value}
+                                  type="button"
+                                  onClick={() => setSeverity(option.value)}
+                                  className={`p-4 rounded-lg border-2 transition-all ${
+                                    severity === option.value
+                                      ? `border-${option.color.replace('bg-', '')} ${option.color} text-white shadow-lg`
+                                      : 'border-slate-200 hover:border-slate-300 bg-white'
+                                  }`}
+                                >
+                                  <div className={`h-3 w-3 rounded-full ${option.color} mx-auto mb-2 ${severity === option.value ? 'bg-white' : ''}`} />
+                                  <p className="font-semibold">{option.label}</p>
+                                  <p className={`text-xs mt-1 ${severity === option.value ? 'text-white/80' : 'text-slate-500'}`}>
+                                    {option.description}
+                                  </p>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Problem Category Selection */}
+                          <div className="space-y-2">
+                            <Label className="text-slate-700 font-semibold flex items-center gap-2">
+                              <Activity className="h-4 w-4 text-red-600" />
+                              Problem Category <span className="text-red-500">*</span>
+                            </Label>
+                            <Select
+                              value={problemCategory}
+                              onValueChange={(value) => setProblemCategory(value as ProblemCategory)}
+                            >
+                              <SelectTrigger className="border-slate-300 focus:border-blue-500 focus:ring-blue-500 h-12">
+                                <SelectValue placeholder="Select the type of health problem" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {PROBLEM_CATEGORIES.map((cat) => (
+                                  <SelectItem key={cat.value} value={cat.value}>
+                                    <div className="flex items-center gap-3">
+                                      <span className="text-xl">{cat.icon}</span>
+                                      <div>
+                                        <span className="font-semibold">{cat.label}</span>
+                                        <span className="text-slate-500 text-xs ml-2">{cat.examples}</span>
+                                      </div>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {/* Symptoms */}
+                          <div className="space-y-2">
+                            <Label className="text-slate-700 font-semibold flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-blue-600" />
+                              Symptoms (comma separated)
+                            </Label>
+                            <Input
+                              placeholder="e.g., chest pain, shortness of breath, dizziness"
+                              value={symptoms}
+                              onChange={(e) => setSymptoms(e.target.value)}
+                              className="border-slate-300 focus:border-blue-500 focus:ring-blue-500 h-12"
+                            />
+                          </div>
+
+                          {/* Doctor Recommendation */}
+                          {(loadingRecommendation || recommendation) && (
+                            <div className={`p-4 rounded-lg border-2 ${
+                              recommendation?.success 
+                                ? 'border-green-200 bg-green-50' 
+                                : 'border-orange-200 bg-orange-50'
+                            }`}>
+                              <div className="flex items-start gap-3">
+                                {loadingRecommendation ? (
+                                  <>
+                                    <Loader2 className="h-5 w-5 animate-spin text-blue-600 mt-0.5" />
+                                    <div>
+                                      <p className="font-semibold text-slate-900">Finding best available doctor...</p>
+                                      <p className="text-sm text-slate-600">Analyzing severity, specialization, and shift availability</p>
+                                    </div>
+                                  </>
+                                ) : recommendation?.success ? (
+                                  <>
+                                    <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                                    <div className="flex-1">
+                                      <p className="font-semibold text-green-900">Recommended Doctor</p>
+                                      <p className="text-lg font-bold text-green-800">Dr. {recommendation.doctor?.name}</p>
+                                      <p className="text-sm text-green-700">{recommendation.doctor?.specialization} • {recommendation.doctor?.seniority}</p>
+                                      <p className="text-xs text-green-600 mt-1">{recommendation.reason}</p>
+                                      {recommendation.alternativeDoctors && recommendation.alternativeDoctors.length > 0 && (
+                                        <div className="mt-2 pt-2 border-t border-green-200">
+                                          <p className="text-xs text-green-700 font-medium">Alternatives:</p>
+                                          {recommendation.alternativeDoctors.slice(0, 2).map((alt) => (
+                                            <button
+                                              key={alt.id}
+                                              type="button"
+                                              onClick={() => {
+                                                setFormData(prev => ({ ...prev, doctorId: alt.id }));
+                                                const doctor = doctors.find(d => d.id === alt.id);
+                                                setSelectedDoctor(doctor || null);
+                                              }}
+                                              className="text-xs text-green-600 hover:text-green-800 underline mr-2"
+                                            >
+                                              Dr. {alt.name} ({alt.seniority})
+                                            </button>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5" />
+                                    <div className="flex-1">
+                                      <p className="font-semibold text-orange-900">No Matching Doctor Found</p>
+                                      <p className="text-sm text-orange-700">{recommendation?.reason}</p>
+                                      {recommendation?.alternativeDoctors && recommendation.alternativeDoctors.length > 0 && (
+                                        <div className="mt-2">
+                                          <p className="text-xs text-orange-700 font-medium">Available alternatives:</p>
+                                          {recommendation.alternativeDoctors.map((alt) => (
+                                            <button
+                                              key={alt.id}
+                                              type="button"
+                                              onClick={() => {
+                                                setFormData(prev => ({ ...prev, doctorId: alt.id }));
+                                                const doctor = doctors.find(d => d.id === alt.id);
+                                                setSelectedDoctor(doctor || null);
+                                              }}
+                                              className="text-xs text-orange-600 hover:text-orange-800 underline mr-2"
+                                            >
+                                              Dr. {alt.name}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                      {/* Doctor Selection - Manual mode or override */}
                       <div className="space-y-2">
                         <Label
                           htmlFor="doctor"
                           className="text-slate-700 font-semibold flex items-center gap-2"
                         >
                           <Stethoscope className="h-4 w-4 text-emerald-600" />
-                          Select Doctor <span className="text-red-500">*</span>
+                          {useSmartScheduling ? 'Override Doctor Selection' : 'Select Doctor'} 
+                          {!useSmartScheduling && <span className="text-red-500">*</span>}
                         </Label>
+                        {useSmartScheduling && (
+                          <p className="text-xs text-slate-500 -mt-1">Optional: Leave empty to use recommended doctor</p>
+                        )}
                         <Select
                           value={formData.doctorId}
                           onValueChange={(value) =>
                             handleChange("doctorId", value)
                           }
-                          required
                         >
                           <SelectTrigger className="border-slate-300 focus:border-blue-500 focus:ring-blue-500 h-12">
                             <SelectValue
