@@ -2,6 +2,8 @@
 
 A comprehensive Hospital Information System (HIS) built with **Next.js 15**, **React 19**, and **TypeScript**, featuring real-time analytics, role-based access control, and modern Apple HCI-inspired UI/UX.
 
+
+
 ## ✨ Current Features
 
 ### Core Capabilities
