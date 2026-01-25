@@ -89,7 +89,6 @@ const getMenuItems = (role?: string) => {
         { title: "Appointments", icon: Calendar, href: "/doctor/appointments" },
         { title: "Emergency", icon: Activity, href: "/doctor/emergency" },
         { title: "Patients", icon: Users, href: "/doctor/patients" },
-        { title: "Prescriptions", icon: Pill, href: "/doctor/prescriptions" },
         { title: "Referrals", icon: FileText, href: "/doctor/referrals" },
         { title: "Surgeries", icon: Briefcase, href: "/doctor/surgeries" },
       ];
