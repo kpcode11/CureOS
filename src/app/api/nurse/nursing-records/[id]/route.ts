@@ -10,7 +10,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const rec = await prisma.nursingRecord.findUnique({ where: { id: params.id } });
+  const { id } = await params;
+  const rec = await prisma.nursingRecord.findUnique({ where: { id } });
   if (!rec) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(rec);
 }

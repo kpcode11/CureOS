@@ -8,7 +8,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     const res = await requirePermission(req, 'beds.update');
     const actorId = res.session?.user?.id ?? null;
 
-    const existing = await prisma.bedAssignment.findUnique({ where: { id: params.id }, include: { bed: true } });
+    const { id } = await params;
+    const existing = await prisma.bedAssignment.findUnique({ where: { id }, include: { bed: true } });
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     if (existing.dischargedAt) return NextResponse.json({ error: 'Already discharged' }, { status: 409 });
 

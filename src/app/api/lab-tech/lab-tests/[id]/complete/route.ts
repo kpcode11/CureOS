@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { createAudit } from '@/services/audit.service';
 
 // PATCH /api/lab-tech/lab-tests/:id/complete
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: { id: string } | Promise<{ id: string }> }) {
   let actorId: string | null = null;
   try {
     const res: any = await requirePermission(req, 'lab.sample.track');
@@ -13,7 +13,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const id = params.id;
+  const { id } = await params;
   try {
     const before = await prisma.labTest.findUnique({ where: { id } });
     if (!before) return NextResponse.json({ error: 'Not found' }, { status: 404 });

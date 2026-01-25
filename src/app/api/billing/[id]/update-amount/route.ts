@@ -12,7 +12,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
   try {
     const body = await req.json();
-    const before = await prisma.billing.findUnique({ where: { id: params.id } });
+    const { id } = await params;
+    const before = await prisma.billing.findUnique({ where: { id } });
     if (!before) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     if (before.status === 'PAID') return NextResponse.json({ error: 'Cannot modify paid bill' }, { status: 409 });
 

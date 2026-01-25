@@ -16,7 +16,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     const { status } = await req.json();
     if (!ALLOWED.includes(status)) return NextResponse.json({ error: 'invalid status' }, { status: 400 });
 
-    const before = await prisma.billing.findUnique({ where: { id: params.id } });
+    const { id } = await params;
+    const before = await prisma.billing.findUnique({ where: { id } });
     if (!before) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     const updated = await prisma.billing.update({ where: { id: params.id }, data: { status } });
