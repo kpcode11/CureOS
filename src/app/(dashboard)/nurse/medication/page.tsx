@@ -60,12 +60,14 @@ export default function MedicationPage() {
       // Get all active bed assignments first
       const assignmentsRes = await fetch("/api/nurse/bed-assignments");
       if (!assignmentsRes.ok) return;
-      
+
       const assignments = await assignmentsRes.json();
-      
+
       // Fetch prescriptions for each assigned patient
       const prescriptionsPromises = assignments.map(async (assignment: any) => {
-        const res = await fetch(`/api/nurse/patients/${assignment.patientId}/prescriptions`);
+        const res = await fetch(
+          `/api/nurse/patients/${assignment.patientId}/prescriptions`,
+        );
         if (res.ok) {
           const data = await res.json();
           return data.map((p: any) => ({
@@ -298,28 +300,30 @@ export default function MedicationPage() {
                       </h4>
                       <div className="space-y-2">
                         {Array.isArray(prescription.medications) &&
-                          prescription.medications.map((med: any, idx: number) => (
-                            <div
-                              key={idx}
-                              className="p-3 bg-slate-50 rounded-lg"
-                            >
-                              <div className="flex items-start justify-between">
-                                <div>
-                                  <p className="font-medium text-slate-900">
-                                    {med.name}
-                                  </p>
-                                  <p className="text-sm text-slate-600">
-                                    {med.dosage} - {med.frequency}
-                                  </p>
-                                  {med.duration && (
-                                    <p className="text-sm text-slate-500">
-                                      Duration: {med.duration}
+                          prescription.medications.map(
+                            (med: any, idx: number) => (
+                              <div
+                                key={idx}
+                                className="p-3 bg-slate-50 rounded-lg"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div>
+                                    <p className="font-medium text-slate-900">
+                                      {med.name}
                                     </p>
-                                  )}
+                                    <p className="text-sm text-slate-600">
+                                      {med.dosage} - {med.frequency}
+                                    </p>
+                                    {med.duration && (
+                                      <p className="text-sm text-slate-500">
+                                        Duration: {med.duration}
+                                      </p>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            ),
+                          )}
                       </div>
                     </div>
 
@@ -336,12 +340,16 @@ export default function MedicationPage() {
                       <div className="flex items-center gap-2 text-slate-600">
                         <Calendar className="w-4 h-4" />
                         <span className="text-sm">
-                          {new Date(prescription.createdAt).toLocaleDateString()}
+                          {new Date(
+                            prescription.createdAt,
+                          ).toLocaleDateString()}
                         </span>
                       </div>
                       <Button
                         onClick={() =>
-                          router.push(`/nurse/patients/${prescription.patientId}`)
+                          router.push(
+                            `/nurse/patients/${prescription.patientId}`,
+                          )
                         }
                       >
                         View Patient

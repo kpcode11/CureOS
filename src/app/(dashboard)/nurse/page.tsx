@@ -140,7 +140,8 @@ export default function NurseDashboardPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + index * 0.1 }}
               >
-                <Card className="border-none shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer"
+                <Card
+                  className="border-none shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer"
                   onClick={() => router.push(action.href)}
                 >
                   <CardContent className="p-6">
@@ -160,7 +161,9 @@ export default function NurseDashboardPage() {
                     <h3 className="font-semibold text-lg text-slate-900 mb-1">
                       {action.title}
                     </h3>
-                    <p className="text-sm text-slate-600">{action.description}</p>
+                    <p className="text-sm text-slate-600">
+                      {action.description}
+                    </p>
                   </CardContent>
                 </Card>
               </motion.div>
