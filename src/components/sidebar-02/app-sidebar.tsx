@@ -169,10 +169,22 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
           link: "/doctor/patients",
         },
         {
+          id: "appointments",
+          title: "Appointments",
+          icon: <Package2 className="size-4" />,
+          link: "/doctor/appointments",
+        },
+        {
           id: "emr",
-          title: "EMR",
+          title: "Consultation",
           icon: <FileText className="size-4" />,
-          link: "/doctor/emr",
+          link: "/doctor/consultation",
+        },
+        {
+          id: "emergency",
+          title: "Emergency",
+          icon: <AlertTriangle className="size-4" />,
+          link: "/doctor/emergency",
         },
         {
           id: "prescriptions",
@@ -181,16 +193,16 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
           link: "/doctor/prescriptions",
         },
         {
-          id: "orders",
-          title: "Orders",
-          icon: <Package2 className="size-4" />,
-          link: "/doctor/orders",
+          id: "referrals",
+          title: "Referrals",
+          icon: <ArrowRightLeft className="size-4" />,
+          link: "/doctor/referrals",
         },
         {
           id: "surgery",
-          title: "Surgery",
+          title: "Surgeries",
           icon: <Briefcase className="size-4" />,
-          link: "/doctor/surgery",
+          link: "/doctor/surgeries",
         },
       ];
 
@@ -227,10 +239,28 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
           link: "/pharmacist/prescriptions",
         },
         {
+          id: "dispense",
+          title: "Dispense",
+          icon: <Package2 className="size-4" />,
+          link: "/pharmacist/dispense",
+        },
+        {
+          id: "queue",
+          title: "Queue",
+          icon: <Users className="size-4" />,
+          link: "/pharmacist/queue",
+        },
+        {
           id: "inventory",
           title: "Inventory",
           icon: <Package2 className="size-4" />,
           link: "/pharmacist/inventory",
+        },
+        {
+          id: "safety-alerts",
+          title: "Safety Alerts",
+          icon: <AlertTriangle className="size-4" />,
+          link: "/pharmacist/safety-alerts",
         },
       ];
 
@@ -238,16 +268,22 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
       return [
         getDashboardRoute("LAB_TECHNICIAN"),
         {
-          id: "tests",
-          title: "Tests",
-          icon: <TestTube className="size-4" />,
-          link: "/lab-tech/tests",
+          id: "orders",
+          title: "Orders",
+          icon: <Package2 className="size-4" />,
+          link: "/lab-tech/orders",
         },
         {
           id: "results",
           title: "Results",
           icon: <FileText className="size-4" />,
           link: "/lab-tech/results",
+        },
+        {
+          id: "critical",
+          title: "Critical",
+          icon: <AlertTriangle className="size-4" />,
+          link: "/lab-tech/critical",
         },
       ];
 
@@ -292,6 +328,29 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
         },
       ];
 
+    case "BILLING_OFFICER":
+      return [
+        getDashboardRoute(userRole),
+        {
+          id: "patient",
+          title: "Patient Billing",
+          icon: <Users className="size-4" />,
+          link: "/billing/patient",
+        },
+        {
+          id: "overdue",
+          title: "Overdue",
+          icon: <AlertTriangle className="size-4" />,
+          link: "/billing/overdue",
+        },
+        {
+          id: "audit-logs",
+          title: "Audit Logs",
+          icon: <FileText className="size-4" />,
+          link: "/billing/audit-logs",
+        },
+      ];
+
     default:
       return [getDashboardRoute(userRole)];
   }
@@ -318,7 +377,7 @@ export function DashboardSidebar() {
           "flex md:pt-3.5",
           isCollapsed
             ? "flex-row items-center justify-between gap-y-4 md:flex-col md:items-start md:justify-start"
-            : "flex-row items-center justify-between"
+            : "flex-row items-center justify-between",
         )}
       >
         <a href="/" className="flex items-center gap-2">
@@ -334,7 +393,7 @@ export function DashboardSidebar() {
           key={isCollapsed ? "header-collapsed" : "header-expanded"}
           className={cn(
             "flex items-center gap-2",
-            isCollapsed ? "flex-row md:flex-col-reverse" : "flex-row"
+            isCollapsed ? "flex-row md:flex-col-reverse" : "flex-row",
           )}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -357,11 +416,8 @@ export function DashboardSidebar() {
           <span>Logout</span>
         </button>
       </SidebarFooter>
-      
-      <LogoutModal 
-        open={logoutModalOpen} 
-        onOpenChange={setLogoutModalOpen} 
-      />
+
+      <LogoutModal open={logoutModalOpen} onOpenChange={setLogoutModalOpen} />
     </Sidebar>
   );
 }
