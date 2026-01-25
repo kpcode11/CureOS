@@ -9,7 +9,22 @@ export async function GET(req: Request, { params }: { params: { patientId: strin
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const p = await prisma.patient.findUnique({ where: { id: params.patientId }, select: { id: true, firstName: true, lastName: true, dateOfBirth: true, gender: true, phone: true, bloodType: true } });
+  const { patientId } = await params;
+  const p = await prisma.patient.findUnique({ 
+    where: { id: patientId }, 
+    select: { 
+      id: true, 
+      firstName: true, 
+      lastName: true, 
+      dateOfBirth: true, 
+      gender: true, 
+      phone: true, 
+      bloodType: true,
+      address: true,
+      emergencyContact: true,
+      email: true
+    } 
+  });
   if (!p) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(p);
 }

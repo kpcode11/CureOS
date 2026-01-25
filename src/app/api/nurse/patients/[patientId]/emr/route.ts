@@ -9,6 +9,7 @@ export async function GET(req: Request, { params }: { params: { patientId: strin
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const rows = await prisma.eMR.findMany({ where: { patientId: params.patientId }, orderBy: { createdAt: 'desc' } });
+  const { patientId } = await params;
+  const rows = await prisma.eMR.findMany({ where: { patientId }, orderBy: { createdAt: 'desc' } });
   return NextResponse.json(rows);
 }

@@ -9,6 +9,7 @@ export async function GET(req: Request, { params }: { params: { patientId: strin
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const rows = await prisma.labTest.findMany({ where: { patientId: params.patientId }, orderBy: { orderedAt: 'desc' } });
+  const { patientId } = await params;
+  const rows = await prisma.labTest.findMany({ where: { patientId }, orderBy: { orderedAt: 'desc' } });
   return NextResponse.json(rows);
 }

@@ -42,7 +42,22 @@ export async function POST(req: Request) {
       prisma.bed.update({ where: { id: bedId }, data: { status: 'OCCUPIED' } })
     ]);
 
-    await createAudit({ actorId, action: 'bed.assign', resource: 'BedAssignment', resourceId: assignment.id, after: assignment });
+    // Create billing for bed assignment (₹1000 per day)
+    const bedCharge = 1000;
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 1); // Due next day
+
+    await prisma.billing.create({
+      data: {
+        patientId,
+        amount: bedCharge,
+        description: `Bed Assignment - ${bed.bedNumber} (${bed.ward})`,
+        status: 'PENDING',
+        dueDate: dueDate,
+      },
+    });
+
+    await createAudit({ actorId, action: 'bed.assign', resource: 'BedAssignment', resourceId: assignment.id, after: assignment, meta: { bedCharge } });
 
     return NextResponse.json(assignment, { status: 201 });
   } catch (err) {
