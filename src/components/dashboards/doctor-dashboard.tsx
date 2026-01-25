@@ -553,7 +553,7 @@ export function DoctorDashboard() {
       <Card>
         <CardContent className="p-6">
           <h3 className="font-semibold text-base mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
             <Link href="/doctor/patients">
               <Button
                 variant="outline"
@@ -563,15 +563,6 @@ export function DoctorDashboard() {
                 <span className="text-xs">My Patients</span>
               </Button>
             </Link>
-            <Link href="/doctor/emr">
-              <Button
-                variant="outline"
-                className="w-full h-auto py-4 flex flex-col gap-2 hover:bg-accent"
-              >
-                <FileText className="h-5 w-5" />
-                <span className="text-xs">EMR</span>
-              </Button>
-            </Link>
             <Link href="/doctor/surgeries">
               <Button
                 variant="outline"
@@ -579,15 +570,6 @@ export function DoctorDashboard() {
               >
                 <Stethoscope className="h-5 w-5" />
                 <span className="text-xs">Surgeries</span>
-              </Button>
-            </Link>
-            <Link href="/doctor/prescriptions">
-              <Button
-                variant="outline"
-                className="w-full h-auto py-4 flex flex-col gap-2 hover:bg-accent"
-              >
-                <Pill className="h-5 w-5" />
-                <span className="text-xs">Prescriptions</span>
               </Button>
             </Link>
           </div>

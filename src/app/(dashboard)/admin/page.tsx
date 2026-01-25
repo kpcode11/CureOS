@@ -1,22 +1,39 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { Button } from '@/components/ui/button';
+import React, { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { ChevronDown, Plus, Download, FileText, Users, Lock, Shield, TrendingUp, Search, Command, UserPlus, Settings, Database, Activity, CheckCircle } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { ThemeToggle } from '@/components/theme-toggle';
-import Link from 'next/link';
-import { WelcomeSection } from '@/components/dashboard-2/welcome-section';
-import { LeadSourcesChart } from '@/components/dashboard-2/lead-sources-chart';
-import { RevenueFlowChart } from '@/components/dashboard-2/revenue-flow-chart';
-import { DealsTable } from '@/components/dashboard-2/deals-table';
+} from "@/components/ui/dropdown-menu";
+import {
+  ChevronDown,
+  Plus,
+  Download,
+  FileText,
+  Users,
+  Lock,
+  Shield,
+  TrendingUp,
+  Search,
+  Command,
+  UserPlus,
+  Settings,
+  Database,
+  Activity,
+  CheckCircle,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ThemeToggle } from "@/components/theme-toggle";
+import Link from "next/link";
+import { WelcomeSection } from "@/components/dashboard-2/welcome-section";
+import { LeadSourcesChart } from "@/components/dashboard-2/lead-sources-chart";
+import { RevenueFlowChart } from "@/components/dashboard-2/revenue-flow-chart";
+import { DealsTable } from "@/components/dashboard-2/deals-table";
+import GooeyDepartmentDashboard from "@/components/gooey-department-dashboard";
 
 interface StatCard {
   title: string;
@@ -36,9 +53,9 @@ export default function AdminPage() {
     const fetchStats = async () => {
       try {
         const [usersRes, rolesRes, permsRes] = await Promise.all([
-          fetch('/api/admin/users'),
-          fetch('/api/admin/roles'),
-          fetch('/api/admin/permissions'),
+          fetch("/api/admin/users"),
+          fetch("/api/admin/roles"),
+          fetch("/api/admin/permissions"),
         ]);
 
         // Check if responses are successful and have content
@@ -52,7 +69,7 @@ export default function AdminPage() {
             try {
               users = JSON.parse(text);
             } catch (e) {
-              console.warn('Failed to parse users response:', e);
+              console.warn("Failed to parse users response:", e);
               users = [];
             }
           }
@@ -64,7 +81,7 @@ export default function AdminPage() {
             try {
               roles = JSON.parse(text);
             } catch (e) {
-              console.warn('Failed to parse roles response:', e);
+              console.warn("Failed to parse roles response:", e);
               roles = [];
             }
           }
@@ -76,7 +93,7 @@ export default function AdminPage() {
             try {
               perms = JSON.parse(text);
             } catch (e) {
-              console.warn('Failed to parse permissions response:', e);
+              console.warn("Failed to parse permissions response:", e);
               perms = [];
             }
           }
@@ -84,41 +101,41 @@ export default function AdminPage() {
 
         const statsData: StatCard[] = [
           {
-            title: 'Total Users',
+            title: "Total Users",
             value: Array.isArray(users) ? users.length : 0,
-            change: '+12%',
+            change: "+12%",
             icon: <Users className="w-5 h-5" />,
-            color: 'bg-blue-50 dark:bg-blue-900/20',
-            link: '/admin/rbac?tab=users',
+            color: "bg-blue-50 dark:bg-blue-900/20",
+            link: "/admin/rbac?tab=users",
           },
           {
-            title: 'Roles',
+            title: "Roles",
             value: Array.isArray(roles) ? roles.length : 0,
-            change: '+4%',
+            change: "+4%",
             icon: <Shield className="w-5 h-5" />,
-            color: 'bg-purple-50 dark:bg-purple-900/20',
-            link: '/admin/rbac?tab=roles',
+            color: "bg-purple-50 dark:bg-purple-900/20",
+            link: "/admin/rbac?tab=roles",
           },
           {
-            title: 'Permissions',
+            title: "Permissions",
             value: Array.isArray(perms) ? perms.length : 0,
-            change: '+8%',
+            change: "+8%",
             icon: <Lock className="w-5 h-5" />,
-            color: 'bg-green-50 dark:bg-green-900/20',
-            link: '/admin/rbac?tab=permissions',
+            color: "bg-green-50 dark:bg-green-900/20",
+            link: "/admin/rbac?tab=permissions",
           },
           {
-            title: 'System Health',
-            value: '98%',
-            change: '+2%',
+            title: "System Health",
+            value: "98%",
+            change: "+2%",
             icon: <TrendingUp className="w-5 h-5" />,
-            color: 'bg-emerald-50 dark:bg-emerald-900/20',
+            color: "bg-emerald-50 dark:bg-emerald-900/20",
           },
         ];
 
         setStats(statsData);
       } catch (error) {
-        console.error('Failed to fetch stats:', error);
+        console.error("Failed to fetch stats:", error);
       } finally {
         setIsLoading(false);
       }
@@ -132,7 +149,9 @@ export default function AdminPage() {
       <div className="lg:border lg:rounded-md overflow-hidden flex flex-col items-center justify-start bg-container h-full w-full bg-background">
         {/* Header */}
         <header className="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 border-b bg-card sticky top-0 z-10 w-full">
-          <h1 className="text-base sm:text-lg font-medium flex-1 truncate">Admin Dashboard</h1>
+          <h1 className="text-base sm:text-lg font-medium flex-1 truncate">
+            Admin Dashboard
+          </h1>
 
           <div className="hidden md:block relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
@@ -147,34 +166,6 @@ export default function AdminPage() {
           </div>
 
           <ThemeToggle />
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 sm:gap-3 h-8 sm:h-9 text-xs sm:text-sm"
-                >
-                  <span className="hidden xs:inline">Export</span>
-                  <Download className="w-4 h-4" />
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <FileText className="w-4 h-4 mr-2" />
-                  Export Report
-                </DropdownMenuItem>
-                <DropdownMenuItem>Export Users</DropdownMenuItem>
-                <DropdownMenuItem>Export Audit Log</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button size="sm" className="gap-2 h-8 sm:h-9 text-xs sm:text-sm">
-              <Plus className="w-4 h-4" />
-              <span className="hidden xs:inline">Add User</span>
-            </Button>
-          </div>
         </header>
 
         {/* Main Content */}
@@ -187,7 +178,7 @@ export default function AdminPage() {
             {stats.map((stat, index) => (
               <Link
                 key={stat.title}
-                href={stat.link || '#'}
+                href={stat.link || "#"}
                 className={`group flex flex-col justify-between p-4 rounded-lg transition-all ${stat.color} hover:shadow-md cursor-pointer`}
               >
                 <div className="flex items-start justify-between mb-3">
@@ -200,7 +191,7 @@ export default function AdminPage() {
                 </div>
                 <div className="space-y-2">
                   <p className="text-lg sm:text-xl lg:text-[28px] font-semibold">
-                    {isLoading ? '-' : stat.value}
+                    {isLoading ? "-" : stat.value}
                   </p>
                   <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
                     <TrendingUp className="w-3 h-3" />
@@ -215,6 +206,21 @@ export default function AdminPage() {
           <div className="flex flex-col xl:flex-row gap-4 sm:gap-6">
             <LeadSourcesChart />
             <RevenueFlowChart />
+          </div>
+
+          {/* Department Analytics */}
+          <div className="border rounded-xl bg-card overflow-hidden">
+            <div className="p-4 sm:p-6 border-b bg-card">
+              <h3 className="text-base sm:text-lg font-semibold">
+                Department Analytics
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Real-time metrics across all hospital departments
+              </p>
+            </div>
+            <div className="overflow-auto">
+              <GooeyDepartmentDashboard />
+            </div>
           </div>
 
           {/* Deals Table */}

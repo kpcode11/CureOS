@@ -15,6 +15,7 @@ import { ChevronDown, Plus, Download, FileText } from "lucide-react";
 import { DashboardSidebar } from "@/components/dashboard-2/sidebar";
 import { DashboardHeader } from "@/components/dashboard-2/header";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import GooeyDepartmentDashboard from "@/components/gooey-department-dashboard";
 
 interface StatCard {
   title: string;
@@ -39,7 +40,7 @@ export default function AdminDashboard2Page() {
         if (response.ok) {
           const data = await response.json();
           setAnalyticsData(data);
-          
+
           // Map API data to stat cards
           const mappedStats = [
             {
@@ -78,7 +79,7 @@ export default function AdminDashboard2Page() {
               icon: "🏥",
             },
           ];
-          
+
           setStats(mappedStats);
         }
       } catch (error) {
@@ -97,7 +98,7 @@ export default function AdminDashboard2Page() {
       <div className="h-svh overflow-hidden lg:p-2 w-full">
         <div className="lg:border lg:rounded-md overflow-hidden flex flex-col items-center justify-start bg-container h-full w-full bg-background">
           <DashboardHeader />
-          
+
           <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 bg-background w-full">
             {/* Welcome Section */}
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6">
@@ -106,16 +107,19 @@ export default function AdminDashboard2Page() {
                   Welcome Back, {session?.user?.name || "Admin"}!
                 </h2>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  System Status: <span className="text-emerald-600 font-medium">Operational</span>
+                  System Status:{" "}
+                  <span className="text-emerald-600 font-medium">
+                    Operational
+                  </span>
                 </p>
               </div>
 
               <div className="flex items-center gap-2 sm:gap-3">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="gap-2 sm:gap-3 h-8 sm:h-9 text-xs sm:text-sm"
                     >
                       <span className="hidden xs:inline">Export</span>
@@ -131,10 +135,28 @@ export default function AdminDashboard2Page() {
                     <DropdownMenuItem>Export Dashboard</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <Button size="sm" className="gap-2 h-8 sm:h-9 text-xs sm:text-sm">
+                <Button
+                  size="sm"
+                  className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+                >
                   <Plus className="w-4 h-4" />
                   <span className="hidden xs:inline">Add Report</span>
                 </Button>
+              </div>
+            </div>
+
+            {/* Department Analytics */}
+            <div className="border rounded-xl bg-card overflow-hidden">
+              <div className="p-4 sm:p-6 border-b bg-card">
+                <h3 className="text-base sm:text-lg font-semibold">
+                  Department Analytics
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Real-time metrics across all hospital departments
+                </p>
+              </div>
+              <div className="overflow-auto">
+                <GooeyDepartmentDashboard />
               </div>
             </div>
 
@@ -153,9 +175,15 @@ export default function AdminDashboard2Page() {
                       {stat.value}
                     </p>
                     <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-[10px] sm:text-xs lg:text-sm font-medium">
-                      <span className={stat.isPositive ? "text-emerald-600" : "text-red-600"}>
+                      <span
+                        className={
+                          stat.isPositive ? "text-emerald-600" : "text-red-600"
+                        }
+                      >
                         {stat.change}
-                        <span className="hidden sm:inline">{stat.changeValue}</span>
+                        <span className="hidden sm:inline">
+                          {stat.changeValue}
+                        </span>
                       </span>
                       <span className="text-muted-foreground hidden sm:inline">
                         vs Last Month
@@ -173,7 +201,9 @@ export default function AdminDashboard2Page() {
             <div className="flex flex-col xl:flex-row gap-4 sm:gap-6">
               {/* Placeholder for Lead Sources Chart */}
               <div className="flex-1 p-6 border rounded-xl bg-card">
-                <h3 className="text-base font-semibold mb-4">Department Distribution</h3>
+                <h3 className="text-base font-semibold mb-4">
+                  Department Distribution
+                </h3>
                 <div className="h-64 flex items-center justify-center text-muted-foreground">
                   Chart placeholder - Charts to be connected
                 </div>
@@ -181,7 +211,9 @@ export default function AdminDashboard2Page() {
 
               {/* Placeholder for Revenue Flow Chart */}
               <div className="flex-1 p-6 border rounded-xl bg-card">
-                <h3 className="text-base font-semibold mb-4">Monthly Revenue Trend</h3>
+                <h3 className="text-base font-semibold mb-4">
+                  Monthly Revenue Trend
+                </h3>
                 <div className="h-64 flex items-center justify-center text-muted-foreground">
                   Chart placeholder - Charts to be connected
                 </div>

@@ -179,7 +179,7 @@ export function LeadSourcesChart() {
               {totalPatients.toLocaleString()}
             </span>
             <span className="text-xs sm:text-sm text-muted-foreground">
-              Total Admissions
+              Admissions
             </span>
           </div>
         </div>

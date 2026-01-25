@@ -32,6 +32,7 @@ import {
   Search,
   AlertTriangle,
   ArrowRightLeft,
+  LayoutGrid,
 } from "lucide-react";
 import { Logo } from "@/components/sidebar-02/logo";
 import type { Route } from "./nav-main";
@@ -145,18 +146,6 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
           icon: <Lock className="size-4" />,
           link: "/admin/rbac?tab=permissions",
         },
-        {
-          id: "reports",
-          title: "Reports",
-          icon: <FileText className="size-4" />,
-          link: "/admin/reports",
-        },
-        {
-          id: "billing",
-          title: "Billing",
-          icon: <DollarSign className="size-4" />,
-          link: "/admin/billing",
-        },
       ];
 
     case "DOCTOR":
@@ -175,22 +164,10 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
           link: "/doctor/appointments",
         },
         {
-          id: "emr",
-          title: "Consultation",
-          icon: <FileText className="size-4" />,
-          link: "/doctor/consultation",
-        },
-        {
           id: "emergency",
           title: "Emergency",
           icon: <AlertTriangle className="size-4" />,
           link: "/doctor/emergency",
-        },
-        {
-          id: "prescriptions",
-          title: "Prescriptions",
-          icon: <Pill className="size-4" />,
-          link: "/doctor/prescriptions",
         },
         {
           id: "referrals",
@@ -213,7 +190,31 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
           id: "bed-assignments",
           title: "Bed Assignments",
           icon: <Bed className="size-4" />,
+          link: "/nurse/bed-assignments",
+        },
+        {
+          id: "beds",
+          title: "Beds",
+          icon: <Bed className="size-4" />,
           link: "/nurse/beds",
+        },
+        {
+          id: "medication",
+          title: "Medication",
+          icon: <Pill className="size-4" />,
+          link: "/nurse/medication",
+        },
+        {
+          id: "nursing-records",
+          title: "Nursing Records",
+          icon: <FileText className="size-4" />,
+          link: "/nurse/nursing-records",
+        },
+        {
+          id: "patients",
+          title: "Patients",
+          icon: <Users className="size-4" />,
+          link: "/nurse/patients",
         },
         {
           id: "vitals",
@@ -222,10 +223,10 @@ const getHospitalRoutes = (userRole?: string): Route[] => {
           link: "/nurse/vitals",
         },
         {
-          id: "mar",
-          title: "MAR",
-          icon: <Pill className="size-4" />,
-          link: "/nurse/mar",
+          id: "ward",
+          title: "Ward",
+          icon: <LayoutGrid className="size-4" />,
+          link: "/nurse/ward",
         },
       ];
 
