@@ -87,6 +87,32 @@ export interface Surgery {
   createdAt: string;
 }
 
+export interface VitalScore {
+  name: string;
+  value: string | number | null;
+  score: number;
+  status: 'normal' | 'warning' | 'critical' | 'unknown';
+  normalRange?: string;
+}
+
+export interface HealthIndex {
+  overallScore: number;
+  trend: 'IMPROVING' | 'STABLE' | 'DETERIORATING' | 'UNKNOWN';
+  trendDelta: number;
+  category: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR' | 'CRITICAL';
+  breakdown: {
+    vitals: VitalScore[];
+    vitalsScore: number;
+    labScore: number;
+    medicationScore: number;
+    hospitalizationScore: number;
+    diagnosisScore: number;
+  };
+  lastUpdated: string;
+  dataPoints: number;
+  historicalScores: Array<{ date: string; score: number }>;
+}
+
 /**
  * Hook for doctor API interactions
  * Handles all patient, prescription, EMR, and lab data fetching
@@ -704,6 +730,44 @@ export function useDoctor() {
 
   const clearError = useCallback(() => setError(null), []);
 
+  // ============================================================================
+  // HEALTH INDEX
+  // ============================================================================
+
+  const getHealthIndex = useCallback(
+    async (patientId: string): Promise<HealthIndex | null> => {
+      if (!patientId) {
+        setError('Invalid patient ID');
+        return null;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`/api/doctor/patients/${patientId}/health-index`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to fetch health index');
+        }
+
+        return await response.json();
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        setError(message);
+        toast({ title: 'Error', description: message, variant: 'destructive' });
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [toast]
+  );
+
   return {
     loading,
     error,
@@ -732,6 +796,9 @@ export function useDoctor() {
 
     // Surgery
     getSurgeries,
-    scheduleSurgery
+    scheduleSurgery,
+
+    // Health Index
+    getHealthIndex
   };
 }

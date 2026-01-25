@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { CreateReferralDialog } from "@/components/referrals/create-referral-dialog";
 import { downloadPatientEMRPDF } from "@/lib/pdf-generator";
+import { HealthIndexCard } from "@/components/doctor/health-index-card";
 
 interface PatientDetailComponentProps {
   patientId: string;
@@ -166,6 +167,9 @@ export function PatientDetailComponent({
           </div>
         </CardContent>
       </Card>
+
+      {/* Health Index Score */}
+      <HealthIndexCard patientId={patientId} />
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-2">
