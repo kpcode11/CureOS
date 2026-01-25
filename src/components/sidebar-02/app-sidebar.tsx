@@ -36,6 +36,8 @@ import DashboardNavigation from "@/components/sidebar-02/nav-main";
 import { NotificationsPopover } from "@/components/sidebar-02/nav-notifications";
 import { TeamSwitcher } from "@/components/sidebar-02/team-switcher";
 import { useSession, signOut } from "next-auth/react";
+import { useState } from "react";
+import { LogoutModal } from "@/components/ui/logout-modal";
 
 const sampleNotifications = [
   {
@@ -269,6 +271,7 @@ const teams = [
 export function DashboardSidebar() {
   const { state } = useSidebar();
   const { data: session } = useSession();
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const userRole = session?.user?.role;
   const isCollapsed = state === "collapsed";
   const routes = getHospitalRoutes(userRole);
@@ -312,13 +315,18 @@ export function DashboardSidebar() {
       <SidebarFooter className="px-2 space-y-2">
         <TeamSwitcher teams={teams} />
         <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
+          onClick={() => setLogoutModalOpen(true)}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors text-sm font-medium border border-gray-200 hover:border-red-200"
         >
           <LogOut className="w-4 h-4" />
           <span>Logout</span>
         </button>
       </SidebarFooter>
+      
+      <LogoutModal 
+        open={logoutModalOpen} 
+        onOpenChange={setLogoutModalOpen} 
+      />
     </Sidebar>
   );
 }
