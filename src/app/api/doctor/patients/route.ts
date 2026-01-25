@@ -5,9 +5,12 @@ import { createAudit } from "@/services/audit.service";
 
 /**
  * GET /api/doctor/patients
- * List all patients assigned to the current doctor
+ * List patients with COMPLETED consultations for this doctor
  *
  * RBAC: patient.read
+ * Query params:
+ * - includeAll: 'true' to include all patients (not just completed consultations)
+ * 
  * Edge cases handled:
  * - Non-doctor users (permission denied)
  * - Doctor with no patients (empty array)
@@ -44,13 +47,26 @@ export async function GET(req: Request) {
       );
     }
 
-    // Get all patients who have appointments or prescriptions with this doctor
+    // Parse query params
+    const url = new URL(req.url);
+    const includeAll = url.searchParams.get("includeAll") === "true";
+
+    // Get patients with COMPLETED appointments with this doctor
+    // This ensures only patients who have finished consultations appear
     const patients = await prisma.patient.findMany({
       where: {
         OR: [
-          { appointments: { some: { doctorId: doctor.id } } },
+          // Patients with completed appointments
+          { 
+            appointments: { 
+              some: { 
+                doctorId: doctor.id,
+                ...(includeAll ? {} : { status: "COMPLETED" })
+              } 
+            } 
+          },
+          // Also include patients with prescriptions from this doctor
           { prescriptions: { some: { doctorId: doctor.id } } },
-          { emrRecords: { some: {} } }, // Doctor can see all EMR records
         ],
       },
       select: {
@@ -65,8 +81,19 @@ export async function GET(req: Request) {
         address: true,
         createdAt: true,
         updatedAt: true,
+        appointments: {
+          where: { doctorId: doctor.id },
+          select: { 
+            id: true, 
+            status: true, 
+            dateTime: true,
+            reason: true 
+          },
+          orderBy: { dateTime: "desc" },
+          take: 1,
+        },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { updatedAt: "desc" },
       take: 200,
     });
 

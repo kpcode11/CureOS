@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,23 +12,32 @@ import {
   Clock,
   AlertCircle,
   Loader,
+  Play,
+  CheckCircle,
 } from "lucide-react";
 import { ReferralBadge } from "@/components/referrals/referral-badge";
+import { useToast } from "@/hooks/use-toast";
 
 interface Appointment {
   id: string;
   patientId: string;
-  patientName: string;
-  patientEmail: string;
-  patientPhone: string;
-  appointmentDate: string;
+  dateTime: string;
   reason: string;
   status: string;
+  notes?: string;
   createdAt: string;
+  patient: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email?: string;
+  };
   referral?: {
     id: string;
     urgency: string;
     fromDoctor: {
+      id: string;
       user: {
         name: string;
       };
@@ -37,23 +47,35 @@ interface Appointment {
 
 export default function DoctorAppointmentsPage() {
   const { data: session } = useSession();
+  const router = useRouter();
+  const { toast } = useToast();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [startingConsultation, setStartingConsultation] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/doctor/appointments");
+        setError(null);
+        console.log("[DoctorAppointments] Fetching appointments...");
+        
+        // Only fetch SCHEDULED appointments - completed ones should not appear
+        const response = await fetch("/api/doctor/appointments?status=SCHEDULED");
+        console.log("[DoctorAppointments] Response status:", response.status);
 
         if (!response.ok) {
-          throw new Error("Failed to fetch appointments");
+          const errorData = await response.json();
+          console.error("[DoctorAppointments] Error response:", errorData);
+          throw new Error(errorData.error || "Failed to fetch appointments");
         }
 
         const data = await response.json();
+        console.log("[DoctorAppointments] Received data:", data);
         setAppointments(Array.isArray(data) ? data : data.data || []);
       } catch (err) {
+        console.error("[DoctorAppointments] Fetch error:", err);
         setError(
           err instanceof Error ? err.message : "Failed to load appointments",
         );
@@ -62,10 +84,29 @@ export default function DoctorAppointmentsPage() {
       }
     };
 
-    if (session?.user?.role === "DOCTOR") {
+    // Fetch appointments regardless of role check - let the API handle authorization
+    if (session) {
+      console.log("[DoctorAppointments] Session found, role:", session.user?.role);
       fetchAppointments();
+    } else {
+      console.log("[DoctorAppointments] No session yet, waiting...");
     }
   }, [session]);
+
+  const handleStartConsultation = async (appointment: Appointment) => {
+    setStartingConsultation(appointment.id);
+    try {
+      // Navigate to the consultation page for this patient
+      router.push(`/doctor/consultation/${appointment.id}`);
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to start consultation",
+        variant: "destructive",
+      });
+      setStartingConsultation(null);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -132,10 +173,24 @@ export default function DoctorAppointmentsPage() {
             </Card>
           ) : (
             <div className="grid gap-4">
-              {appointments.map((appointment) => (
+              {appointments.map((appointment) => {
+                const patientName = appointment.patient 
+                  ? `${appointment.patient.firstName} ${appointment.patient.lastName}`
+                  : 'Unknown Patient';
+                const patientPhone = appointment.patient?.phone || 'N/A';
+                const patientEmail = appointment.patient?.email || 'N/A';
+                const appointmentDate = appointment.dateTime 
+                  ? new Date(appointment.dateTime)
+                  : null;
+                const isScheduled = appointment.status === 'SCHEDULED';
+                const isStarting = startingConsultation === appointment.id;
+                
+                return (
                 <Card
                   key={appointment.id}
-                  className="border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 hover:border-gray-300"
+                  className={`border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 hover:border-gray-300 ${
+                    isScheduled ? 'border-l-4 border-l-blue-500' : ''
+                  }`}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between gap-6">
@@ -147,13 +202,14 @@ export default function DoctorAppointmentsPage() {
                           </div>
                           <div className="flex-1">
                             <h3 className="text-lg font-semibold text-gray-900">
-                              {appointment.patientName}
+                              {patientName}
                             </h3>
                             <span
                               className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
                                 appointment.status,
                               )}`}
                             >
+                              {appointment.status === 'COMPLETED' && <CheckCircle className="h-3 w-3 mr-1" />}
                               {appointment.status.replace("_", " ")}
                             </span>
                           </div>
@@ -169,26 +225,28 @@ export default function DoctorAppointmentsPage() {
                           <div className="flex items-center gap-3 text-sm text-gray-600">
                             <Clock className="h-4 w-4 text-gray-400" />
                             <span>
-                              {new Date(
-                                appointment.appointmentDate,
-                              ).toLocaleString()}
+                              {appointmentDate 
+                                ? appointmentDate.toLocaleString()
+                                : 'Date not set'}
                             </span>
                           </div>
                           <div className="flex items-center gap-3 text-sm text-gray-600">
                             <Phone className="h-4 w-4 text-gray-400" />
-                            <span>{appointment.patientPhone}</span>
+                            <span>{patientPhone}</span>
                           </div>
-                          <div className="flex items-center gap-3 text-sm text-gray-600 md:col-span-2">
-                            <User className="h-4 w-4 text-gray-400" />
-                            <span>{appointment.patientEmail}</span>
-                          </div>
+                          {patientEmail !== 'N/A' && (
+                            <div className="flex items-center gap-3 text-sm text-gray-600 md:col-span-2">
+                              <User className="h-4 w-4 text-gray-400" />
+                              <span>{patientEmail}</span>
+                            </div>
+                          )}
                         </div>
 
                         {/* Reason Section */}
                         {appointment.reason && (
                           <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 p-4 rounded-xl border border-gray-200">
                             <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-                              Reason
+                              Reason for Visit
                             </p>
                             <p className="text-sm text-gray-800 leading-relaxed">
                               {appointment.reason}
@@ -196,10 +254,38 @@ export default function DoctorAppointmentsPage() {
                           </div>
                         )}
                       </div>
+                      
+                      {/* Action Buttons */}
+                      <div className="flex flex-col gap-2">
+                        {isScheduled && (
+                          <Button
+                            onClick={() => handleStartConsultation(appointment)}
+                            disabled={isStarting}
+                            className="bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg transition-all"
+                          >
+                            {isStarting ? (
+                              <Loader className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <Play className="h-4 w-4 mr-2" />
+                            )}
+                            Start Consultation
+                          </Button>
+                        )}
+                        {appointment.status === 'COMPLETED' && (
+                          <Button
+                            variant="outline"
+                            onClick={() => router.push(`/doctor/patients/${appointment.patient?.id}`)}
+                            className="border-green-200 text-green-700 hover:bg-green-50"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            View Record
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              )})}
             </div>
           )}
         </div>
