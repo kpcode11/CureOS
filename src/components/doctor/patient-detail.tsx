@@ -15,8 +15,10 @@ import {
   Bed,
   ChevronDown,
   UserPlus,
+  Download,
 } from "lucide-react";
 import { CreateReferralDialog } from "@/components/referrals/create-referral-dialog";
+import { downloadPatientEMRPDF } from "@/lib/pdf-generator";
 
 interface PatientDetailComponentProps {
   patientId: string;
@@ -33,6 +35,7 @@ export function PatientDetailComponent({
 }: PatientDetailComponentProps) {
   const { getPatientDetail, loading, error } = useDoctor();
   const [patient, setPatient] = useState<PatientDetail | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -42,6 +45,33 @@ export function PatientDetailComponent({
 
     fetchPatient();
   }, [patientId, getPatientDetail]);
+
+  const handleExportPDF = async () => {
+    if (!patient) return;
+
+    try {
+      setIsExporting(true);
+      downloadPatientEMRPDF({
+        firstName: patient.firstName,
+        lastName: patient.lastName,
+        dateOfBirth: patient.dateOfBirth,
+        gender: patient.gender,
+        bloodType: patient.bloodType || "Unknown",
+        phone: patient.phone,
+        email: patient.email || "N/A",
+        address: patient.address || "N/A",
+        emrRecords: patient.emrRecords,
+        prescriptions: patient.prescriptions,
+        appointments: patient.appointments,
+        labTests: patient.labTests,
+      });
+    } catch (err) {
+      console.error("Error exporting PDF:", err);
+      alert("Failed to export PDF. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -93,6 +123,26 @@ export function PatientDetailComponent({
                 {patient.bloodType || "Type: N/A"}
               </p>
             </div>
+            <Button
+              onClick={handleExportPDF}
+              disabled={isExporting}
+              variant="outline"
+              size="sm"
+              className="ml-4"
+              title="Export patient EMR to PDF"
+            >
+              {isExporting ? (
+                <>
+                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export PDF
+                </>
+              )}
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
