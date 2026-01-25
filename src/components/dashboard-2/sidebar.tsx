@@ -3,6 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useState } from "react";
+import { LogoutModal } from "@/components/ui/logout-modal";
 import {
   Sidebar,
   SidebarContent,
@@ -149,6 +151,7 @@ export function DashboardSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = useSession();
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const userRole = session?.user?.role;
   const [foldersOpen, setFoldersOpen] = React.useState(true);
   
@@ -285,13 +288,21 @@ export function DashboardSidebar({
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[200px]">
-            <DropdownMenuItem className="text-red-600 hover:bg-accent" onClick={() => window.location.href = '/api/auth/signout'}>
+            <DropdownMenuItem 
+              className="text-red-600 hover:bg-accent cursor-pointer" 
+              onClick={() => setLogoutModalOpen(true)}
+            >
               <LogOut className="size-4 mr-2" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarFooter>
+      
+      <LogoutModal 
+        open={logoutModalOpen} 
+        onOpenChange={setLogoutModalOpen} 
+      />
     </Sidebar>
   );
 }
