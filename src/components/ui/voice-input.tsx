@@ -498,80 +498,131 @@ function parseMedicationFromText(text: string): ParsedMedication {
     duration: "",
   };
   
-  // Work with lowercase for matching
-  const lowerText = text.toLowerCase().trim();
-  let remaining = lowerText;
-  
-  // 1. Extract DURATION first (to avoid "5 days" being caught as dosage)
-  // Pattern: "for X days/weeks/months" or just "X days/weeks/months"
-  const durationMatch = lowerText.match(/(?:for\s+)?(\d+\s*(?:days?|weeks?|months?|years?))/i);
-  if (durationMatch) {
-    result.duration = durationMatch[1].trim();
-    remaining = remaining.replace(durationMatch[0], " ");
+  if (!text || text.trim().length === 0) {
+    console.log("[MedicationParser] Empty input");
+    return result;
   }
   
-  // Also check word-based durations
-  if (!result.duration) {
-    const wordDurationMatch = lowerText.match(/\b(one|two|three|four|five|six|seven)\s+(days?|weeks?|months?)\b/i);
-    if (wordDurationMatch) {
-      result.duration = wordDurationMatch[0].trim();
-      remaining = remaining.replace(wordDurationMatch[0], " ");
-    }
-  }
+  // Step 1: NORMALIZE the text
+  let normalized = text
+    .toLowerCase()
+    .trim()
+    // Fix common speech-to-text issues
+    .replace(/milligrams?/gi, "mg")
+    .replace(/grams?/gi, "g")
+    .replace(/milliliters?/gi, "ml")
+    .replace(/micrograms?/gi, "mcg")
+    // Normalize spacing
+    .replace(/\s+/g, " ")
+    // Remove punctuation except periods in numbers
+    .replace(/[,;:!?]/g, " ");
   
-  // 2. Extract FREQUENCY
-  const frequencyPatterns = [
-    /\b(once\s+(?:a|per)\s+day|once\s+daily)\b/i,
-    /\b(twice\s+(?:a|per)\s+day|twice\s+daily)\b/i,
-    /\b(three\s+times\s+(?:a|per)\s+day|thrice\s+daily)\b/i,
-    /\b(four\s+times\s+(?:a|per)\s+day)\b/i,
-    /\b(every\s+\d+\s+hours?)\b/i,
-    /\b(at\s+(?:bed\s*time|night))\b/i,
-    /\b(in\s+the\s+morning)\b/i,
-    /\b(after\s+(?:meals?|food))\b/i,
-    /\b(before\s+(?:meals?|food))\b/i,
-    /\b(with\s+(?:meals?|food))\b/i,
-    /\b(as\s+needed)\b/i,
-    /\b(daily)\b/i,
-    /\b(weekly)\b/i,
-    /\b(monthly)\b/i,
+  console.log("[MedicationParser] Input:", text);
+  console.log("[MedicationParser] Normalized:", normalized);
+  
+  let remaining = normalized;
+  
+  // Step 2: Extract DURATION first (prevents "5 days" from being caught as dosage)
+  const durationPatterns = [
+    /\bfor\s+(\d+)\s*(days?|weeks?|months?|years?)\b/i,
+    /\b(\d+)\s*(days?|weeks?|months?|years?)\b/i,
+    /\b(one|two|three|four|five|six|seven|eight|nine|ten)\s+(days?|weeks?|months?)\b/i,
   ];
   
-  for (const pattern of frequencyPatterns) {
+  for (const pattern of durationPatterns) {
     const match = remaining.match(pattern);
     if (match) {
-      result.frequency = match[0].trim();
-      remaining = remaining.replace(match[0], " ");
+      // For "for X days" pattern, capture just "X days"
+      if (match[0].startsWith("for ")) {
+        result.duration = match[0].substring(4).trim();
+      } else {
+        result.duration = match[0].trim();
+      }
+      remaining = remaining.replace(match[0], " ").trim();
+      console.log("[MedicationParser] Found duration:", result.duration);
       break;
     }
   }
   
-  // 3. Extract DOSAGE (e.g., "500mg", "500 mg", "10ml", "2 tablets")
-  const dosageMatch = remaining.match(/(\d+\.?\d*)\s*(mg|g|ml|mcg|iu|units?|tablets?|tabs?|capsules?|caps?|pills?|drops?|puffs?|sprays?)\b/i);
-  if (dosageMatch) {
-    result.dosage = dosageMatch[0].trim();
-    remaining = remaining.replace(dosageMatch[0], " ");
+  // Step 3: Extract FREQUENCY (order matters - check longer patterns first)
+  const frequencyPatterns = [
+    // Specific patterns first
+    { pattern: /\btwice\s+(?:a\s+)?daily\b/i, value: "twice daily" },
+    { pattern: /\btwice\s+a\s+day\b/i, value: "twice daily" },
+    { pattern: /\btwice\s+per\s+day\b/i, value: "twice daily" },
+    { pattern: /\btwo\s+times\s+(?:a\s+)?day\b/i, value: "twice daily" },
+    { pattern: /\b2\s+times\s+(?:a\s+)?day\b/i, value: "twice daily" },
+    { pattern: /\bonce\s+(?:a\s+)?daily\b/i, value: "once daily" },
+    { pattern: /\bonce\s+a\s+day\b/i, value: "once daily" },
+    { pattern: /\bonce\s+per\s+day\b/i, value: "once daily" },
+    { pattern: /\bthree\s+times\s+(?:a\s+)?day\b/i, value: "three times daily" },
+    { pattern: /\b3\s+times\s+(?:a\s+)?day\b/i, value: "three times daily" },
+    { pattern: /\bthrice\s+daily\b/i, value: "three times daily" },
+    { pattern: /\bfour\s+times\s+(?:a\s+)?day\b/i, value: "four times daily" },
+    { pattern: /\b4\s+times\s+(?:a\s+)?day\b/i, value: "four times daily" },
+    { pattern: /\bevery\s+(\d+)\s+hours?\b/i, value: null }, // Keep original
+    { pattern: /\bat\s+(?:bed\s*time|night)\b/i, value: "at bedtime" },
+    { pattern: /\bin\s+the\s+morning\b/i, value: "in the morning" },
+    { pattern: /\bafter\s+(?:meals?|food|eating)\b/i, value: "after meals" },
+    { pattern: /\bbefore\s+(?:meals?|food|eating)\b/i, value: "before meals" },
+    { pattern: /\bwith\s+(?:meals?|food)\b/i, value: "with meals" },
+    { pattern: /\bas\s+needed\b/i, value: "as needed" },
+    { pattern: /\bprn\b/i, value: "as needed" },
+    // Generic - must be last
+    { pattern: /\bdaily\b/i, value: "once daily" },
+  ];
+  
+  for (const { pattern, value } of frequencyPatterns) {
+    const match = remaining.match(pattern);
+    if (match) {
+      result.frequency = value || match[0].trim();
+      remaining = remaining.replace(match[0], " ").trim();
+      console.log("[MedicationParser] Found frequency:", result.frequency);
+      break;
+    }
   }
   
-  // 4. Extract DRUG NAME - whatever is left after cleaning
-  const stopWords = ["for", "and", "the", "a", "an", "take", "give", "to", "of", "with"];
+  // Step 4: Extract DOSAGE (number + unit)
+  const dosagePatterns = [
+    /\b(\d+\.?\d*)\s*(mg|g|ml|mcg|iu)\b/i,
+    /\b(\d+\.?\d*)\s*(tablets?|tabs?)\b/i,
+    /\b(\d+\.?\d*)\s*(capsules?|caps?)\b/i,
+    /\b(\d+\.?\d*)\s*(pills?)\b/i,
+    /\b(\d+\.?\d*)\s*(drops?)\b/i,
+    /\b(\d+\.?\d*)\s*(puffs?|sprays?)\b/i,
+    /\b(\d+\.?\d*)\s*(units?)\b/i,
+  ];
+  
+  for (const pattern of dosagePatterns) {
+    const match = remaining.match(pattern);
+    if (match) {
+      result.dosage = match[0].trim();
+      remaining = remaining.replace(match[0], " ").trim();
+      console.log("[MedicationParser] Found dosage:", result.dosage);
+      break;
+    }
+  }
+  
+  // Step 5: Extract DRUG NAME (whatever meaningful words remain)
+  const stopWords = new Set([
+    "for", "and", "the", "a", "an", "take", "give", "to", "of", "with",
+    "please", "prescribe", "prescription", "medicine", "medication", "drug",
+    "i", "need", "want", "get", "me", "my", "patient"
+  ]);
+  
   const nameWords = remaining
-    .replace(/[,\.]/g, " ")
     .split(/\s+/)
-    .filter(word => word.length > 1 && !stopWords.includes(word))
+    .filter(word => word.length > 1 && !stopWords.has(word) && !/^\d+$/.test(word))
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ")
     .trim();
   
-  // Capitalize each word in drug name
   if (nameWords) {
-    result.name = nameWords
-      .split(" ")
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+    result.name = nameWords;
+    console.log("[MedicationParser] Found name:", result.name);
   }
   
-  console.log("[MedicationParser] Input:", text);
-  console.log("[MedicationParser] Parsed:", result);
+  console.log("[MedicationParser] Final result:", result);
   
   return result;
 }
@@ -593,8 +644,15 @@ export function VoiceMedicationInput({
   onUpdate,
   disabled,
 }: VoiceMedicationInputProps) {
+  const [lastTranscript, setLastTranscript] = React.useState<string>("");
+  
   const handleTranscript = (text: string) => {
+    console.log("[VoiceMedicationInput] Raw transcript received:", JSON.stringify(text));
+    setLastTranscript(text);
+    
     const parsed = parseMedicationFromText(text);
+    
+    console.log("[VoiceMedicationInput] Parsed result:", parsed);
     
     // Update all fields that were parsed
     if (parsed.name) onUpdate("name", parsed.name);
@@ -617,6 +675,14 @@ export function VoiceMedicationInput({
           </p>
         </div>
       </div>
+      
+      {/* Debug: Show what was transcribed */}
+      {lastTranscript && (
+        <div className="p-2 bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded text-xs">
+          <span className="font-medium text-yellow-800 dark:text-yellow-200">Heard: </span>
+          <span className="text-yellow-700 dark:text-yellow-300">"{lastTranscript}"</span>
+        </div>
+      )}
       
       {/* Manual input fields */}
       <div className="grid grid-cols-2 gap-3">

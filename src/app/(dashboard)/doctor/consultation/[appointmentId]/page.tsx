@@ -129,9 +129,13 @@ export default function ConsultationPage() {
   };
 
   const updateMedication = (index: number, field: keyof Medication, value: string) => {
-    const newMeds = [...medications];
-    newMeds[index] = { ...newMeds[index], [field]: value };
-    setMedications(newMeds);
+    // Use functional update to ensure we always work with the latest state
+    // This is critical when multiple fields are updated in quick succession
+    setMedications(prevMeds => {
+      const newMeds = [...prevMeds];
+      newMeds[index] = { ...newMeds[index], [field]: value };
+      return newMeds;
+    });
   };
 
   const addLabTest = () => {
