@@ -35,6 +35,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import Link from "next/link";
 
 // Types matching the backend response
 interface VitalScore {
@@ -61,6 +62,7 @@ interface HealthIndexResult {
   lastUpdated: string;
   dataPoints: number;
   historicalScores: Array<{ date: string; score: number }>;
+  hasSufficientData: boolean;
 }
 
 interface HealthIndexCardProps {
@@ -199,6 +201,42 @@ export function HealthIndexCard({ patientId, compact = false }: HealthIndexCardP
       <Card className="w-full">
         <CardContent className="flex items-center justify-center p-6 text-gray-500">
           No health data available
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show message when there's no sufficient clinical data (no diagnosis or lab tests)
+  if (!healthIndex.hasSufficientData) {
+    return (
+      <Card className="w-full border-gray-200 border">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Activity className="w-5 h-5 text-gray-400" />
+            Health Index Score
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+            <Stethoscope className="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 className="text-base font-medium text-gray-700 mb-2">
+            Awaiting Clinical Data
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            Health Index will be calculated once the patient has a diagnosis recorded or lab test results are available.
+          </p>
+          <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Stethoscope className="w-3 h-3" />
+              <span>Diagnosis</span>
+            </div>
+            <span>or</span>
+            <div className="flex items-center gap-1">
+              <FlaskConical className="w-3 h-3" />
+              <span>Lab Results</span>
+            </div>
+          </div>
         </CardContent>
       </Card>
     );
@@ -369,9 +407,17 @@ export function HealthIndexCard({ patientId, compact = false }: HealthIndexCardP
         )}
 
         {/* Last Updated */}
-        <p className="text-xs text-gray-400 text-right">
-          Last updated: {new Date(healthIndex.lastUpdated).toLocaleString()}
-        </p>
+        <div className="flex items-center justify-between">
+          <Link href={`/doctor/patients/${patientId}/health-index`}>
+            <Button variant="outline" size="sm" className="text-xs">
+              <Activity className="w-3 h-3 mr-1" />
+              View Full Dashboard
+            </Button>
+          </Link>
+          <p className="text-xs text-gray-400">
+            Last updated: {new Date(healthIndex.lastUpdated).toLocaleString()}
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
