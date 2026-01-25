@@ -146,12 +146,14 @@ export function LabTechDashboard() {
             Laboratory Dashboard
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
+            {mounted
+              ? new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
+              : "\u00A0"}
           </p>
         </div>
         {summary.critical > 0 && (

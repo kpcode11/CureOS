@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "motion/react";
@@ -30,6 +30,7 @@ export default function PaymentPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const [mounted, setMounted] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<
     "CASH" | "CARD" | "UPI" | "INSURANCE"
@@ -43,6 +44,10 @@ export default function PaymentPage() {
     insuranceProvider: "",
     insuranceId: "",
   });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handlePayment = async () => {
     setProcessing(true);
@@ -382,7 +387,7 @@ export default function PaymentPage() {
                   <div className="flex justify-between items-center pb-4 border-b">
                     <span className="text-slate-600">Date</span>
                     <span className="font-semibold">
-                      {new Date().toLocaleDateString()}
+                      {mounted ? new Date().toLocaleDateString() : "\u00A0"}
                     </span>
                   </div>
 
