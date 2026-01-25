@@ -229,17 +229,13 @@ export default function GooeyDepartmentDashboard() {
                 duration: 0.2,
                 ease: 'easeOut',
               }}
-              className="p-6 md:p-12"
+              className="p-6 md:p-12 md:py-6"
             >
-              <div className="space-y-4">
-                <div className="pt-4">
-                  <Stats10
-                    data={departments[activeTab].analyticsData}
-                    summary={departments[activeTab].summary}
-                    isLoading={isLoading}
-                  />
-                </div>
-              </div>
+              <Stats10
+                data={departments[activeTab].analyticsData}
+                summary={departments[activeTab].summary}
+                isLoading={isLoading}
+              />
             </motion.div>
           </AnimatePresence>
         </div>
