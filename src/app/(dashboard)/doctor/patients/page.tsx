@@ -27,7 +27,7 @@ export default function DoctorPatientsPage() {
                 My Patients
               </h1>
               <p className="text-base text-gray-600">
-                Manage and view patient records
+                Patients with completed consultations
               </p>
             </div>
           </div>

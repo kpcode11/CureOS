@@ -4,38 +4,38 @@ import { prisma } from "@/lib/prisma";
 import { createAudit } from "@/services/audit.service";
 
 /**
- * GET /api/doctor/appointments
- * Get all appointments for the current doctor
+ * GET /api/doctor/appointments/:appointmentId
+ * Get a single appointment by ID
  *
  * RBAC: appointment.read
- * Query params:
- * - status: 'SCHEDULED'|'COMPLETED'|'CANCELLED'
- * - dateFrom: ISO date string
- * - dateTo: ISO date string
- *
- * Edge cases handled:
- * - Invalid date format
- * - Doctor with no appointments (empty array)
- * - Invalid status filter
  */
-export async function GET(req: Request) {
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ appointmentId: string }> }
+) {
   let sessionRes;
   try {
     sessionRes = await requirePermission(req, "appointment.read");
-    console.log("[Doctor GET /appointments] Permission granted for user:", sessionRes.session?.user?.email);
   } catch (err) {
-    console.error("[Doctor GET /appointments] Permission denied:", err);
+    console.error("[Doctor GET /appointments/:id] Permission denied:", err);
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
+    const { appointmentId } = await params;
+
+    if (!appointmentId || appointmentId.trim() === "") {
+      return NextResponse.json(
+        { error: "Invalid appointment ID" },
+        { status: 400 }
+      );
+    }
+
     const doctorUserId = sessionRes.session?.user?.id;
-    console.log("[Doctor GET /appointments] Doctor user ID:", doctorUserId);
-    
     if (!doctorUserId) {
       return NextResponse.json(
         { error: "Doctor ID not found in session" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -45,56 +45,16 @@ export async function GET(req: Request) {
       select: { id: true },
     });
 
-    console.log("[Doctor GET /appointments] Doctor profile:", doctor);
-
     if (!doctor) {
-      console.log("[Doctor GET /appointments] No doctor profile found for userId:", doctorUserId);
-      // Let's also check what appointments exist for debugging
-      const allAppointments = await prisma.appointment.findMany({
-        take: 5,
-        select: { id: true, doctorId: true, status: true },
-      });
-      console.log("[Doctor GET /appointments] Sample appointments in DB:", allAppointments);
       return NextResponse.json(
         { error: "Doctor profile not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
-    // Parse query params
-    const url = new URL(req.url);
-    const statusQ = url.searchParams.get("status");
-    const dateFromQ = url.searchParams.get("dateFrom");
-    const dateToQ = url.searchParams.get("dateTo");
-
-    const where: any = { doctorId: doctor.id };
-    console.log("[Doctor GET /appointments] Query where:", where);
-
-    // Validate and apply status filter
-    if (
-      statusQ &&
-      ["SCHEDULED", "COMPLETED", "CANCELLED", "NO_SHOW"].includes(statusQ)
-    ) {
-      where.status = statusQ;
-    }
-
-    // Validate and apply date range
-    if (dateFromQ) {
-      const dateFrom = new Date(dateFromQ);
-      if (!isNaN(dateFrom.getTime())) {
-        where.dateTime = { gte: dateFrom };
-      }
-    }
-
-    if (dateToQ) {
-      const dateTo = new Date(dateToQ);
-      if (!isNaN(dateTo.getTime())) {
-        where.dateTime = { ...where.dateTime, lte: dateTo };
-      }
-    }
-
-    const appointments = await prisma.appointment.findMany({
-      where,
+    // Get appointment
+    const appointment = await prisma.appointment.findUnique({
+      where: { id: appointmentId },
       include: {
         patient: {
           select: {
@@ -103,6 +63,10 @@ export async function GET(req: Request) {
             lastName: true,
             phone: true,
             email: true,
+            dateOfBirth: true,
+            gender: true,
+            bloodType: true,
+            address: true,
           },
         },
         doctor: {
@@ -116,57 +80,64 @@ export async function GET(req: Request) {
           select: {
             id: true,
             urgency: true,
+            reason: true,
+            clinicalNotes: true,
             fromDoctor: {
               select: {
                 id: true,
+                specialization: true,
                 user: { select: { name: true } },
               },
             },
           },
         },
       },
-      orderBy: { dateTime: "desc" },
-      take: 200,
     });
 
-    console.log("[Doctor GET /appointments] Found appointments:", appointments.length);
+    if (!appointment) {
+      return NextResponse.json(
+        { error: "Appointment not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify doctor has access to this appointment
+    if (appointment.doctorId !== doctor.id) {
+      return NextResponse.json(
+        { error: "You do not have access to this appointment" },
+        { status: 403 }
+      );
+    }
 
     // Audit log
     await createAudit({
       actorId: doctorUserId,
-      action: "doctor.appointments.list",
+      action: "appointment.view",
       resource: "Appointment",
-      resourceId: "bulk",
-      meta: { count: appointments.length },
+      resourceId: appointmentId,
+      meta: { patientId: appointment.patientId },
     });
 
-    return NextResponse.json(appointments);
+    return NextResponse.json(appointment);
   } catch (err) {
-    console.error("[Doctor GET /appointments] Error:", err);
+    console.error("[Doctor GET /appointments/:id] Error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 /**
- * PATCH /api/doctor/appointments/:id
+ * PATCH /api/doctor/appointments/:appointmentId
  * Update appointment status or notes
  *
  * RBAC: appointment.update
  * Body: { status?, notes? }
- * Valid statuses: 'SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'
- *
- * Edge cases handled:
- * - Appointment doesn't exist
- * - Invalid status value
- * - Appointment belongs to different doctor
- * - Cannot uncomplete a completed appointment
  */
 export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ appointmentId: string }> }
 ) {
   let sessionRes;
   try {
@@ -177,12 +148,12 @@ export async function PATCH(
   }
 
   try {
-    const { id } = await params;
+    const { appointmentId } = await params;
 
-    if (!id || id.trim() === "") {
+    if (!appointmentId || appointmentId.trim() === "") {
       return NextResponse.json(
         { error: "Invalid appointment ID" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -190,7 +161,7 @@ export async function PATCH(
     if (!doctorUserId) {
       return NextResponse.json(
         { error: "Doctor ID not found in session" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -203,7 +174,7 @@ export async function PATCH(
     if (!doctor) {
       return NextResponse.json(
         { error: "Doctor profile not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -214,26 +185,26 @@ export async function PATCH(
     if (status === undefined && notes === undefined) {
       return NextResponse.json(
         { error: "At least one field (status or notes) must be provided" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     // Get existing appointment
     const existing = await prisma.appointment.findUnique({
-      where: { id },
+      where: { id: appointmentId },
     });
 
     if (!existing) {
       return NextResponse.json(
         { error: "Appointment not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
     if (existing.doctorId !== doctor.id) {
       return NextResponse.json(
         { error: "You do not have access to this appointment" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -245,7 +216,7 @@ export async function PATCH(
           {
             error: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
           },
-          { status: 400 },
+          { status: 400 }
         );
       }
     }
@@ -254,7 +225,7 @@ export async function PATCH(
     if (notes !== undefined && typeof notes !== "string") {
       return NextResponse.json(
         { error: "notes must be a string" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -266,7 +237,7 @@ export async function PATCH(
     // Update in transaction
     const updated = await prisma.$transaction(async (tx) => {
       const apt = await tx.appointment.update({
-        where: { id },
+        where: { id: appointmentId },
         data: updateData,
         include: {
           patient: { select: { firstName: true, lastName: true } },
@@ -278,7 +249,7 @@ export async function PATCH(
         actorId: doctorUserId,
         action: "appointment.update",
         resource: "Appointment",
-        resourceId: id,
+        resourceId: appointmentId,
         before: existing,
         after: apt,
         meta: {
@@ -295,7 +266,7 @@ export async function PATCH(
     console.error("[Doctor PATCH /appointments/:id] Error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
