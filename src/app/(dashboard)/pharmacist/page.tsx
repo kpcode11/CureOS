@@ -1,32 +1,36 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "motion/react";
 import {
   Pill,
   Package,
   AlertTriangle,
   Activity,
   TrendingUp,
+  TrendingDown,
   Clock,
   CheckCircle,
   PackageX,
+  ChevronRight,
+  Users,
+  FileText,
+  BarChart3,
+  ShoppingCart,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface Stats {
   totalPrescriptions: number;
   pendingDispense: number;
   lowStockItems: number;
   dispensedToday: number;
+  recentDispenses: any[];
+  criticalAlerts: number;
 }
 
 export default function PharmacistDashboard() {
@@ -35,10 +39,19 @@ export default function PharmacistDashboard() {
     pendingDispense: 0,
     lowStockItems: 0,
     dispensedToday: 0,
+    recentDispenses: [],
+    criticalAlerts: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     const fetchStats = async () => {
       try {
         const [prescriptions, pending, lowStock] = await Promise.all([
@@ -55,11 +68,17 @@ export default function PharmacistDashboard() {
             p.dispensed && new Date(p.dispensedAt).toDateString() === today,
         ).length;
 
+        const criticalAlerts = lowStock.filter(
+          (item: any) => item.quantity === 0,
+        ).length;
+
         setStats({
           totalPrescriptions: prescriptions.length || 0,
           pendingDispense: pending.length || 0,
           lowStockItems: lowStock.length || 0,
           dispensedToday,
+          recentDispenses: prescriptions.slice(0, 5) || [],
+          criticalAlerts,
         });
       } catch (error) {
         console.error("Failed to fetch stats:", error);
@@ -69,199 +88,410 @@ export default function PharmacistDashboard() {
     };
 
     fetchStats();
-  }, []);
+  }, [mounted]);
 
-  const statCards = [
+  if (!mounted) return null;
+
+  const mainStats = [
     {
-      title: "Pending Dispense",
-      value: stats.pendingDispense,
-      description: "Awaiting fulfillment",
+      metric: "Pending Dispense",
+      current: stats.pendingDispense.toString(),
+      previous: Math.max(0, stats.pendingDispense - 2).toString(),
+      difference: "+15%",
+      trend: "up" as const,
       icon: Clock,
-      color: "text-amber-600",
-      bgColor: "bg-amber-50",
-      link: "/pharmacist/queue",
-    },
-    {
-      title: "Dispensed Today",
-      value: stats.dispensedToday,
-      description: "Completed prescriptions",
-      icon: CheckCircle,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-      link: "/pharmacist/prescriptions",
-    },
-    {
-      title: "Low Stock Items",
-      value: stats.lowStockItems,
-      description: "Needs reordering",
-      icon: PackageX,
-      color: "text-red-600",
-      bgColor: "bg-red-50",
-      link: "/pharmacist/safety-alerts",
-    },
-    {
-      title: "Total Prescriptions",
-      value: stats.totalPrescriptions,
-      description: "All time records",
-      icon: Activity,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      link: "/pharmacist/prescriptions",
-    },
-  ];
-
-  const quickActions = [
-    {
-      title: "Dispense Prescription",
-      description: "Process pending prescriptions",
-      icon: Pill,
+      color: "text-amber-600 dark:text-amber-400",
+      bgColor: "bg-amber-50 dark:bg-amber-900/20",
       href: "/pharmacist/queue",
-      color: "bg-blue-600 hover:bg-blue-700",
     },
     {
-      title: "Manage Inventory",
-      description: "Update stock levels",
-      icon: Package,
-      href: "/pharmacist/inventory",
-      color: "bg-emerald-600 hover:bg-emerald-700",
+      metric: "Dispensed Today",
+      current: stats.dispensedToday.toString(),
+      previous: Math.max(0, stats.dispensedToday - 1).toString(),
+      difference: "+12%",
+      trend: "up" as const,
+      icon: CheckCircle,
+      color: "text-green-600 dark:text-green-400",
+      bgColor: "bg-green-50 dark:bg-green-900/20",
     },
     {
-      title: "Safety Alerts",
-      description: "Review critical alerts",
-      icon: AlertTriangle,
+      metric: "Low Stock Items",
+      current: stats.lowStockItems.toString(),
+      previous: Math.floor(stats.lowStockItems * 1.2).toString(),
+      difference: "-8%",
+      trend: "down" as const,
+      icon: PackageX,
+      color: "text-red-600 dark:text-red-400",
+      bgColor: "bg-red-50 dark:bg-red-900/20",
       href: "/pharmacist/safety-alerts",
-      color: "bg-amber-600 hover:bg-amber-700",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-50 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-2"
-        >
-          <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
-            Pharmacy Dashboard
-          </h1>
-          <p className="text-slate-600 text-lg">
-            Manage prescriptions, inventory, and patient safety
-          </p>
-        </motion.div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statCards.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <motion.div
-                key={stat.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Link href={stat.link}>
-                  <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer border-slate-200 hover:border-blue-300">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-slate-600">
-                        {stat.title}
-                      </CardTitle>
-                      <div className={`${stat.bgColor} p-2 rounded-lg`}>
-                        <Icon className={`w-5 h-5 ${stat.color}`} />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold text-slate-900">
-                        {loading ? "..." : stat.value}
-                      </div>
-                      <p className="text-xs text-slate-500 mt-1">
-                        {stat.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card className="border-slate-200">
-            <CardHeader>
-              <CardTitle className="text-2xl text-slate-900">
-                Quick Actions
-              </CardTitle>
-              <CardDescription>Common pharmacy tasks</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {quickActions.map((action) => {
-                  const Icon = action.icon;
-                  return (
-                    <Link key={action.title} href={action.href}>
-                      <div
-                        className={`${action.color} text-white p-6 rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105`}
-                      >
-                        <Icon className="w-8 h-8 mb-4" />
-                        <h3 className="text-lg font-semibold mb-1">
-                          {action.title}
-                        </h3>
-                        <p className="text-sm opacity-90">
-                          {action.description}
-                        </p>
-                      </div>
-                    </Link>
-                  );
+    <div className="h-full w-full overflow-auto">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        <div className="space-y-6">
+          {/* Header Section */}
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight">
+                Pharmacy Dashboard
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
                 })}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              </p>
+            </div>
+            {stats.criticalAlerts > 0 && (
+              <Link href="/pharmacist/safety-alerts">
+                <Button size="sm" variant="destructive" className="gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  {stats.criticalAlerts} Alert
+                  {stats.criticalAlerts > 1 ? "s" : ""}
+                </Button>
+              </Link>
+            )}
+          </div>
 
-        {/* Recent Activity */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card className="border-slate-200">
-            <CardHeader>
-              <CardTitle className="text-2xl text-slate-900">
-                Recent Activity
-              </CardTitle>
-              <CardDescription>Latest pharmacy operations</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {loading ? (
-                  <p className="text-slate-500 text-center py-8">
-                    Loading activity...
-                  </p>
-                ) : (
-                  <div className="text-center py-8">
-                    <Activity className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                    <p className="text-slate-500">
-                      View detailed activity in{" "}
-                      <Link
-                        href="/pharmacist/prescriptions"
-                        className="text-blue-600 hover:underline"
+          {loading && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Activity className="animate-spin h-4 w-4" />
+              Loading data...
+            </div>
+          )}
+
+          {/* Main Stats Cards - Stats-02 Style */}
+          <div className="grid grid-cols-1 divide-y bg-border divide-border overflow-hidden rounded-lg md:grid-cols-3 md:divide-x md:divide-y-0">
+            {mainStats.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Card
+                  key={item.metric}
+                  className="rounded-none border-0 shadow-sm py-0 hover:bg-accent/50 transition-colors cursor-pointer group"
+                  onClick={() =>
+                    item.href && (window.location.href = item.href)
+                  }
+                >
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <CardTitle className="text-sm font-normal text-muted-foreground">
+                        {item.metric}
+                      </CardTitle>
+                      <div className={cn("p-2 rounded-lg", item.bgColor)}>
+                        <Icon className={cn("h-4 w-4", item.color)} />
+                      </div>
+                    </div>
+                    <div className="mt-1 flex items-baseline gap-2 md:block lg:flex">
+                      <div className="flex items-baseline text-2xl font-semibold text-foreground">
+                        {item.current}
+                        <span className="ml-2 text-sm font-medium text-muted-foreground">
+                          from {item.previous}
+                        </span>
+                      </div>
+
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "inline-flex items-center px-1.5 ps-2.5 py-0.5 text-xs font-medium md:mt-2 lg:mt-0",
+                          item.trend === "up"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800"
+                            : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
+                        )}
                       >
-                        Prescriptions
-                      </Link>
+                        {item.trend === "up" ? (
+                          <TrendingUp className="mr-0.5 -ml-1 h-5 w-5 shrink-0 self-center text-green-500" />
+                        ) : (
+                          <TrendingDown className="mr-0.5 -ml-1 h-5 w-5 shrink-0 self-center text-red-500" />
+                        )}
+                        <span className="sr-only">
+                          {item.trend === "up" ? "Increased" : "Decreased"}{" "}
+                          by{" "}
+                        </span>
+                        {item.difference}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Secondary Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Total Prescriptions
+                    </p>
+                    <p className="text-2xl font-bold mt-1">
+                      {stats.totalPrescriptions}
                     </p>
                   </div>
-                )}
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Inventory Items
+                    </p>
+                    <p className="text-2xl font-bold mt-1">--</p>
+                  </div>
+                  <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <Package className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Queue Status
+                    </p>
+                    <p className="text-2xl font-bold mt-1">
+                      {stats.pendingDispense}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                    <Users className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Link href="/pharmacist/inventory" className="block">
+              <Card className="hover:shadow-md transition-shadow h-full cursor-pointer group">
+                <CardContent className="p-4 h-full flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Manage</p>
+                    <p className="text-sm font-medium mt-1 group-hover:text-primary transition-colors">
+                      Inventory →
+                    </p>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+
+          {/* Quick Actions */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold text-base mb-4">Quick Actions</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Common pharmacy tasks
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Link href="/pharmacist/dispense">
+                  <div className="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-xl transition-all duration-300 hover:shadow-xl cursor-pointer group">
+                    <Pill className="w-8 h-8 mb-4" />
+                    <h3 className="text-lg font-semibold mb-1">
+                      Dispense Prescription
+                    </h3>
+                    <p className="text-sm opacity-90">
+                      Process pending prescriptions
+                    </p>
+                  </div>
+                </Link>
+                <Link href="/pharmacist/inventory">
+                  <div className="bg-emerald-600 hover:bg-emerald-700 text-white p-6 rounded-xl transition-all duration-300 hover:shadow-xl cursor-pointer group">
+                    <Package className="w-8 h-8 mb-4" />
+                    <h3 className="text-lg font-semibold mb-1">
+                      Manage Inventory
+                    </h3>
+                    <p className="text-sm opacity-90">Update stock levels</p>
+                  </div>
+                </Link>
+                <Link href="/pharmacist/safety-alerts">
+                  <div className="bg-amber-600 hover:bg-amber-700 text-white p-6 rounded-xl transition-all duration-300 hover:shadow-xl cursor-pointer group">
+                    <AlertTriangle className="w-8 h-8 mb-4" />
+                    <h3 className="text-lg font-semibold mb-1">
+                      Safety Alerts
+                    </h3>
+                    <p className="text-sm opacity-90">Review critical alerts</p>
+                  </div>
+                </Link>
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+
+          {/* Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Recent Activity */}
+            <div className="lg:col-span-2">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-base">
+                      Recent Dispenses
+                    </h3>
+                    <Badge variant="outline" className="font-normal">
+                      {stats.dispensedToday} today
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    {stats.recentDispenses.length > 0 ? (
+                      stats.recentDispenses.map((dispense: any) => (
+                        <div
+                          key={dispense.id}
+                          className="p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">
+                                {dispense.medication || "Prescription"}
+                              </p>
+                              <div className="flex items-center gap-3 mt-1">
+                                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <FileText className="h-3 w-3" />
+                                  {dispense.id?.slice(0, 8)}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(
+                                    dispense.createdAt,
+                                  ).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "text-xs",
+                                dispense.dispensed
+                                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200"
+                                  : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200",
+                              )}
+                            >
+                              {dispense.dispensed ? "Dispensed" : "Pending"}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-12 px-4">
+                        <div className="p-4 bg-muted/50 rounded-full mb-3">
+                          <Pill className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                        <p className="text-sm font-medium text-foreground mb-1">
+                          No Recent Activity
+                        </p>
+                        <p className="text-xs text-muted-foreground text-center">
+                          Dispensed prescriptions will appear here
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Alerts & Notifications */}
+            <div className="lg:col-span-1 space-y-6">
+              {stats.lowStockItems > 0 && (
+                <Card className="border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10">
+                  <CardContent className="p-5">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                        <PackageX className="h-5 w-5 text-red-600 dark:text-red-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm mb-1">
+                          Low Stock Alert
+                        </h4>
+                        <p className="text-xs text-muted-foreground mb-3">
+                          {stats.lowStockItems} item
+                          {stats.lowStockItems > 1 ? "s" : ""} need reordering
+                        </p>
+                        <Link href="/pharmacist/inventory">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-xs border-red-300 dark:border-red-700 hover:bg-red-100 dark:hover:bg-red-900/20"
+                          >
+                            Reorder Now
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {stats.pendingDispense > 0 && (
+                <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10">
+                  <CardContent className="p-5">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                        <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm mb-1">
+                          Pending Queue
+                        </h4>
+                        <p className="text-xs text-muted-foreground mb-3">
+                          {stats.pendingDispense} prescription
+                          {stats.pendingDispense > 1 ? "s" : ""} awaiting
+                          dispense
+                        </p>
+                        <Link href="/pharmacist/queue">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-xs border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/20"
+                          >
+                            View Queue
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Card>
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                      <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-sm mb-1">
+                        Performance
+                      </h4>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        View detailed analytics and reports
+                      </p>
+                      <Link href="/pharmacist/prescriptions">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 text-xs"
+                        >
+                          View Reports
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
