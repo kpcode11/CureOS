@@ -3,12 +3,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "motion/react";
 import {
   ArrowLeft,
   CreditCard,
   Calendar,
-  DollarSign,
+  IndianRupee,
   FileText,
   Clock,
   CheckCircle2,
@@ -18,6 +17,8 @@ import {
   Wallet,
   Settings,
   Download,
+  Search,
+  Command,
 } from "lucide-react";
 import {
   Card,
@@ -28,6 +29,8 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface BillingRecord {
   id: string;
@@ -98,32 +101,34 @@ export default function BillingDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600" />
+      <div className="h-svh overflow-hidden lg:p-2 w-full">
+        <div className="lg:border lg:rounded-md overflow-hidden flex items-center justify-center bg-container h-full w-full bg-background">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </div>
       </div>
     );
   }
 
   if (!bill) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="p-8 text-center">
-            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">
-              Bill Not Found
-            </h2>
-            <p className="text-slate-600 mb-6">
-              The bill you're looking for doesn't exist.
-            </p>
-            <Link href="/billing">
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Billing
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+      <div className="h-svh overflow-hidden lg:p-2 w-full">
+        <div className="lg:border lg:rounded-md overflow-hidden flex items-center justify-center bg-container h-full w-full bg-background">
+          <Card className="max-w-md border">
+            <CardContent className="p-8 text-center">
+              <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Bill Not Found</h2>
+              <p className="text-sm text-muted-foreground mb-6">
+                The bill you're looking for doesn't exist.
+              </p>
+              <Link href="/billing">
+                <Button>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Billing
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -131,298 +136,216 @@ export default function BillingDetailPage() {
   const StatusIcon = statusConfig[bill.status].icon;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-      {/* Header */}
-      <motion.div
-        className="relative bg-white border-b"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Link href="/billing">
-              <Button variant="ghost" className="hover:bg-blue-50">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
-            </Link>
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-600 rounded-xl">
-                <CreditCard className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-slate-900">
-                  Invoice Details
-                </h1>
-                <p className="text-slate-600 mt-1">
-                  Invoice #{bill.id.slice(0, 8).toUpperCase()}
-                </p>
-              </div>
+    <div className="h-svh overflow-hidden lg:p-2 w-full">
+      <div className="lg:border lg:rounded-md overflow-hidden flex flex-col items-center justify-start bg-container h-full w-full bg-background">
+        {/* Header */}
+        <header className="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 border-b bg-card sticky top-0 z-10 w-full">
+          <Link href="/billing">
+            <Button variant="ghost" size="sm" className="gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Back</span>
+            </Button>
+          </Link>
+
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+              <CreditCard className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
-            <Badge
-              className={`${statusConfig[bill.status].color} border px-4 py-2 text-lg`}
-            >
-              <StatusIcon className="w-5 h-5 mr-2" />
-              {statusConfig[bill.status].label}
-            </Badge>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-base sm:text-lg font-medium truncate">
+                Invoice Details
+              </h1>
+              <p className="text-xs text-muted-foreground truncate">
+                Invoice #{bill.id.slice(0, 8).toUpperCase()}
+              </p>
+            </div>
           </div>
-        </div>
-      </motion.div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Invoice Summary */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <Card className="border-none shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
-                  <CardTitle className="text-2xl">Invoice Summary</CardTitle>
-                  <CardDescription>
-                    Complete billing information
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-slate-600">
-                        <User className="w-4 h-4" />
-                        <span className="text-sm font-medium">Patient</span>
+          <Badge
+            className={`${statusConfig[bill.status].color} border-0 text-xs px-2 py-1`}
+          >
+            <StatusIcon className="w-3 h-3 mr-1" />
+            {statusConfig[bill.status].label}
+          </Badge>
+
+          <ThemeToggle />
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6 w-full bg-background">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+              {/* Main Content */}
+              <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+                {/* Invoice Summary */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base sm:text-lg">
+                      Invoice Summary
+                    </CardTitle>
+                    <CardDescription>
+                      Complete billing information
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <User className="w-4 h-4" />
+                          <span className="text-xs font-medium">Patient</span>
+                        </div>
+                        <p className="text-sm font-semibold">
+                          {bill.patient?.name || "Unknown Patient"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          MRN:{" "}
+                          {bill.patient?.mrn?.slice(0, 20) ||
+                            bill.patientId.slice(0, 20)}
+                        </p>
                       </div>
-                      <p className="text-lg font-semibold text-slate-900">
-                        {bill.patient?.name || "Unknown Patient"}
-                      </p>
-                      <p className="text-sm text-slate-600">
-                        MRN: {bill.patient?.mrn || bill.patientId}
-                      </p>
-                    </div>
 
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-slate-600">
-                        <DollarSign className="w-4 h-4" />
-                        <span className="text-sm font-medium">Amount</span>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <IndianRupee className="w-4 h-4" />
+                          <span className="text-xs font-medium">Amount</span>
+                        </div>
+                        <p className="text-2xl font-bold">
+                          ₹{bill.amount.toLocaleString()}
+                        </p>
                       </div>
-                      <p className="text-3xl font-bold text-blue-600">
-                        ₹{bill.amount.toLocaleString()}
-                      </p>
-                    </div>
 
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-slate-600">
-                        <Calendar className="w-4 h-4" />
-                        <span className="text-sm font-medium">Due Date</span>
-                      </div>
-                      <p className="text-lg font-semibold text-slate-900">
-                        {new Date(bill.dueDate).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-slate-600">
-                        <Clock className="w-4 h-4" />
-                        <span className="text-sm font-medium">Created On</span>
-                      </div>
-                      <p className="text-lg font-semibold text-slate-900">
-                        {new Date(bill.createdAt).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t">
-                    <div className="flex items-start gap-2 text-slate-600 mb-2">
-                      <FileText className="w-4 h-4 mt-1" />
-                      <span className="text-sm font-medium">Description</span>
-                    </div>
-                    <p className="text-slate-900 text-lg leading-relaxed">
-                      {bill.description}
-                    </p>
-                  </div>
-
-                  {bill.paidAt && (
-                    <div className="pt-4 border-t">
-                      <div className="flex items-center gap-2 text-green-600 mb-2">
-                        <CheckCircle2 className="w-5 h-5" />
-                        <span className="font-medium">
-                          Paid on{" "}
-                          {new Date(bill.paidAt).toLocaleDateString("en-US", {
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Calendar className="w-4 h-4" />
+                          <span className="text-xs font-medium">Due Date</span>
+                        </div>
+                        <p className="text-sm font-semibold">
+                          {new Date(bill.dueDate).toLocaleDateString("en-US", {
                             year: "numeric",
                             month: "long",
                             day: "numeric",
                           })}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Timeline */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card className="border-none shadow-lg">
-                <CardHeader>
-                  <CardTitle>Activity Timeline</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex gap-4">
-                      <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                          <FileText className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div className="w-0.5 h-full bg-slate-200 mt-2" />
-                      </div>
-                      <div className="flex-1 pb-4">
-                        <p className="font-semibold text-slate-900">
-                          Invoice Created
                         </p>
-                        <p className="text-sm text-slate-600">
-                          {new Date(bill.createdAt).toLocaleString()}
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Clock className="w-4 h-4" />
+                          <span className="text-xs font-medium">
+                            Created On
+                          </span>
+                        </div>
+                        <p className="text-sm font-semibold">
+                          {new Date(bill.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            },
+                          )}
                         </p>
                       </div>
                     </div>
 
-                    {bill.updatedAt !== bill.createdAt && (
-                      <div className="flex gap-4">
-                        <div className="flex flex-col items-center">
-                          <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                            <Edit className="w-5 h-5 text-yellow-600" />
-                          </div>
-                          <div className="w-0.5 h-full bg-slate-200 mt-2" />
-                        </div>
-                        <div className="flex-1 pb-4">
-                          <p className="font-semibold text-slate-900">
-                            Last Updated
-                          </p>
-                          <p className="text-sm text-slate-600">
-                            {new Date(bill.updatedAt).toLocaleString()}
-                          </p>
-                        </div>
+                    <div className="pt-3 border-t">
+                      <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                        <FileText className="w-4 h-4" />
+                        <span className="text-xs font-medium">Description</span>
                       </div>
-                    )}
+                      <p className="text-sm">{bill.description}</p>
+                    </div>
 
                     {bill.paidAt && (
-                      <div className="flex gap-4">
-                        <div className="flex flex-col items-center">
-                          <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                            <CheckCircle2 className="w-5 h-5 text-green-600" />
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-semibold text-slate-900">
-                            Payment Received
-                          </p>
-                          <p className="text-sm text-slate-600">
-                            {new Date(bill.paidAt).toLocaleString()}
-                          </p>
+                      <div className="pt-3 border-t">
+                        <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span className="text-sm font-medium">
+                            Paid on{" "}
+                            {new Date(bill.paidAt).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </span>
                         </div>
                       </div>
                     )}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-          {/* Actions Sidebar */}
-          <div className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <Card className="border-none shadow-lg sticky top-6">
-                <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
-                  <CardTitle>Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-3">
-                  {bill.status === "PENDING" && (
-                    <Link href={`/billing/${bill.id}/pay`}>
-                      <Button className="w-full bg-green-600 hover:bg-green-700 shadow-md">
-                        <Wallet className="w-4 h-4 mr-2" />
-                        Process Payment
+              {/* Actions Sidebar */}
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Quick Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {bill.status === "PENDING" && (
+                      <Link href={`/billing/${bill.id}/pay`} className="block">
+                        <Button className="w-full" size="sm">
+                          <Wallet className="w-4 h-4 mr-2" />
+                          Process Payment
+                        </Button>
+                      </Link>
+                    )}
+
+                    <Link href={`/billing/${bill.id}/update`} className="block">
+                      <Button className="w-full" variant="outline" size="sm">
+                        <Edit className="w-4 h-4 mr-2" />
+                        Update Amount
                       </Button>
                     </Link>
-                  )}
 
-                  <Link href={`/billing/${bill.id}/update`}>
-                    <Button className="w-full" variant="outline">
-                      <Edit className="w-4 h-4 mr-2" />
-                      Update Amount
-                    </Button>
-                  </Link>
-
-                  <Link href={`/billing/${bill.id}/status`}>
-                    <Button className="w-full" variant="outline">
-                      <Settings className="w-4 h-4 mr-2" />
-                      Change Status
-                    </Button>
-                  </Link>
-
-                  <Button className="w-full" variant="outline">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Invoice
-                  </Button>
-
-                  <div className="pt-4 border-t">
-                    <Link href={`/billing/patient/${bill.patientId}`}>
-                      <Button className="w-full" variant="ghost">
-                        <User className="w-4 h-4 mr-2" />
-                        View Patient Bills
+                    <Link href={`/billing/${bill.id}/status`} className="block">
+                      <Button className="w-full" variant="outline" size="sm">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Change Status
                       </Button>
                     </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
 
-            {/* Info Card */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <Card className="border-l-4 border-l-blue-600 shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <FileText className="w-5 h-5 text-blue-600" />
+                    <Button className="w-full" variant="outline" size="sm">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download Invoice
+                    </Button>
+
+                    <div className="pt-2 border-t">
+                      <Link
+                        href={`/billing/patient/${bill.patientId}`}
+                        className="block"
+                      >
+                        <Button className="w-full" variant="ghost" size="sm">
+                          <User className="w-4 h-4 mr-2" />
+                          View Patient Bills
+                        </Button>
+                      </Link>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-slate-900 mb-2">
-                        Need Help?
-                      </h3>
-                      <p className="text-sm text-slate-600">
-                        Contact billing support for assistance with this invoice
-                        or payment processing.
-                      </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-blue-200 dark:border-blue-800">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-semibold mb-1">
+                          Need Help?
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          Contact billing support for assistance with this
+                          invoice or payment processing.
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
