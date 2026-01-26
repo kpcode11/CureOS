@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { createAudit } from "@/services/audit.service";
+import { SeverityLevel, ProblemCategory } from "@/types/scheduling";
 
 export async function GET(req: Request) {
   try {
@@ -82,6 +83,11 @@ export async function POST(req: Request) {
         reason: body.reason,
         notes: body.notes || null,
         status: "SCHEDULED",
+        // Smart scheduling fields (optional)
+        severity: body.severity as SeverityLevel | undefined,
+        problemCategory: body.problemCategory as ProblemCategory | undefined,
+        symptoms: body.symptoms || [],
+        wasAutoAssigned: body.wasAutoAssigned || false,
       },
       include: {
         patient: true,

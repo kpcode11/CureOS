@@ -58,14 +58,34 @@ model Doctor {
   userId            String         @unique
   specialization    String
   licenseNumber     String         @unique
+  seniority         SeniorityLevel @default(JUNIOR)
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   appointments      Appointment[]
+  shifts            DoctorShift[]
   user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   prescriptions     Prescription[]
   referralsSent     Referral[]     @relation("ReferralsFrom")
   referralsReceived Referral[]     @relation("ReferralsTo")
   surgeries         Surgery[]
+}
+
+model DoctorShift {
+  id        String    @id @default(cuid())
+  doctorId  String
+  shiftType ShiftType
+  dayOfWeek Int       // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  startTime String    // Format: "HH:mm" (e.g., "09:00")
+  endTime   String    // Format: "HH:mm" (e.g., "17:00")
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  doctor    Doctor    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, shiftType, dayOfWeek])
+  @@index([doctorId])
+  @@index([shiftType])
+  @@index([dayOfWeek])
 }
 
 model Nurse {
@@ -134,6 +154,11 @@ model Appointment {
   reason                                       String
   status                                       AppointmentStatus @default(SCHEDULED)
   notes                                        String?
+  // Smart Scheduling Fields
+  severity                                     SeverityLevel?
+  problemCategory                              ProblemCategory?
+  symptoms                                     String[]
+  wasAutoAssigned                              Boolean           @default(false)
   createdAt                                    DateTime          @default(now())
   updatedAt                                    DateTime          @updatedAt
   referralId                                   String?           @unique
@@ -503,6 +528,41 @@ enum ReferralUrgency {
   EMERGENCY
 }
 
+// Smart Scheduling Enums
+enum SeverityLevel {
+  LOW
+  MODERATE
+  HIGH
+}
+
+enum ProblemCategory {
+  HEART
+  BONE_JOINT
+  EAR_NOSE_THROAT
+  EYE
+  SKIN
+  DIGESTIVE
+  RESPIRATORY
+  NEUROLOGICAL
+  DENTAL
+  GENERAL
+  PEDIATRIC
+  GYNECOLOGY
+  UROLOGY
+  MENTAL_HEALTH
+}
+
+enum SeniorityLevel {
+  HOD
+  SENIOR
+  JUNIOR
+}
+
+enum ShiftType {
+  MORNING
+  AFTERNOON
+  EVENING
+  NIGHT
 enum InsurancePolicyStatus {
   ACTIVE
   EXPIRED
