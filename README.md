@@ -1,176 +1,137 @@
-# CureOS - Hospital Information System
+# CureOS — Hospital Information System
 
-A comprehensive Hospital Information System (HIS) built with **Next.js 15**, **React 19**, and **TypeScript**, featuring real-time analytics, role-based access control, and modern Apple HCI-inspired UI/UX.
+A modular, production-ready clinical operations platform built with **Next.js + TypeScript**. CureOS provides role-based dashboards, a robust RBAC system, PDF reporting, real database analytics, and end-to-end developer documentation so teams can ship hospital workflows reliably.
 
-## ✨ Current Features
+---
 
-### Core Capabilities
-- 🏥 **22 Hospital Modules**: Complete coverage across 5 functional domains (Clinical, Administrative, Financial, Lab, Support)
-- 👥 **Multi-Role Support**: Admin, Doctor, Nurse, Pharmacist, Lab Tech, Receptionist, Emergency
-- 📊 **Real-time Analytics Dashboard**: 7-department analytics with live data visualization
-- 🔐 **Advanced RBAC**: Role-based access control with granular permission management
-- 💬 **Professional Sidebar Navigation**: Dynamic role-aware navigation with team switcher
-- 📱 **Responsive Design**: Mobile-first approach with collapsible sidebar
+## Quick description
+A secure, extensible hospital back-office platform that unifies patient workflows, permissions, and document exports into a single developer-friendly codebase.
 
-### Department Analytics (7 Modules)
-- **Billing** - Financial operations & revenue tracking
-- **Emergency** - Emergency department operations
-- **Nursing** - Patient care & bed management
-- **Clinical** - EMR & patient records
-- **Pharmacy** - Prescription & inventory management
-- **Laboratory** - Lab tests & results
-- **Surgery** - Operation theater management
+## Key features 
+- Role-based dashboards (Admin, Doctor, Nurse, Pharmacist, Lab Tech, Reception)
+- Fine-grained RBAC with emergency override and audit trails
+- PDF export and printable reports (server-side + client helpers)
+- Real DB-driven analytics and charts (Postgres + Prisma)
+- Real-time updates via Socket.io (live dashboards)
+- Mobile-first, accessible UI (Tailwind, shadcn/ui)
+- Comprehensive docs and automated tests (Vitest)
 
-### Data & Integration
-- 🗄️ **PostgreSQL Database**: Comprehensive Prisma ORM schema
-- 🔄 **Real-time Updates**: Socket.io integration ready
-- 📈 **Smart Analytics**: 7-day trend analysis with actual database queries
-- 🔐 **Secure Auth**: NextAuth.js v4 with session management
+## Tech stack 🔧
+- Frontend: Next.js 15, React 19, TypeScript, Tailwind CSS
+- UI: shadcn/ui, Framer Motion, Lucide icons
+- Backend: Next.js API routes, NextAuth.js (session + auth)
+- Database: PostgreSQL + Prisma
+- Real-time: Socket.io
+- Testing / tooling: Vitest, ESLint, Prettier, Prisma
 
-## 🚀 Recent Updates (January 2026)
+---
 
-- ✅ React 19 compatibility (lucide-react v0.408.0)
-- ✅ Gooey morphing tab effects with smooth animations
-- ✅ Professional sidebar-02 component with role-based routes
-- ✅ Logout button in sidebar footer
-- ✅ Real database integration for all analytics
-- ✅ Organized documentation structure
-- ✅ Apple HCI-inspired neutral color scheme
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| **Frontend** | Next.js 15, React 19, TypeScript, Tailwind CSS |
-| **UI Components** | shadcn/ui, Framer Motion (motion/react) |
-| **Backend** | Next.js API Routes, NextAuth v4 |
-| **Database** | PostgreSQL, Prisma ORM |
-| **Real-time** | Socket.io |
-| **Icons** | Lucide React v0.408.0 |
-
-## 🛠️ Getting Started
-
-### Prerequisites
-- Node.js 18+
-- PostgreSQL 14+
-- npm or yarn
-
-### Installation
-
-1. **Clone the repository:**
+## Getting started — fast (30–60s)
+1. Clone:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/CureOS.git
-   cd CureOS
+   git clone https://github.com/<org>/<repo>.git
+   cd cureos-hospital-system
    ```
-
-2. **Install dependencies:**
+2. Install:
    ```bash
    npm install
    ```
-
-3. **Environment setup:**
+3. Create env and configure (see `docs/QUICK_START.md`):
    ```bash
    cp .env.example .env
-   # Edit .env with your database credentials
+   # set DATABASE_URL, NEXTAUTH_SECRET, RBAC_* credentials
    ```
-
-4. **Database setup:**
+4. Prepare DB & seed:
    ```bash
    npx prisma generate
-   npx prisma db push
-   npx prisma db seed
+   npx prisma db push        # or `npm run migrate:dev` for migrations
+   npm run prisma:seed
    ```
-
-5. **Run development server:**
+5. Run app:
    ```bash
    npm run dev
+   # open http://localhost:3000
    ```
 
-   Visit http://localhost:3000
+> Tip: run `npm run test` to verify the test-suite and `npm run lint` for linting.
 
-## 📁 Project Structure
+### Important env vars (minimum)
+- DATABASE_URL — Postgres connection
+- NEXTAUTH_SECRET — session signing key
+- NEXT_PUBLIC_APP_URL — app origin for callbacks
+- RBAC_ADMIN_EMAIL / RBAC_ADMIN_PASSWORD — seed admin account
 
-```
-CureOS/
-├── docs/                   # Organized documentation
-│   ├── guides/            # Implementation guides
-│   ├── architecture/       # System architecture
-│   ├── deployment/        # Deployment guides
-│   ├── modules/           # Module documentation
-│   ├── reference/         # API & permission references
-│   └── summaries/         # Project summaries
-├── src/
-│   ├── app/
-│   │   ├── (auth)/        # Auth pages
-│   │   ├── (dashboard)/   # Role-based dashboards
-│   │   └── api/           # API endpoints
-│   ├── components/
-│   │   ├── admin/         # Admin components
-│   │   ├── dashboards/    # Role dashboards
-│   │   ├── sidebar-02/    # Modern sidebar
-│   │   ├── stats-10/      # Analytics cards
-│   │   ├── gooey-*        # Morphing effects
-│   │   └── ui/            # UI components
-│   ├── hooks/             # Custom hooks
-│   ├── lib/               # Utilities
-│   ├── services/          # Business logic
-│   └── types/             # Type definitions
-├── prisma/
-│   ├── schema.prisma      # Database schema
-│   └── seed-rbac.ts       # Database seed
-└── server.ts              # Socket.io server
-```
+For a full list and examples see: `docs/QUICK_START.md` and `prisma/seed-rbac.ts`.
 
-## 🔐 Security & Authentication
+## Project structure (high level)
+- `app/` — Next.js app routes, pages & role-based layouts
+- `components/` — UI primitives & dashboard components
+- `lib/` — utilities, Prisma client, auth helpers
+- `services/` — business logic and API integrations
+- `prisma/` — schema.prisma, seeds, migrations
+- `public/` — static assets
+- `docs/` — architecture, guides, API reference
+- `tests/` — unit & integration tests (Vitest)
 
-### Features
-- **RBAC System**: Role-based access control with atomic permissions
-- **Session Management**: NextAuth.js v4 with JWT enhancement
-- **Emergency Override**: Time-limited, single-use override tokens
-- **Audit Logging**: Immutable audit trail for sensitive operations
-- **Permission Scopes**: Fine-grained permission management
+See `docs/` for deeper module-level documentation and architecture notes.
 
-### Core API Endpoints
-- `GET /api/admin/roles` - List all roles
-- `POST /api/admin/roles` - Create role
-- `GET /api/admin/permissions` - List permissions
-- `GET /api/admin/users` - List users
-- `POST /api/auth/override` - Emergency override request
+---
 
-## 🎨 UI/UX Highlights
+## Tests & CI
+- Unit / integration tests: `npm test` (Vitest)
+- Test files: `tests/` and `tests/integration/`
+- Recommended CI: run `npm ci && npm run lint && npm run test && npm run build`
 
-- **Gooey Morphing Effects**: Smooth tab transitions with SVG filter animations
-- **Real-time Analytics**: 7-day trend visualization with actual database data
-- **Dark Mode**: Full dark mode support across all components
-- **Apple HCI Design**: Clean, minimal, focus-driven interface
-- **Mobile Responsive**: Adaptive layout with collapsible navigation
-- **Performance Optimized**: Lazy loading, code splitting, optimized re-renders
+---
 
-## 📊 Available Scripts
+## Security & Compliance
+- RBAC-first design, audit logging, and time-limited emergency overrides
+- Review `docs/COMPREHENSIVE_RBAC_GUIDE.md` for implementation details
+- Do not commit credentials; use environment variables and secrets manager for production
 
+---
+
+## Scripts (most-used)
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm start           # Start production server
-npm run lint        # Run ESLint
-npm run type-check  # TypeScript type checking
+npm install
+npm run dev         # local dev
+npm run build       # production build
+npm start           # run production
+npm run test        # run test suite
+npm run migrate:dev # prisma migrate (dev)
+npm run prisma:seed # seed RBAC and demo data
 ```
 
-## 🤝 Contributing
+---
 
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Submit a pull request
+## Contributing
+We welcome contributions and improvements.
+- Open an issue to discuss large changes
+- Fork → branch → PR against `main`
+- Include tests & documentation for new features
 
-## 📄 License
+PR checklist:
+- Reproducible locally
+- Tests added/updated
+- Docs updated (`docs/` or `README.md`)
+- No secrets in the commit history
 
-This project is proprietary - All rights reserved
+---
 
-## 💡 Support
+## License
+This repository is **proprietary — all rights reserved**. To open-source, add an SPDX `LICENSE` (e.g. MIT) and update this section.
 
-For questions or issues:
-- Check the [documentation](docs/)
-- Open an issue on GitHub
-- Review the [API Reference](docs/reference/)
+---
+
+## Support & contact
+- Read the docs: `docs/` (quick start, API reference, architecture)
+- Report bugs / request features: open an issue on GitHub
+- For commercial support or onboarding: contact the maintainers via repository settings
+
+---
+
+If you want, I can also:
+- Add CI/coverage badges to the top of this README ✅
+- Create `CONTRIBUTING.md` and issue/PR templates ✅
+- Produce a short repo summary for the GitHub description and social preview ✅
 
