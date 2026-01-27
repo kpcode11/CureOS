@@ -119,7 +119,7 @@ PR checklist:
 ---
 
 ## License
-This repository is **proprietary — all rights reserved**. To open-source, add an SPDX `LICENSE` (e.g. MIT) and update this section.
+This repository is **proprietary — all rights reserved**.
 
 ---
 
@@ -127,11 +127,4 @@ This repository is **proprietary — all rights reserved**. To open-source, add 
 - Read the docs: `docs/` (quick start, API reference, architecture)
 - Report bugs / request features: open an issue on GitHub
 - For commercial support or onboarding: contact the maintainers via repository settings
-
----
-
-If you want, I can also:
-- Add CI/coverage badges to the top of this README ✅
-- Create `CONTRIBUTING.md` and issue/PR templates ✅
-- Produce a short repo summary for the GitHub description and social preview ✅
 
