@@ -4,15 +4,16 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: Request,
-  { params }: { params: { patientId: string } },
+  { params }: { params: Promise<{ patientId: string }> }
 ) {
+  const { patientId } = await params;
   try {
     await requirePermission(req, "patient.read");
   } catch (err) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { patientId } = await params;
+  
   const p = await prisma.patient.findUnique({
     where: { id: patientId },
     select: {

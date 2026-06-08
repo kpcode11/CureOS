@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { createAudit } from '@/services/audit.service';
 
 // PATCH /api/lab-tech/lab-tests/:id/start
-export async function PATCH(req: Request, { params }: { params: { id: string } | Promise<{ id: string }> }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let actorId: string | null = null;
   try {
     const res: any = await requirePermission(req, 'lab.sample.track');

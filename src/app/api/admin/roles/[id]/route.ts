@@ -23,6 +23,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
+  
   const { id } = await params;
   const body = await req.json();
   const { name, permissions } = body;
@@ -43,6 +44,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   } catch (err) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
+  
   const { id } = await params;
   try {
     await deleteRole(id);

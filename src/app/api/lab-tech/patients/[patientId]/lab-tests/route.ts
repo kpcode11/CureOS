@@ -3,7 +3,11 @@ import { requirePermission } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/lab-tech/patients/:patientId/lab-tests
-export async function GET(req: Request, { params }: { params: { patientId: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ patientId: string }> }
+) {
+  const { patientId } = await params;
   try {
     await requirePermission(req, 'lab.order.read');
   } catch (err) {
@@ -11,7 +15,7 @@ export async function GET(req: Request, { params }: { params: { patientId: strin
   }
 
   try {
-    const rows = await prisma.labTest.findMany({ where: { patientId: params.patientId }, orderBy: { orderedAt: 'desc' } });
+    const rows = await prisma.labTest.findMany({ where: { patientId: patientId }, orderBy: { orderedAt: 'desc' } });
     return NextResponse.json(rows);
   } catch (err) {
     console.error('lab-tech patient lab-tests GET error', err);

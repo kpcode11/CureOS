@@ -387,12 +387,12 @@ export default function AppointmentBooking() {
   const getStatusBadge = (status: string) => {
     const variants: Record<
       string,
-      "default" | "success" | "warning" | "destructive"
+      "default" | "secondary" | "destructive" | "outline"
     > = {
-      SCHEDULED: "default",
-      COMPLETED: "success",
+      SCHEDULED: "outline",
+      COMPLETED: "default",
       CANCELLED: "destructive",
-      NO_SHOW: "warning",
+      NO_SHOW: "secondary",
     };
     return <Badge variant={variants[status] || "default"}>{status}</Badge>;
   };

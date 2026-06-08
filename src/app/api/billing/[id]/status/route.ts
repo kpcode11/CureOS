@@ -5,7 +5,11 @@ import { createAudit } from '@/services/audit.service';
 
 const ALLOWED = ['PENDING','PAID','OVERDUE','CANCELLED'];
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
   try {
     await requirePermission(req, 'billing.update');
   } catch (err) {
@@ -16,15 +20,15 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     const { status } = await req.json();
     if (!ALLOWED.includes(status)) return NextResponse.json({ error: 'invalid status' }, { status: 400 });
 
-    const { id } = await params;
+    
     const before = await prisma.billing.findUnique({ where: { id } });
     if (!before) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    const updated = await prisma.billing.update({ where: { id: params.id }, data: { status } });
+    const updated = await prisma.billing.update({ where: { id: id }, data: { status } });
 
     try {
       const actorId = (req as any).__session?.user?.id ?? null;
-      await createAudit({ actorId, action: 'billing.status.update', resource: 'Billing', resourceId: params.id, before, after: updated });
+      await createAudit({ actorId, action: 'billing.status.update', resource: 'Billing', resourceId: id, before, after: updated });
     } catch (auditErr) {
       // eslint-disable-next-line no-console
       console.warn('billing.status.update audit failed:', auditErr);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import RolesManagement from '@/components/rbac/roles-management';
 import UsersManagement from '@/components/rbac/users-management';
@@ -8,7 +8,7 @@ import PermissionsManagement from '@/components/rbac/permissions-management';
 
 type TabType = 'roles' | 'users' | 'permissions';
 
-export default function RBACPage() {
+function RBACContent() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabType>('roles');
 
@@ -56,5 +56,13 @@ export default function RBACPage() {
         {activeTab === 'permissions' && <PermissionsManagement />}
       </div>
     </div>
+  );
+}
+
+export default function RBACPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Loading...</div>}>
+      <RBACContent />
+    </Suspense>
   );
 }

@@ -3,7 +3,11 @@ import { requirePermission } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { createAudit } from '@/services/audit.service';
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
   try {
     await requirePermission(req, 'billing.update');
   } catch (err) {
@@ -12,7 +16,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
   try {
     const body = await req.json();
-    const { id } = await params;
+    
     const before = await prisma.billing.findUnique({ where: { id } });
     if (!before) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     if (before.status === 'PAID') return NextResponse.json({ error: 'Cannot modify paid bill' }, { status: 409 });
@@ -21,11 +25,11 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     if (typeof body.amount === 'number') data.amount = body.amount;
     if (typeof body.description === 'string') data.description = body.description;
 
-    const updated = await prisma.billing.update({ where: { id: params.id }, data });
+    const updated = await prisma.billing.update({ where: { id: id }, data });
 
     try {
       const actorId = (req as any).__session?.user?.id ?? null;
-      await createAudit({ actorId, action: 'billing.update_amount', resource: 'Billing', resourceId: params.id, before, after: updated });
+      await createAudit({ actorId, action: 'billing.update_amount', resource: 'Billing', resourceId: id, before, after: updated });
     } catch (auditErr) {
       // eslint-disable-next-line no-console
       console.warn('billing.update_amount audit failed:', auditErr);

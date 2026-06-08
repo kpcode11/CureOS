@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { Suspense, useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Mic, Square, Send, Loader } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function PrescribePage() {
+function PrescribeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const patientId = searchParams.get('patientId');
@@ -279,5 +279,13 @@ export default function PrescribePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function PrescribePage() {
+  return (
+    <Suspense fallback={<div className="p-8">Loading...</div>}>
+      <PrescribeContent />
+    </Suspense>
   );
 }

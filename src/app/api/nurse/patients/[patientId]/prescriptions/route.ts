@@ -4,15 +4,16 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: Request,
-  { params }: { params: { patientId: string } },
+  { params }: { params: Promise<{ patientId: string }> }
 ) {
+  const { patientId } = await params;
   try {
     await requirePermission(req, "prescription.read");
   } catch (err) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { patientId } = await params;
+  
   const prescriptions = await prisma.prescription.findMany({
     where: { patientId },
     include: {

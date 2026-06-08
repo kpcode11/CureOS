@@ -126,7 +126,7 @@ export function DoctorDashboard() {
         appointments: appointments.slice(0, 5),
         prescriptions: prescriptions.slice(0, 5),
         surgeries: surgeries.slice(0, 5),
-        patients: patients.slice(0, 4) as Patient[],
+        patients: patients.slice(0, 4) as unknown as Patient[],
       });
     };
 

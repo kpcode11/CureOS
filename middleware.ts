@@ -105,46 +105,4 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
   ],
 };
-        }
-      }
-    }
 
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        const pathname = req.nextUrl.pathname;
-
-        // Allow public routes
-        if (pathname === '/' || pathname === '/login') {
-          return true;
-        }
-
-        // Protected routes require authentication
-        if (protectedRoutes.some(route => pathname.startsWith(route))) {
-          return !!token;
-        }
-
-        return true;
-      },
-    },
-    pages: {
-      signIn: '/login',
-    },
-  }
-);
-
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public (public folder)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
-  ],
-};

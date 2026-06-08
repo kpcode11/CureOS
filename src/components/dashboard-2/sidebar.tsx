@@ -220,27 +220,27 @@ export function DashboardSidebar({
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={item.isActive}
+                    isActive={(item as any).isActive}
                     className="h-9 sm:h-[38px]"
                   >
                     <Link href={item.href}>
                       {item.icon && (
                         <item.icon
                           className={`size-4 sm:size-5 ${
-                            item.isGradient ? "text-[#6e3ff3]" : ""
+                            (item as any).isGradient ? "text-[#6e3ff3]" : ""
                           }`}
                         />
                       )}
                       <span
                         className={`text-sm ${
-                          item.isGradient
+                          (item as any).isGradient
                             ? "bg-clip-text text-transparent bg-linear-to-r from-[#6e3ff3] to-[#df3674]"
                             : ""
                         }`}
                       >
                         {item.title}
                       </span>
-                      {item.isActive && (
+                      {(item as any).isActive && (
                         <ChevronRight className="ml-auto size-4 text-muted-foreground opacity-60" />
                       )}
                     </Link>

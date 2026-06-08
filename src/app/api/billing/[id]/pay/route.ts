@@ -5,8 +5,9 @@ import { createAudit } from "@/services/audit.service";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     await requirePermission(req, "billing.update");
   } catch (err) {
@@ -15,7 +16,7 @@ export async function PATCH(
 
   try {
     const actorId = (req as any).__session?.user?.id ?? null;
-    const { id } = await params;
+    
     const existing = await prisma.billing.findUnique({ where: { id } });
     if (!existing)
       return NextResponse.json({ error: "Not found" }, { status: 404 });

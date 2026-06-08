@@ -5,8 +5,9 @@ import { createAudit } from "@/services/audit.service";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   let actorId: string | null = null;
   try {
     const res = await requirePermission(req, "insurance.update");
@@ -16,7 +17,7 @@ export async function PATCH(
   }
 
   try {
-    const { id } = await params;
+    
     const body = await req.json();
     const { status, approvedAmount, notes } = body;
 

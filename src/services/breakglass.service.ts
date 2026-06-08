@@ -84,7 +84,7 @@ export async function requestBreakglassAccess(request: BreakglassRequest): Promi
       action: 'BREAKGLASS_REQUESTED',
       resource: 'Patient',
       resourceId: patientId,
-      details: { reason, expiresAt, token }
+      meta: { reason, expiresAt, token }
     }
   });
 
@@ -181,7 +181,7 @@ export async function logBreakglassAccess(
       action: 'BREAKGLASS_DATA_ACCESS',
       resource: dataType,
       resourceId: patientId,
-      details: {
+      meta: {
         reason: override.reason,
         expiresAt: override.expiresAt,
         ...details
@@ -216,7 +216,7 @@ export async function revokeBreakglassAccess(token: string, revokedBy: string): 
       action: 'BREAKGLASS_REVOKED',
       resource: 'EmergencyOverride',
       resourceId: override.id,
-      details: { originalReason: override.reason }
+      meta: { originalReason: override.reason }
     }
   });
 }

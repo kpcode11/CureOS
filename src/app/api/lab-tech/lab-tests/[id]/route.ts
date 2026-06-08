@@ -3,7 +3,7 @@ import { requirePermission } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/lab-tech/lab-tests/:id
-export async function GET(req: Request, { params }: { params: { id: string } | Promise<{ id: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requirePermission(req, 'lab.order.read');
   } catch (err) {

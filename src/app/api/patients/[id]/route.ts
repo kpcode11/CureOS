@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } | Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     await requirePermission(req, "patient.read");
@@ -60,15 +60,17 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } | Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
+
   try {
     await requirePermission(req, "patient.update");
   } catch (err) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { id } = await params;
+  
   const body = await req.json();
 
   // Validate phone if provided
@@ -95,7 +97,7 @@ export async function PUT(
 
   try {
     const patient = await prisma.patient.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         firstName: body.firstName?.trim(),
         lastName: body.lastName?.trim(),
@@ -119,15 +121,17 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } | Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
+
   try {
     await requirePermission(req, "patient.delete");
   } catch (err) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { id } = await params;
+  
   try {
     await prisma.patient.delete({
       where: { id },

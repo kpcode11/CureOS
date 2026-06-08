@@ -47,7 +47,7 @@ async function generateAnalyticsData(department: string) {
             },
           },
         });
-        const activeCases = appointments.filter(a => a.status === 'SCHEDULED' || a.status === 'IN_PROGRESS').length;
+        const activeCases = appointments.filter(a => a.status === 'SCHEDULED').length;
         const completed = appointments.filter(a => a.status === 'COMPLETED').length;
 
         dataPoint = {
@@ -392,10 +392,12 @@ function calculateChangeType(prev: any, current: any): 'positive' | 'negative' {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { department: string } }
+  { params }: { params: Promise<{ department: string }> }
 ) {
+  const { department } = await params;
+
   try {
-    const department = params.department.toLowerCase();
+    const department = (await params).department.toLowerCase();
 
     const analyticsData = await generateAnalyticsData(department);
     const summary = await generateSummary(department, analyticsData);

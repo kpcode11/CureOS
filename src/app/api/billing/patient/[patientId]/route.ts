@@ -4,8 +4,9 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: Request,
-  { params }: { params: { patientId: string } },
+  { params }: { params: Promise<{ patientId: string }> }
 ) {
+  const { patientId } = await params;
   try {
     await requirePermission(req, "billing.read");
   } catch (err) {
@@ -13,7 +14,7 @@ export async function GET(
   }
 
   try {
-    const { patientId } = await params;
+    
     const rows = await prisma.billing.findMany({
       where: { patientId },
       orderBy: { createdAt: "desc" },

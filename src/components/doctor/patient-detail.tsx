@@ -61,10 +61,10 @@ export function PatientDetailComponent({
         phone: patient.phone,
         email: patient.email || "N/A",
         address: patient.address || "N/A",
-        emrRecords: patient.emrRecords,
-        prescriptions: patient.prescriptions,
-        appointments: patient.appointments,
-        labTests: patient.labTests,
+        emrRecords: patient.emrRecords as any,
+        prescriptions: patient.prescriptions as any,
+        appointments: patient.appointments as any,
+        labTests: patient.labTests as any,
       });
     } catch (err) {
       console.error("Error exporting PDF:", err);

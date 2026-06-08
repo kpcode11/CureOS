@@ -24,7 +24,7 @@ import {
   validateBreakglassToken,
   logBreakglassAccess
 } from '@/services/breakglass.service';
-import { auditLog } from '@/services/audit.service';
+import { createAudit as auditLog } from '@/services/audit.service';
 
 // ============================================================================
 // EXAMPLE 1: GET /api/patients/:patientId

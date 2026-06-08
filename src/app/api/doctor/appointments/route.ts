@@ -166,7 +166,7 @@ export async function GET(req: Request) {
  */
 export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: any,
 ) {
   let sessionRes;
   try {
